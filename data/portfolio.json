@@ -1,0 +1,110 @@
+[
+  {
+    "id": 1,
+    "title": "Dissolving Boundaries",
+    "series": "Liminal Spaces",
+    "category": "Conceptual",
+    "image": "images/portfolio/series-1/01.svg",
+    "featured": true,
+    "description": "An exploration of thresholds — the spaces between states of being."
+  },
+  {
+    "id": 2,
+    "title": "The Weight of Silence",
+    "series": "Liminal Spaces",
+    "category": "Conceptual",
+    "image": "images/portfolio/series-1/02.svg",
+    "featured": true,
+    "description": "Silence as a tangible presence, captured in light and shadow."
+  },
+  {
+    "id": 3,
+    "title": "Fractured Light",
+    "series": "Liminal Spaces",
+    "category": "Conceptual",
+    "image": "images/portfolio/series-1/03.svg",
+    "featured": false,
+    "description": "Light breaking through barriers, creating new patterns of existence."
+  },
+  {
+    "id": 4,
+    "title": "Residual Memory",
+    "series": "Liminal Spaces",
+    "category": "Conceptual",
+    "image": "images/portfolio/series-1/04.svg",
+    "featured": false,
+    "description": "The traces left behind when presence becomes absence."
+  },
+  {
+    "id": 5,
+    "title": "Erosion I",
+    "series": "Materia",
+    "category": "Abstract",
+    "image": "images/portfolio/series-2/01.svg",
+    "featured": true,
+    "description": "The beauty of decay — textures revealing stories of transformation."
+  },
+  {
+    "id": 6,
+    "title": "Erosion II",
+    "series": "Materia",
+    "category": "Abstract",
+    "image": "images/portfolio/series-2/02.svg",
+    "featured": false,
+    "description": "Layers peeling away, exposing the raw honesty beneath."
+  },
+  {
+    "id": 7,
+    "title": "Surface Tension",
+    "series": "Materia",
+    "category": "Abstract",
+    "image": "images/portfolio/series-2/03.svg",
+    "featured": true,
+    "description": "Where the visible meets the hidden, the surface holds its breath."
+  },
+  {
+    "id": 8,
+    "title": "Patina",
+    "series": "Materia",
+    "category": "Abstract",
+    "image": "images/portfolio/series-2/04.svg",
+    "featured": false,
+    "description": "Time written in texture, age as an aesthetic language."
+  },
+  {
+    "id": 9,
+    "title": "The Unseen Observer",
+    "series": "Presence / Absence",
+    "category": "Fine Art",
+    "image": "images/portfolio/series-3/01.svg",
+    "featured": true,
+    "description": "The feeling of being watched when no one is there."
+  },
+  {
+    "id": 10,
+    "title": "Vanishing Point",
+    "series": "Presence / Absence",
+    "category": "Fine Art",
+    "image": "images/portfolio/series-3/02.svg",
+    "featured": false,
+    "description": "Perspective collapsing into infinity, the eye searching for an anchor."
+  },
+  {
+    "id": 11,
+    "title": "Negative Space",
+    "series": "Presence / Absence",
+    "category": "Fine Art",
+    "image": "images/portfolio/series-3/03.svg",
+    "featured": false,
+    "description": "What's absent defines what remains. Emptiness as subject."
+  },
+  {
+    "id": 12,
+    "title": "Echo Chamber",
+    "series": "Presence / Absence",
+    "category": "Fine Art",
+    "image": "images/portfolio/series-3/04.svg",
+    "featured": false,
+    "description": "Repetition and reflection creating a hall of visual echoes."
+  }
+]
