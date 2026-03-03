@@ -4,8 +4,7 @@
     "title": "Dissolving Boundaries",
     "series": "Liminal Spaces",
     "category": "Conceptual",
-    "image": "images/portfolio/series-1/01.svg",
-    "featured": true,
+    "image": "images/exhibitions/01.svg",
     "description": "An exploration of thresholds — the spaces between states of being."
   },
   {
@@ -13,8 +12,7 @@
     "title": "The Weight of Silence",
     "series": "Liminal Spaces",
     "category": "Conceptual",
-    "image": "images/portfolio/series-1/02.svg",
-    "featured": true,
+    "image": "images/exhibitions/02.svg",
     "description": "Silence as a tangible presence, captured in light and shadow."
   },
   {
@@ -22,17 +20,15 @@
     "title": "Fractured Light",
     "series": "Liminal Spaces",
     "category": "Conceptual",
-    "image": "images/portfolio/series-1/03.svg",
-    "featured": false,
-    "description": "Light breaking through barriers, creating new patterns of existence."
+    "image": "images/exhibitions/03.svg",
+    "description": "Light breaking through barriers, creating new patterns."
   },
   {
     "id": 4,
     "title": "Residual Memory",
     "series": "Liminal Spaces",
     "category": "Conceptual",
-    "image": "images/portfolio/series-1/04.svg",
-    "featured": false,
+    "image": "images/exhibitions/04.svg",
     "description": "The traces left behind when presence becomes absence."
   },
   {
@@ -40,17 +36,15 @@
     "title": "Erosion I",
     "series": "Materia",
     "category": "Abstract",
-    "image": "images/portfolio/series-2/01.svg",
-    "featured": true,
-    "description": "The beauty of decay — textures revealing stories of transformation."
+    "image": "images/exhibitions/05.svg",
+    "description": "Textures revealing stories of transformation."
   },
   {
     "id": 6,
     "title": "Erosion II",
     "series": "Materia",
     "category": "Abstract",
-    "image": "images/portfolio/series-2/02.svg",
-    "featured": false,
+    "image": "images/exhibitions/06.svg",
     "description": "Layers peeling away, exposing the raw honesty beneath."
   },
   {
@@ -58,26 +52,23 @@
     "title": "Surface Tension",
     "series": "Materia",
     "category": "Abstract",
-    "image": "images/portfolio/series-2/03.svg",
-    "featured": true,
-    "description": "Where the visible meets the hidden, the surface holds its breath."
+    "image": "images/exhibitions/07.svg",
+    "description": "Where the visible meets the hidden."
   },
   {
     "id": 8,
     "title": "Patina",
     "series": "Materia",
     "category": "Abstract",
-    "image": "images/portfolio/series-2/04.svg",
-    "featured": false,
-    "description": "Time written in texture, age as an aesthetic language."
+    "image": "images/exhibitions/08.svg",
+    "description": "Time written in texture."
   },
   {
     "id": 9,
     "title": "The Unseen Observer",
     "series": "Presence / Absence",
     "category": "Fine Art",
-    "image": "images/portfolio/series-3/01.svg",
-    "featured": true,
+    "image": "images/exhibitions/09.svg",
     "description": "The feeling of being watched when no one is there."
   },
   {
@@ -85,26 +76,23 @@
     "title": "Vanishing Point",
     "series": "Presence / Absence",
     "category": "Fine Art",
-    "image": "images/portfolio/series-3/02.svg",
-    "featured": false,
-    "description": "Perspective collapsing into infinity, the eye searching for an anchor."
+    "image": "images/exhibitions/10.svg",
+    "description": "Perspective collapsing into infinity."
   },
   {
     "id": 11,
     "title": "Negative Space",
     "series": "Presence / Absence",
     "category": "Fine Art",
-    "image": "images/portfolio/series-3/03.svg",
-    "featured": false,
-    "description": "What's absent defines what remains. Emptiness as subject."
+    "image": "images/exhibitions/11.svg",
+    "description": "What's absent defines what remains."
   },
   {
     "id": 12,
     "title": "Echo Chamber",
     "series": "Presence / Absence",
     "category": "Fine Art",
-    "image": "images/portfolio/series-3/04.svg",
-    "featured": false,
-    "description": "Repetition and reflection creating a hall of visual echoes."
+    "image": "images/exhibitions/12.svg",
+    "description": "Repetition and reflection creating visual echoes."
   }
 ]
