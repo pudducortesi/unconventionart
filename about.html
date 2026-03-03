@@ -4,269 +4,133 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About — UnconventionArt</title>
-  <meta name="description" content="About UnconventionArt — The story, vision, and artistic philosophy behind the lens.">
+  <meta name="description" content="About UnconventionArt — the artistic duo behind the lens.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    .about__layout {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4rem;
-      align-items: start;
-    }
-
-    .about__image {
-      position: sticky;
-      top: 8rem;
-    }
-
-    .about__image img {
-      width: 100%;
-      filter: grayscale(20%);
-    }
-
-    .about__text {
-      padding-top: 1rem;
-    }
-
-    .about__text p {
-      margin-bottom: 1.5rem;
-      font-size: 1.05rem;
-      color: var(--text-muted);
-      line-height: 1.8;
-      max-width: none;
-    }
-
-    .about__text p:first-of-type {
-      font-size: 1.15rem;
-      color: var(--text);
-    }
-
-    .about__divider {
-      width: 40px;
-      height: 1px;
-      background: var(--accent);
-      margin: 2.5rem 0;
-    }
-
-    .about__section-title {
-      font-family: var(--serif);
-      font-size: 1.5rem;
-      margin-bottom: 1.5rem;
-      color: var(--text);
-    }
-
-    /* Publications / Clients */
-    .publications {
-      margin-top: 2rem;
-    }
-
-    .publications__list {
-      list-style: none;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.8rem;
-    }
-
-    .publications__item {
-      padding: 0.5rem 1.2rem;
-      border: 1px solid var(--border);
-      font-size: 0.8rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      transition: all var(--transition);
-    }
-
-    .publications__item:hover {
-      border-color: var(--text);
-      color: var(--text);
-    }
-
-    /* Skills / Equipment */
-    .skills {
-      margin-top: 2rem;
-    }
-
-    .skills__grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
-
-    .skills__category h4 {
-      font-family: var(--sans);
-      font-size: 0.68rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--text);
-      margin-bottom: 0.8rem;
-      font-weight: 500;
-    }
-
-    .skills__category ul {
-      list-style: none;
-    }
-
-    .skills__category li {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      padding: 0.3rem 0;
-    }
-
-    @media (max-width: 768px) {
-      .about__layout {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-      }
-
-      .about__image {
-        position: static;
-      }
-
-      .skills__grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
 </head>
 <body>
 
-  <!-- Navigation -->
-  <nav class="nav" id="nav">
-    <div class="nav__inner">
-      <a href="index.html" class="nav__logo">Unconvention<span>Art</span></a>
-      <ul class="nav__links" id="navLinks">
-        <li><a href="index.html" class="nav__link">Home</a></li>
-        <li><a href="portfolio.html" class="nav__link">Portfolio</a></li>
-        <li><a href="blog.html" class="nav__link">Journal</a></li>
-        <li><a href="about.html" class="nav__link active">About</a></li>
-        <li><a href="contact.html" class="nav__link">Contact</a></li>
-      </ul>
-      <button class="nav__toggle" id="navToggle" aria-label="Menu">
-        <span></span>
-        <span></span>
-        <span></span>
+  <header class="header" id="header">
+    <div class="header__inner">
+      <a href="index.html" class="header__logo">Unconvention<i>Art</i></a>
+      <nav>
+        <ul class="header__nav" id="navMenu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="exhibitions.html">Exhibitions</a></li>
+          <li><a href="about.html" class="active">About</a></li>
+          <li><a href="journal.html">Journal</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+      <button class="header__toggle" id="navToggle" aria-label="Menu">
+        <span></span><span></span><span></span>
       </button>
-    </div>
-  </nav>
-
-  <!-- Page Header -->
-  <header class="page-header">
-    <div class="container">
-      <p class="page-header__label">About</p>
-      <h1 class="page-header__title">The Artist</h1>
-      <p class="page-header__description">The story behind the unconventional vision.</p>
     </div>
   </header>
 
-  <!-- About Content -->
+  <section class="page-head">
+    <div class="wrap">
+      <p class="label">About</p>
+      <h1>The Duo</h1>
+    </div>
+  </section>
+
+  <!-- Intro -->
   <section class="section">
-    <div class="container">
-      <div class="about__layout">
-        <div class="about__image reveal">
-          <img src="images/site/portrait.svg" alt="Artist portrait">
+    <div class="wrap">
+      <div class="about-intro reveal">
+        <div class="about-intro__img">
+          <img src="images/site/duo.svg" alt="UnconventionArt duo">
         </div>
-        <div class="about__text">
-          <div class="reveal">
-            <p>I am a fine art photographer dedicated to exploring the boundaries between the visible and the imagined. My work seeks to transform everyday subjects into visual narratives that challenge perception and invite contemplation.</p>
-            <p>Through a careful interplay of light, shadow, and composition, I create images that exist at the intersection of documentary and abstraction — each frame a quiet rebellion against the conventional gaze.</p>
-            <p>My artistic practice is rooted in the belief that photography, at its finest, is not merely a record of what exists, but a revelation of what could be. I am drawn to the spaces between moments, the textures often overlooked, and the silent poetry of the ordinary.</p>
-          </div>
-
-          <div class="about__divider reveal"></div>
-
-          <div class="reveal">
-            <h3 class="about__section-title">Publications & Exhibitions</h3>
-            <p>Featured in various publications and exhibitions across the creative industry.</p>
-            <div class="publications">
-              <ul class="publications__list">
-                <li class="publications__item">Kavyar Featured</li>
-                <li class="publications__item">Fine Art Magazine</li>
-                <li class="publications__item">Gallery Exhibition</li>
-                <li class="publications__item">Art Collective</li>
-                <li class="publications__item">Photography Annual</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="about__divider reveal"></div>
-
-          <div class="reveal">
-            <h3 class="about__section-title">Equipment & Process</h3>
-            <div class="skills">
-              <div class="skills__grid">
-                <div class="skills__category">
-                  <h4>Camera</h4>
-                  <ul>
-                    <li>Digital Full Frame</li>
-                    <li>Medium Format Film</li>
-                    <li>35mm Film</li>
-                  </ul>
-                </div>
-                <div class="skills__category">
-                  <h4>Post-Production</h4>
-                  <ul>
-                    <li>Adobe Lightroom</li>
-                    <li>Adobe Photoshop</li>
-                    <li>Capture One</li>
-                  </ul>
-                </div>
-                <div class="skills__category">
-                  <h4>Specialties</h4>
-                  <ul>
-                    <li>Fine Art</li>
-                    <li>Conceptual</li>
-                    <li>Abstract</li>
-                  </ul>
-                </div>
-                <div class="skills__category">
-                  <h4>Printing</h4>
-                  <ul>
-                    <li>Giclée Fine Art</li>
-                    <li>Archival Pigment</li>
-                    <li>Darkroom Silver Gelatin</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="about-intro__text">
+          <p class="label">Our Story</p>
+          <h2>Photographer & Muse</h2>
+          <p>UnconventionArt was born from an encounter — a photographer searching for a new visual language and a muse seeking to transcend the boundaries of traditional posing. What began as a single experimental shoot became an ongoing artistic partnership.</p>
+          <p>Our work lives in the space between direction and spontaneity, between concept and instinct. We believe the most honest images emerge when both artists are fully present — when the camera becomes a bridge rather than a barrier.</p>
+          <p>Based in Italy, we work across fine art, conceptual, and editorial photography. Our collaborative process is built on trust, improvisation, and a shared fascination with light, texture, and the human form in unconventional contexts.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
+  <hr class="divider">
+
+  <!-- Individual Bios -->
+  <section class="section--lg">
+    <div class="wrap">
+      <div class="duo-bios">
+        <div class="duo-bio reveal">
+          <div class="duo-bio__img">
+            <img src="images/site/photographer.svg" alt="The Photographer">
+          </div>
+          <p class="label">Photographer</p>
+          <h3>[Photographer Name]</h3>
+          <p>A self-taught photographer drawn to the interplay of light and shadow, decay and beauty. Influenced by the textures of Italian architecture and the stillness of abandoned spaces. Shoots primarily with natural light, favoring the quiet tension of early morning and late afternoon.</p>
+        </div>
+        <div class="duo-bio reveal">
+          <div class="duo-bio__img">
+            <img src="images/site/muse.svg" alt="The Muse">
+          </div>
+          <p class="label">Muse & Model</p>
+          <h3>[Model Name]</h3>
+          <p>A visual artist in her own right, she brings an instinctive understanding of movement, emotion, and space to every collaboration. Her presence in front of the camera is not passive — it is a creative act, shaping each image through gesture, stillness, and the courage to be truly seen.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quote -->
+  <section class="pullquote">
+    <div class="wrap wrap--narrow">
+      <p class="pullquote__text">"The best work happens when we forget who is directing and who is being directed. In those moments, the image creates itself."</p>
+      <p class="pullquote__attr">UnconventionArt</p>
+    </div>
+  </section>
+
+  <!-- Approach -->
+  <section class="section--lg">
+    <div class="wrap wrap--narrow">
+      <div class="reveal" style="text-align:center;">
+        <p class="label">Our Approach</p>
+        <h2 style="margin-bottom:1.5rem;">Process</h2>
+      </div>
+      <div class="reveal" style="max-width:600px;margin:0 auto;">
+        <p style="color:var(--text-light);font-size:0.95rem;line-height:1.8;margin-bottom:1.2rem;">We work without mood boards. Each series begins with a location — a space that speaks to us — and evolves organically through improvisation. The photographer responds to the muse's movement; the muse responds to the light and the lens. The result is work that feels discovered rather than constructed.</p>
+        <p style="color:var(--text-light);font-size:0.95rem;line-height:1.8;margin-bottom:1.2rem;">Post-production is minimal. We believe in the integrity of the captured moment — color grading is subtle, retouching is restrained. What you see is very close to what was there.</p>
+        <p style="color:var(--text-light);font-size:0.95rem;line-height:1.8;">Our work has been featured on Kavyar and various independent publications. We are available for editorial collaborations, gallery exhibitions, and commissioned projects.</p>
+      </div>
+    </div>
+  </section>
+
   <footer class="footer">
-    <div class="container">
+    <div class="wrap">
       <div class="footer__inner">
         <div class="footer__brand">
-          <div class="footer__logo">Unconvention<span>Art</span></div>
-          <p class="footer__tagline">Fine art photography exploring the boundaries between reality and imagination.</p>
+          <div class="footer__logo">Unconvention<i>Art</i></div>
+          <p class="footer__tagline">Fine art photography duo — photographer and muse.</p>
         </div>
-        <nav class="footer__nav">
-          <h4>Navigation</h4>
+        <div class="footer__col">
+          <h4>Navigate</h4>
           <ul>
             <li><a href="index.html">Home</a></li>
-            <li><a href="portfolio.html">Portfolio</a></li>
-            <li><a href="blog.html">Journal</a></li>
+            <li><a href="exhibitions.html">Exhibitions</a></li>
             <li><a href="about.html">About</a></li>
+            <li><a href="journal.html">Journal</a></li>
             <li><a href="contact.html">Contact</a></li>
           </ul>
-        </nav>
-        <nav class="footer__nav">
-          <h4>Connect</h4>
-          <div class="footer__social">
-            <a href="#" aria-label="Instagram">Instagram</a>
-            <a href="#" aria-label="Kavyar">Kavyar</a>
-          </div>
-        </nav>
+        </div>
+        <div class="footer__col">
+          <h4>Follow</h4>
+          <ul>
+            <li><a href="#" target="_blank">Instagram</a></li>
+          </ul>
+        </div>
       </div>
       <div class="footer__bottom">
-        <p class="footer__copyright">&copy; 2026 UnconventionArt. All rights reserved.</p>
-        <p class="footer__kavyar">Also on <a href="#">Kavyar</a></p>
+        <span>&copy; 2026 UnconventionArt</span>
+        <span>All rights reserved</span>
       </div>
     </div>
   </footer>

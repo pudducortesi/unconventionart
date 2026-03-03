@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Journal — UnconventionArt</title>
-  <meta name="description" content="Journal entry — UnconventionArt">
+  <meta name="description" content="Journal — behind the scenes, thoughts, and process from UnconventionArt.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -32,17 +32,16 @@
 
   <section class="page-head">
     <div class="wrap">
-      <p class="label" id="postMeta"></p>
-      <h1 id="postTitle"></h1>
-      <p id="postSubtitle" style="font-family:var(--serif);font-style:italic;"></p>
+      <p class="label">Journal</p>
+      <h1>Notes & Process</h1>
+      <p>Behind the scenes, reflections, and the stories behind our work.</p>
     </div>
   </section>
 
-  <section class="section" style="padding-top:0;">
-    <div class="wrap wrap--narrow">
-      <div class="post">
-        <div class="post__hero" id="postHero"></div>
-        <div class="post__body" id="postBody"></div>
+  <section class="section">
+    <div class="wrap">
+      <div class="journal-grid" id="journalGrid">
+        <!-- Populated by JS -->
       </div>
     </div>
   </section>
@@ -81,7 +80,7 @@
   <script src="js/main.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      loadPost();
+      loadJournal();
     });
   </script>
 </body>

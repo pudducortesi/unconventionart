@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Journal — UnconventionArt</title>
-  <meta name="description" content="Journal entry — UnconventionArt">
+  <title>Exhibitions — UnconventionArt</title>
+  <meta name="description" content="Exhibition archive — UnconventionArt fine art photography duo.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -18,9 +18,9 @@
       <nav>
         <ul class="header__nav" id="navMenu">
           <li><a href="index.html">Home</a></li>
-          <li><a href="exhibitions.html">Exhibitions</a></li>
+          <li><a href="exhibitions.html" class="active">Exhibitions</a></li>
           <li><a href="about.html">About</a></li>
-          <li><a href="journal.html" class="active">Journal</a></li>
+          <li><a href="journal.html">Journal</a></li>
           <li><a href="contact.html">Contact</a></li>
         </ul>
       </nav>
@@ -32,20 +32,44 @@
 
   <section class="page-head">
     <div class="wrap">
-      <p class="label" id="postMeta"></p>
-      <h1 id="postTitle"></h1>
-      <p id="postSubtitle" style="font-family:var(--serif);font-style:italic;"></p>
+      <p class="label">Archive</p>
+      <h1>Exhibitions</h1>
+      <p>A curated collection of our collaborative series — each one a chapter in an ongoing visual dialogue.</p>
     </div>
   </section>
 
-  <section class="section" style="padding-top:0;">
-    <div class="wrap wrap--narrow">
-      <div class="post">
-        <div class="post__hero" id="postHero"></div>
-        <div class="post__body" id="postBody"></div>
+  <!-- Filters -->
+  <section style="padding-bottom: 1rem;">
+    <div class="wrap">
+      <div class="filters" id="filters">
+        <button class="filters__btn active" data-filter="all">All</button>
+        <button class="filters__btn" data-filter="Conceptual">Conceptual</button>
+        <button class="filters__btn" data-filter="Abstract">Abstract</button>
+        <button class="filters__btn" data-filter="Fine Art">Fine Art</button>
       </div>
     </div>
   </section>
+
+  <!-- Gallery Grid -->
+  <section class="section">
+    <div class="wrap wrap--wide">
+      <div class="gallery-grid" id="galleryGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox__close" id="lightboxClose">&times;</button>
+    <button class="lightbox__nav lightbox__nav--prev" id="lightboxPrev">&larr;</button>
+    <button class="lightbox__nav lightbox__nav--next" id="lightboxNext">&rarr;</button>
+    <img class="lightbox__img" id="lightboxImg" src="" alt="">
+    <div class="lightbox__caption">
+      <p class="lightbox__caption-title" id="lightboxTitle"></p>
+      <p class="lightbox__caption-meta" id="lightboxMeta"></p>
+    </div>
+  </div>
 
   <footer class="footer">
     <div class="wrap">
@@ -81,7 +105,7 @@
   <script src="js/main.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      loadPost();
+      loadGallery();
     });
   </script>
 </body>
