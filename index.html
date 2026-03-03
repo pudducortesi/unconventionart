@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UnconventionArt — Fine Art Photography</title>
+  <meta name="description" content="UnconventionArt — Fine art photography portfolio. Exploring the boundaries between reality and imagination through unconventional visual narratives.">
+  <meta property="og:title" content="UnconventionArt — Fine Art Photography">
+  <meta property="og:description" content="Exploring the boundaries between reality and imagination through unconventional visual narratives.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/gallery.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav" id="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">Unconvention<span>Art</span></a>
+      <ul class="nav__links" id="navLinks">
+        <li><a href="index.html" class="nav__link active">Home</a></li>
+        <li><a href="portfolio.html" class="nav__link">Portfolio</a></li>
+        <li><a href="blog.html" class="nav__link">Journal</a></li>
+        <li><a href="about.html" class="nav__link">About</a></li>
+        <li><a href="contact.html" class="nav__link">Contact</a></li>
+      </ul>
+      <button class="nav__toggle" id="navToggle" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero__bg">
+      <img src="images/site/hero.svg" alt="Featured fine art photograph">
+    </div>
+    <div class="hero__overlay"></div>
+    <div class="hero__content">
+      <p class="hero__subtitle">Fine Art Photography</p>
+      <h1 class="hero__title">Unconvention<em>Art</em></h1>
+      <p class="hero__description">Exploring the boundaries between reality and imagination through unconventional visual narratives.</p>
+      <div class="hero__cta">
+        <a href="portfolio.html" class="btn btn--white">View Portfolio</a>
+      </div>
+    </div>
+    <div class="hero__scroll">
+      <span>Scroll</span>
+      <div class="hero__scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- Featured Work -->
+  <section class="featured section--large" id="featured">
+    <div class="container">
+      <div class="featured__header reveal">
+        <p class="featured__label">Selected Works</p>
+        <h2>Featured Projects</h2>
+      </div>
+      <div class="featured__grid" id="featuredGrid">
+        <!-- Populated by JS from portfolio data -->
+      </div>
+      <div class="featured__cta reveal">
+        <a href="portfolio.html" class="btn">Explore All Works</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Artist Statement -->
+  <section class="statement section--large">
+    <div class="container container--narrow">
+      <div class="reveal">
+        <p class="statement__text">
+          "Art is not what you see, but <em>what you make others see</em>.
+          Every frame is an invitation to look beyond the surface,
+          to find beauty in the unconventional."
+        </p>
+        <p class="statement__attribution">— UnconventionArt</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__brand">
+          <div class="footer__logo">Unconvention<span>Art</span></div>
+          <p class="footer__tagline">Fine art photography exploring the boundaries between reality and imagination.</p>
+        </div>
+        <nav class="footer__nav">
+          <h4>Navigation</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="portfolio.html">Portfolio</a></li>
+            <li><a href="blog.html">Journal</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </nav>
+        <nav class="footer__nav">
+          <h4>Connect</h4>
+          <div class="footer__social">
+            <a href="#" aria-label="Instagram">Instagram</a>
+            <a href="#" aria-label="Kavyar">Kavyar</a>
+          </div>
+        </nav>
+      </div>
+      <div class="footer__bottom">
+        <p class="footer__copyright">&copy; 2026 UnconventionArt. All rights reserved.</p>
+        <p class="footer__kavyar">Also on <a href="#">Kavyar</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/gallery.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadFeaturedWorks();
+    });
+  </script>
+</body>
+</html>
