@@ -5,22 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact — UnconventionArt</title>
   <meta name="description" content="Get in touch with UnconventionArt for collaborations, commissions, and exhibitions.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <header class="header" id="header">
+  <header class="header">
     <div class="header__inner">
-      <a href="index.html" class="header__logo">Unconvention<i>Art</i></a>
+      <a href="index.html" class="header__logo">UnconventionArt</a>
       <nav>
         <ul class="header__nav" id="navMenu">
-          <li><a href="index.html">Home</a></li>
           <li><a href="exhibitions.html">Exhibitions</a></li>
           <li><a href="about.html">About</a></li>
-          <li><a href="journal.html">Journal</a></li>
+          <li><a href="journal.html">News</a></li>
           <li><a href="contact.html" class="active">Contact</a></li>
         </ul>
       </nav>
@@ -30,43 +26,40 @@
     </div>
   </header>
 
-  <section class="page-head">
-    <div class="wrap">
-      <p class="label">Contact</p>
-      <h1>Get in Touch</h1>
-      <p>For collaborations, commissions, exhibition inquiries, and prints.</p>
+  <div class="page-header">
+    <div class="container">
+      <h1>Contact</h1>
     </div>
-  </section>
+  </div>
 
   <section class="section">
-    <div class="wrap">
-      <div class="contact-layout">
+    <div class="container">
+      <div class="contact-grid">
         <div class="contact-info reveal">
-          <p class="label">Inquiries</p>
-          <h2>Let's Work Together</h2>
+          <h2>Get in Touch</h2>
           <p>We welcome proposals for editorial collaborations, gallery exhibitions, and commissioned projects. Whether you're a magazine, a gallery, a brand, or a fellow artist — we'd love to hear from you.</p>
 
-          <ul class="contact-details">
-            <li>
+          <div class="contact-details">
+            <div class="contact-details__row">
               <span class="contact-details__label">Email</span>
               <span class="contact-details__value"><a href="mailto:hello@unconventionart.com">hello@unconventionart.com</a></span>
-            </li>
-            <li>
+            </div>
+            <div class="contact-details__row">
               <span class="contact-details__label">Based in</span>
               <span class="contact-details__value">Italy</span>
-            </li>
-            <li>
+            </div>
+            <div class="contact-details__row">
               <span class="contact-details__label">Available</span>
               <span class="contact-details__value">Worldwide</span>
-            </li>
-          </ul>
+            </div>
+          </div>
 
           <div class="contact-social">
             <a href="#" target="_blank">Instagram</a>
           </div>
         </div>
 
-        <div class="form reveal">
+        <div class="form-card reveal">
           <form id="contactForm" onsubmit="return handleSubmit(event)">
             <div class="form__row">
               <div class="form__group">
@@ -80,7 +73,7 @@
             </div>
             <div class="form__group">
               <label class="form__label" for="subject">Subject</label>
-              <select class="form__select" id="subject" name="subject" style="background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%2712%27 viewBox=%270 0 12 12%27%3E%3Cpath fill=%27%23999%27 d=%27M6 8L1 3h10z%27/%3E%3C/svg%3E');background-repeat:no-repeat;background-position:right 0.8rem center;padding-right:2rem;">
+              <select class="form__select" id="subject" name="subject">
                 <option value="">Select...</option>
                 <option value="collaboration">Collaboration</option>
                 <option value="commission">Commission</option>
@@ -102,11 +95,12 @@
   </section>
 
   <footer class="footer">
-    <div class="wrap">
+    <div class="container">
       <div class="footer__inner">
         <div class="footer__brand">
-          <div class="footer__logo">Unconvention<i>Art</i></div>
+          <div class="footer__logo">UnconventionArt</div>
           <p class="footer__tagline">Fine art photography duo — photographer and muse.</p>
+          <p class="footer__tagline">Based in Italy &middot; Available Worldwide</p>
         </div>
         <div class="footer__col">
           <h4>Navigate</h4>
@@ -114,7 +108,7 @@
             <li><a href="index.html">Home</a></li>
             <li><a href="exhibitions.html">Exhibitions</a></li>
             <li><a href="about.html">About</a></li>
-            <li><a href="journal.html">Journal</a></li>
+            <li><a href="journal.html">News</a></li>
             <li><a href="contact.html">Contact</a></li>
           </ul>
         </div>
@@ -124,10 +118,17 @@
             <li><a href="#" target="_blank">Instagram</a></li>
           </ul>
         </div>
+        <div class="footer__col">
+          <h4>Mailing List</h4>
+          <div class="newsletter">
+            <input type="email" class="newsletter__input" placeholder="Email address">
+            <button class="newsletter__btn">Subscribe</button>
+          </div>
+        </div>
       </div>
       <div class="footer__bottom">
-        <span>&copy; 2026 UnconventionArt</span>
-        <span>All rights reserved</span>
+        <span>&copy; 2026 UnconventionArt. All rights reserved.</span>
+        <span>hello@unconventionart.com</span>
       </div>
     </div>
   </footer>
