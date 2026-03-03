@@ -1,0 +1,4 @@
+# UnconventionArt Publish Agent
+# Install: pip3 install -r tools/requirements.txt
+
+Pillow>=9.0
