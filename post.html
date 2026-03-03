@@ -3,24 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Journal — UnconventionArt</title>
-  <meta name="description" content="Journal entry — UnconventionArt">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <title>News — UnconventionArt</title>
+  <meta name="description" content="News — UnconventionArt">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <header class="header" id="header">
+  <header class="header">
     <div class="header__inner">
-      <a href="index.html" class="header__logo">Unconvention<i>Art</i></a>
+      <a href="index.html" class="header__logo">UnconventionArt</a>
       <nav>
         <ul class="header__nav" id="navMenu">
-          <li><a href="index.html">Home</a></li>
           <li><a href="exhibitions.html">Exhibitions</a></li>
           <li><a href="about.html">About</a></li>
-          <li><a href="journal.html" class="active">Journal</a></li>
+          <li><a href="journal.html" class="active">News</a></li>
           <li><a href="contact.html">Contact</a></li>
         </ul>
       </nav>
@@ -30,29 +26,28 @@
     </div>
   </header>
 
-  <section class="page-head">
-    <div class="wrap">
-      <p class="label" id="postMeta"></p>
+  <div class="post-header">
+    <div class="container container--narrow">
+      <p class="text-upper" id="postMeta"></p>
       <h1 id="postTitle"></h1>
-      <p id="postSubtitle" style="font-family:var(--serif);font-style:italic;"></p>
+      <p class="post-subtitle" id="postSubtitle"></p>
     </div>
-  </section>
+  </div>
 
   <section class="section" style="padding-top:0;">
-    <div class="wrap wrap--narrow">
-      <div class="post">
-        <div class="post__hero" id="postHero"></div>
-        <div class="post__body" id="postBody"></div>
-      </div>
+    <div class="container container--narrow">
+      <div class="post-hero" id="postHero"></div>
+      <div class="post-body" id="postBody"></div>
     </div>
   </section>
 
   <footer class="footer">
-    <div class="wrap">
+    <div class="container">
       <div class="footer__inner">
         <div class="footer__brand">
-          <div class="footer__logo">Unconvention<i>Art</i></div>
+          <div class="footer__logo">UnconventionArt</div>
           <p class="footer__tagline">Fine art photography duo — photographer and muse.</p>
+          <p class="footer__tagline">Based in Italy &middot; Available Worldwide</p>
         </div>
         <div class="footer__col">
           <h4>Navigate</h4>
@@ -60,7 +55,7 @@
             <li><a href="index.html">Home</a></li>
             <li><a href="exhibitions.html">Exhibitions</a></li>
             <li><a href="about.html">About</a></li>
-            <li><a href="journal.html">Journal</a></li>
+            <li><a href="journal.html">News</a></li>
             <li><a href="contact.html">Contact</a></li>
           </ul>
         </div>
@@ -70,19 +65,21 @@
             <li><a href="#" target="_blank">Instagram</a></li>
           </ul>
         </div>
+        <div class="footer__col">
+          <h4>Mailing List</h4>
+          <div class="newsletter">
+            <input type="email" class="newsletter__input" placeholder="Email address">
+            <button class="newsletter__btn">Subscribe</button>
+          </div>
+        </div>
       </div>
       <div class="footer__bottom">
-        <span>&copy; 2026 UnconventionArt</span>
-        <span>All rights reserved</span>
+        <span>&copy; 2026 UnconventionArt. All rights reserved.</span>
+        <span>hello@unconventionart.com</span>
       </div>
     </div>
   </footer>
 
   <script src="js/main.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      loadPost();
-    });
-  </script>
 </body>
 </html>

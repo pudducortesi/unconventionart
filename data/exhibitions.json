@@ -4,6 +4,8 @@
     "title": "Dissolving Boundaries",
     "series": "Liminal Spaces",
     "category": "Conceptual",
+    "status": "current",
+    "date": "January — March 2026",
     "image": "images/exhibitions/01.svg",
     "description": "An exploration of thresholds — the spaces between states of being."
   },
@@ -12,6 +14,8 @@
     "title": "The Weight of Silence",
     "series": "Liminal Spaces",
     "category": "Conceptual",
+    "status": "current",
+    "date": "January — March 2026",
     "image": "images/exhibitions/02.svg",
     "description": "Silence as a tangible presence, captured in light and shadow."
   },
@@ -20,6 +24,8 @@
     "title": "Fractured Light",
     "series": "Liminal Spaces",
     "category": "Conceptual",
+    "status": "current",
+    "date": "January — March 2026",
     "image": "images/exhibitions/03.svg",
     "description": "Light breaking through barriers, creating new patterns."
   },
@@ -28,6 +34,8 @@
     "title": "Residual Memory",
     "series": "Liminal Spaces",
     "category": "Conceptual",
+    "status": "current",
+    "date": "January — March 2026",
     "image": "images/exhibitions/04.svg",
     "description": "The traces left behind when presence becomes absence."
   },
@@ -36,6 +44,8 @@
     "title": "Erosion I",
     "series": "Materia",
     "category": "Abstract",
+    "status": "past",
+    "date": "September — December 2025",
     "image": "images/exhibitions/05.svg",
     "description": "Textures revealing stories of transformation."
   },
@@ -44,6 +54,8 @@
     "title": "Erosion II",
     "series": "Materia",
     "category": "Abstract",
+    "status": "past",
+    "date": "September — December 2025",
     "image": "images/exhibitions/06.svg",
     "description": "Layers peeling away, exposing the raw honesty beneath."
   },
@@ -52,6 +64,8 @@
     "title": "Surface Tension",
     "series": "Materia",
     "category": "Abstract",
+    "status": "past",
+    "date": "September — December 2025",
     "image": "images/exhibitions/07.svg",
     "description": "Where the visible meets the hidden."
   },
@@ -60,6 +74,8 @@
     "title": "Patina",
     "series": "Materia",
     "category": "Abstract",
+    "status": "past",
+    "date": "September — December 2025",
     "image": "images/exhibitions/08.svg",
     "description": "Time written in texture."
   },
@@ -68,6 +84,8 @@
     "title": "The Unseen Observer",
     "series": "Presence / Absence",
     "category": "Fine Art",
+    "status": "past",
+    "date": "May — August 2025",
     "image": "images/exhibitions/09.svg",
     "description": "The feeling of being watched when no one is there."
   },
@@ -76,6 +94,8 @@
     "title": "Vanishing Point",
     "series": "Presence / Absence",
     "category": "Fine Art",
+    "status": "past",
+    "date": "May — August 2025",
     "image": "images/exhibitions/10.svg",
     "description": "Perspective collapsing into infinity."
   },
@@ -84,6 +104,8 @@
     "title": "Negative Space",
     "series": "Presence / Absence",
     "category": "Fine Art",
+    "status": "past",
+    "date": "May — August 2025",
     "image": "images/exhibitions/11.svg",
     "description": "What's absent defines what remains."
   },
@@ -92,6 +114,8 @@
     "title": "Echo Chamber",
     "series": "Presence / Absence",
     "category": "Fine Art",
+    "status": "past",
+    "date": "May — August 2025",
     "image": "images/exhibitions/12.svg",
     "description": "Repetition and reflection creating visual echoes."
   }

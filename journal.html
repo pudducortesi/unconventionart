@@ -3,24 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Journal — UnconventionArt</title>
-  <meta name="description" content="Journal — behind the scenes, thoughts, and process from UnconventionArt.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <title>News — UnconventionArt</title>
+  <meta name="description" content="News and journal from UnconventionArt — fine art photography duo.">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <header class="header" id="header">
+  <header class="header">
     <div class="header__inner">
-      <a href="index.html" class="header__logo">Unconvention<i>Art</i></a>
+      <a href="index.html" class="header__logo">UnconventionArt</a>
       <nav>
         <ul class="header__nav" id="navMenu">
-          <li><a href="index.html">Home</a></li>
           <li><a href="exhibitions.html">Exhibitions</a></li>
           <li><a href="about.html">About</a></li>
-          <li><a href="journal.html" class="active">Journal</a></li>
+          <li><a href="journal.html" class="active">News</a></li>
           <li><a href="contact.html">Contact</a></li>
         </ul>
       </nav>
@@ -30,28 +26,27 @@
     </div>
   </header>
 
-  <section class="page-head">
-    <div class="wrap">
-      <p class="label">Journal</p>
-      <h1>Notes & Process</h1>
-      <p>Behind the scenes, reflections, and the stories behind our work.</p>
+  <div class="page-header">
+    <div class="container">
+      <h1>News</h1>
     </div>
-  </section>
+  </div>
 
   <section class="section">
-    <div class="wrap">
-      <div class="journal-grid" id="journalGrid">
+    <div class="container">
+      <div class="news-list" id="newsList">
         <!-- Populated by JS -->
       </div>
     </div>
   </section>
 
   <footer class="footer">
-    <div class="wrap">
+    <div class="container">
       <div class="footer__inner">
         <div class="footer__brand">
-          <div class="footer__logo">Unconvention<i>Art</i></div>
+          <div class="footer__logo">UnconventionArt</div>
           <p class="footer__tagline">Fine art photography duo — photographer and muse.</p>
+          <p class="footer__tagline">Based in Italy &middot; Available Worldwide</p>
         </div>
         <div class="footer__col">
           <h4>Navigate</h4>
@@ -59,7 +54,7 @@
             <li><a href="index.html">Home</a></li>
             <li><a href="exhibitions.html">Exhibitions</a></li>
             <li><a href="about.html">About</a></li>
-            <li><a href="journal.html">Journal</a></li>
+            <li><a href="journal.html">News</a></li>
             <li><a href="contact.html">Contact</a></li>
           </ul>
         </div>
@@ -69,19 +64,21 @@
             <li><a href="#" target="_blank">Instagram</a></li>
           </ul>
         </div>
+        <div class="footer__col">
+          <h4>Mailing List</h4>
+          <div class="newsletter">
+            <input type="email" class="newsletter__input" placeholder="Email address">
+            <button class="newsletter__btn">Subscribe</button>
+          </div>
+        </div>
       </div>
       <div class="footer__bottom">
-        <span>&copy; 2026 UnconventionArt</span>
-        <span>All rights reserved</span>
+        <span>&copy; 2026 UnconventionArt. All rights reserved.</span>
+        <span>hello@unconventionart.com</span>
       </div>
     </div>
   </footer>
 
   <script src="js/main.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      loadJournal();
-    });
-  </script>
 </body>
 </html>
