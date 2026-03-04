@@ -12,17 +12,20 @@
   <header class="header">
     <div class="header__inner">
       <a href="index.html" class="header__logo">UnconventionArt</a>
-      <nav>
-        <ul class="header__nav" id="navMenu">
-          <li><a href="exhibitions.html">Exhibitions</a></li>
-          <li><a href="about.html">About</a></li>
-          <li><a href="journal.html">News</a></li>
-          <li><a href="contact.html" class="active">Contact</a></li>
-        </ul>
-      </nav>
-      <button class="header__toggle" id="navToggle" aria-label="Menu">
-        <span></span><span></span><span></span>
-      </button>
+      <div class="header__right">
+        <nav>
+          <ul class="header__nav" id="navMenu">
+            <li><a href="exhibitions.html">Works</a></li>
+            <li><a href="exhibitions.html#viewing-room">Viewing Room</a></li>
+            <li><a href="journal.html">Journal</a></li>
+            <li><a href="about.html">Biography</a></li>
+            <li><a href="contact.html" class="active">Contact</a></li>
+          </ul>
+        </nav>
+        <button class="header__toggle" id="navToggle" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -42,7 +45,7 @@
           <div class="contact-details">
             <div class="contact-details__row">
               <span class="contact-details__label">Email</span>
-              <span class="contact-details__value"><a href="mailto:hello@unconventionart.com">hello@unconventionart.com</a></span>
+              <span class="contact-details__value"><a href="mailto:studio@unconventionart.com">studio@unconventionart.com</a></span>
             </div>
             <div class="contact-details__row">
               <span class="contact-details__label">Based in</span>
@@ -56,6 +59,7 @@
 
           <div class="contact-social">
             <a href="#" target="_blank">Instagram</a>
+            <a href="#" target="_blank">Facebook</a>
           </div>
         </div>
 
@@ -99,16 +103,17 @@
       <div class="footer__inner">
         <div class="footer__brand">
           <div class="footer__logo">UnconventionArt</div>
-          <p class="footer__tagline">Fine art photography duo — photographer and muse.</p>
+          <p class="footer__tagline">Fine art photography duo.</p>
           <p class="footer__tagline">Based in Italy &middot; Available Worldwide</p>
+          <p class="footer__tagline" style="margin-top:8px;">studio@unconventionart.com</p>
         </div>
         <div class="footer__col">
           <h4>Navigate</h4>
           <ul>
             <li><a href="index.html">Home</a></li>
-            <li><a href="exhibitions.html">Exhibitions</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="journal.html">News</a></li>
+            <li><a href="exhibitions.html">Works</a></li>
+            <li><a href="journal.html">Journal</a></li>
+            <li><a href="about.html">Biography</a></li>
             <li><a href="contact.html">Contact</a></li>
           </ul>
         </div>
@@ -116,19 +121,20 @@
           <h4>Follow</h4>
           <ul>
             <li><a href="#" target="_blank">Instagram</a></li>
+            <li><a href="#" target="_blank">Facebook</a></li>
           </ul>
         </div>
         <div class="footer__col">
           <h4>Mailing List</h4>
           <div class="newsletter">
             <input type="email" class="newsletter__input" placeholder="Email address">
-            <button class="newsletter__btn">Subscribe</button>
+            <button class="newsletter__btn">Join</button>
           </div>
         </div>
       </div>
       <div class="footer__bottom">
         <span>&copy; 2026 UnconventionArt. All rights reserved.</span>
-        <span>hello@unconventionart.com</span>
+        <span>Italy</span>
       </div>
     </div>
   </footer>
@@ -137,7 +143,7 @@
   <script>
     function handleSubmit(e) {
       e.preventDefault();
-      alert('Form submitted! Connect this to Formspree or Netlify Forms for real delivery.');
+      alert('Message sent! Connect to Formspree or Netlify Forms for real delivery.');
       return false;
     }
   </script>

@@ -1,21 +1,21 @@
 /* ============================================
    UnconventionArt — Main JS
-   Artlogic / Atlas Gallery style
+   Phil Penman / Monochrome Dark style
    ============================================ */
 
 // --- Mobile Nav ---
 (function () {
-  const toggle = document.getElementById('navToggle');
-  const menu = document.getElementById('navMenu');
+  var toggle = document.getElementById('navToggle');
+  var menu = document.getElementById('navMenu');
   if (!toggle || !menu) return;
 
-  toggle.addEventListener('click', () => {
+  toggle.addEventListener('click', function () {
     toggle.classList.toggle('active');
     menu.classList.toggle('open');
   });
 
-  menu.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
+  menu.querySelectorAll('a').forEach(function (link) {
+    link.addEventListener('click', function () {
       toggle.classList.remove('active');
       menu.classList.remove('open');
     });
@@ -24,11 +24,11 @@
 
 // --- Scroll Reveal ---
 (function () {
-  const els = document.querySelectorAll('.reveal');
+  var els = document.querySelectorAll('.reveal');
   if (!els.length) return;
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
       if (entry.isIntersecting) {
         entry.target.classList.add('visible');
         observer.unobserve(entry.target);
@@ -36,201 +36,128 @@
     });
   }, { threshold: 0.1 });
 
-  els.forEach(el => observer.observe(el));
+  els.forEach(function (el) { observer.observe(el); });
 })();
 
-// --- Data Fetch Helper ---
+// --- Helpers ---
 async function fetchJSON(path) {
-  const res = await fetch(path);
+  var res = await fetch(path);
   return res.json();
 }
 
-// --- Format Date ---
 function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  const months = ['January','February','March','April','May','June',
+  var d = new Date(dateStr);
+  var months = ['January','February','March','April','May','June',
     'July','August','September','October','November','December'];
   return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
 }
 
-// --- Hero Slideshow ---
-(function () {
-  const slides = document.getElementById('heroSlides');
-  const dotsContainer = document.getElementById('heroDots');
-  if (!slides || !dotsContainer) return;
-
-  const slideEls = slides.querySelectorAll('.hero__slide');
-  if (slideEls.length < 2) return;
-
-  // Create dots
-  slideEls.forEach((_, i) => {
-    const dot = document.createElement('button');
-    dot.classList.add('hero__dot');
-    if (i === 0) dot.classList.add('active');
-    dot.setAttribute('aria-label', 'Slide ' + (i + 1));
-    dot.addEventListener('click', () => goToSlide(i));
-    dotsContainer.appendChild(dot);
+function reobserveReveals() {
+  document.querySelectorAll('.reveal:not(.visible)').forEach(function (el) {
+    new IntersectionObserver(function (entries, obs) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 }).observe(el);
   });
+}
 
-  let current = 0;
-  let interval = setInterval(nextSlide, 5000);
+// --- Works Grid Item HTML ---
+function workGridItem(item, index) {
+  return '<div class="works-grid__item" data-index="' + index + '">' +
+    '<img src="' + item.image + '" alt="' + item.title + '" loading="lazy">' +
+    '<div class="works-grid__item-info">' +
+      '<h4>' + item.title + '</h4>' +
+      '<span>' + item.series + '</span>' +
+    '</div>' +
+  '</div>';
+}
 
-  function goToSlide(index) {
-    slideEls[current].classList.remove('active');
-    dotsContainer.children[current].classList.remove('active');
-    current = index;
-    slideEls[current].classList.add('active');
-    dotsContainer.children[current].classList.add('active');
-    clearInterval(interval);
-    interval = setInterval(nextSlide, 5000);
-  }
-
-  function nextSlide() {
-    goToSlide((current + 1) % slideEls.length);
-  }
-})();
+// --- Viewing Room Card HTML ---
+function vrCard(series, items) {
+  var first = items[0];
+  return '<div class="vr-card">' +
+    '<img src="' + first.image + '" alt="' + series + '" loading="lazy">' +
+    '<div class="vr-card__info">' +
+      '<h3>' + series + '</h3>' +
+      '<span>' + first.date + ' &mdash; ' + items.length + ' works</span>' +
+    '</div>' +
+  '</div>';
+}
 
 // --- Exhibition Tabs ---
 (function () {
-  const tabsContainer = document.getElementById('exhTabs');
+  var tabsContainer = document.getElementById('exhTabs');
   if (!tabsContainer) return;
 
-  const tabs = tabsContainer.querySelectorAll('a');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', (e) => {
+  var tabs = tabsContainer.querySelectorAll('a');
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function (e) {
       e.preventDefault();
-      const target = tab.dataset.tab;
+      var target = tab.dataset.tab;
 
-      tabs.forEach(t => t.classList.remove('active'));
+      tabs.forEach(function (t) { t.classList.remove('active'); });
       tab.classList.add('active');
 
-      document.querySelectorAll('[id^="panel-"]').forEach(p => {
+      document.querySelectorAll('[id^="panel-"]').forEach(function (p) {
         p.style.display = 'none';
       });
-      const panel = document.getElementById('panel-' + target);
+      var panel = document.getElementById('panel-' + target);
       if (panel) panel.style.display = '';
     });
   });
 
-  loadExhibitions();
+  loadWorks();
 })();
 
-// --- Load Exhibitions ---
-async function loadExhibitions() {
-  const currentContainer = document.getElementById('currentExhibitions');
-  const pastContainer = document.getElementById('pastExhibitions');
-  if (!currentContainer && !pastContainer) return;
+// --- Load Works (exhibitions page) ---
+async function loadWorks() {
+  var allContainer = document.getElementById('allWorks');
+  var currentContainer = document.getElementById('currentWorks');
+  var pastContainer = document.getElementById('pastWorks');
+  var vrContainer = document.getElementById('viewingRooms');
+  if (!allContainer) return;
 
-  const data = await fetchJSON('data/exhibitions.json');
-  const current = data.filter(item => item.status === 'current');
-  const past = data.filter(item => item.status === 'past');
+  var data = await fetchJSON('data/exhibitions.json');
 
+  // All works grid
+  allContainer.innerHTML = data.map(function (item, i) {
+    return workGridItem(item, i);
+  }).join('');
+
+  // Current
   if (currentContainer) {
-    // Group by series for current
-    const series = {};
-    current.forEach(item => {
+    var current = data.filter(function (d) { return d.status === 'current'; });
+    currentContainer.innerHTML = current.map(function (item) {
+      return workGridItem(item, data.indexOf(item));
+    }).join('');
+  }
+
+  // Past
+  if (pastContainer) {
+    var past = data.filter(function (d) { return d.status === 'past'; });
+    pastContainer.innerHTML = past.map(function (item) {
+      return workGridItem(item, data.indexOf(item));
+    }).join('');
+  }
+
+  // Viewing Rooms — group by series
+  if (vrContainer) {
+    var series = {};
+    data.forEach(function (item) {
       if (!series[item.series]) series[item.series] = [];
       series[item.series].push(item);
     });
 
-    let html = '';
-    Object.keys(series).forEach(seriesName => {
-      const items = series[seriesName];
-      const first = items[0];
-      html += '<div class="exh-item">' +
-        '<div class="exh-item__img">' +
-          '<img src="' + first.image + '" alt="' + seriesName + '" loading="lazy">' +
-        '</div>' +
-        '<div class="exh-item__info">' +
-          '<p class="text-upper">' + first.date + '</p>' +
-          '<h3>' + seriesName + '</h3>' +
-          '<p>' + items.map(function(i) { return i.title; }).join(', ') + '. ' + first.description + '</p>' +
-          '<div class="gallery-grid" style="grid-template-columns:repeat(' + Math.min(items.length, 4) + ',1fr);gap:8px;margin-top:16px;">' +
-            items.map(function(item) {
-              return '<div class="gallery-grid__item" data-index="' + data.indexOf(item) + '">' +
-                '<div class="gallery-grid__item-img">' +
-                  '<img src="' + item.image + '" alt="' + item.title + '" loading="lazy">' +
-                '</div>' +
-              '</div>';
-            }).join('') +
-          '</div>' +
-        '</div>' +
-      '</div>';
-    });
-    currentContainer.innerHTML = html;
-  }
-
-  if (pastContainer) {
-    pastContainer.innerHTML = past.map(function(item) {
-      return '<div class="exh-grid__item" data-index="' + data.indexOf(item) + '">' +
-        '<div class="exh-grid__item-img">' +
-          '<img src="' + item.image + '" alt="' + item.title + '" loading="lazy">' +
-        '</div>' +
-        '<h4>' + item.title + '</h4>' +
-        '<p class="text-upper">' + item.series + ' &mdash; ' + item.date + '</p>' +
-      '</div>';
+    vrContainer.innerHTML = Object.keys(series).map(function (s) {
+      return vrCard(s, series[s]);
     }).join('');
   }
 
-  // Setup lightbox for all clickable items
-  setupExhibitionLightbox(data);
-}
-
-// --- Exhibition Lightbox ---
-var allExhData = [];
-var currentLightboxIndex = 0;
-
-function setupExhibitionLightbox(data) {
-  allExhData = data;
-  var lightbox = document.getElementById('lightbox');
-  if (!lightbox) return;
-
-  document.querySelectorAll('.gallery-grid__item, .exh-grid__item').forEach(function(el) {
-    el.addEventListener('click', function() {
-      var idx = parseInt(el.dataset.index);
-      if (!isNaN(idx)) {
-        currentLightboxIndex = idx;
-        openLightbox();
-      }
-    });
-  });
-
-  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
-  document.getElementById('lightboxPrev').addEventListener('click', function() { navigateLightbox(-1); });
-  document.getElementById('lightboxNext').addEventListener('click', function() { navigateLightbox(1); });
-
-  lightbox.addEventListener('click', function(e) {
-    if (e.target === lightbox) closeLightbox();
-  });
-
-  document.addEventListener('keydown', function(e) {
-    if (!lightbox.classList.contains('open')) return;
-    if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowLeft') navigateLightbox(-1);
-    if (e.key === 'ArrowRight') navigateLightbox(1);
-  });
-}
-
-function openLightbox() {
-  var lightbox = document.getElementById('lightbox');
-  var item = allExhData[currentLightboxIndex];
-  if (!item) return;
-  document.getElementById('lightboxImg').src = item.image;
-  document.getElementById('lightboxImg').alt = item.title;
-  document.getElementById('lightboxTitle').textContent = item.title;
-  document.getElementById('lightboxMeta').textContent = item.series + ' \u2014 ' + item.category;
-  lightbox.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function navigateLightbox(dir) {
-  currentLightboxIndex = (currentLightboxIndex + dir + allExhData.length) % allExhData.length;
-  openLightbox();
+  setupLightbox(data);
 }
 
 // --- Load Recent Works (Home) ---
@@ -241,17 +168,74 @@ async function loadRecentWorks() {
   var data = await fetchJSON('data/exhibitions.json');
   var recent = data.slice(0, 6);
 
-  container.innerHTML = recent.map(function(item) {
-    return '<div class="exh-grid__item">' +
-      '<div class="exh-grid__item-img">' +
-        '<img src="' + item.image + '" alt="' + item.title + '" loading="lazy">' +
-      '</div>' +
-      '<h4>' + item.title + '</h4>' +
-      '<p class="text-upper">' + item.series + '</p>' +
-    '</div>';
+  container.innerHTML = recent.map(function (item, i) {
+    return workGridItem(item, i);
   }).join('');
 
+  setupLightbox(data);
   reobserveReveals();
+}
+
+// --- Lightbox ---
+var lbData = [];
+var lbIndex = 0;
+
+function setupLightbox(data) {
+  lbData = data;
+  var lightbox = document.getElementById('lightbox');
+  if (!lightbox) return;
+
+  document.querySelectorAll('.works-grid__item').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var idx = parseInt(el.dataset.index);
+      if (!isNaN(idx)) {
+        lbIndex = idx;
+        openLightbox();
+      }
+    });
+  });
+
+  var closeBtn = document.getElementById('lightboxClose');
+  var prevBtn = document.getElementById('lightboxPrev');
+  var nextBtn = document.getElementById('lightboxNext');
+
+  if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+  if (prevBtn) prevBtn.addEventListener('click', function () { navLightbox(-1); });
+  if (nextBtn) nextBtn.addEventListener('click', function () { navLightbox(1); });
+
+  lightbox.addEventListener('click', function (e) {
+    if (e.target === lightbox) closeLightbox();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (!lightbox.classList.contains('open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') navLightbox(-1);
+    if (e.key === 'ArrowRight') navLightbox(1);
+  });
+}
+
+function openLightbox() {
+  var lightbox = document.getElementById('lightbox');
+  var item = lbData[lbIndex];
+  if (!item || !lightbox) return;
+  document.getElementById('lightboxImg').src = item.image;
+  document.getElementById('lightboxImg').alt = item.title;
+  document.getElementById('lightboxTitle').textContent = item.title;
+  document.getElementById('lightboxMeta').textContent = item.series + ' \u2014 ' + item.category;
+  lightbox.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  var lb = document.getElementById('lightbox');
+  if (lb) lb.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function navLightbox(dir) {
+  lbIndex = (lbIndex + dir + lbData.length) % lbData.length;
+  openLightbox();
 }
 
 // --- Load Recent News (Home) ---
@@ -262,7 +246,7 @@ async function loadRecentNews() {
   var data = await fetchJSON('data/journal.json');
   var recent = data.slice(0, 2);
 
-  container.innerHTML = recent.map(function(post) {
+  container.innerHTML = recent.map(function (post) {
     return '<a href="post.html?slug=' + post.slug + '" class="news-item">' +
       '<div class="news-item__img">' +
         '<img src="' + post.image + '" alt="' + post.title + '" loading="lazy">' +
@@ -278,14 +262,14 @@ async function loadRecentNews() {
   reobserveReveals();
 }
 
-// --- Load News List (News page) ---
+// --- Load News List (Journal page) ---
 async function loadNewsList() {
   var container = document.getElementById('newsList');
   if (!container) return;
 
   var data = await fetchJSON('data/journal.json');
 
-  container.innerHTML = data.map(function(post) {
+  container.innerHTML = data.map(function (post) {
     return '<a href="post.html?slug=' + post.slug + '" class="news-item">' +
       '<div class="news-item__img">' +
         '<img src="' + post.image + '" alt="' + post.title + '" loading="lazy">' +
@@ -306,7 +290,7 @@ async function loadPost() {
   if (!slug) return;
 
   var data = await fetchJSON('data/journal.json');
-  var post = data.find(function(p) { return p.slug === slug; });
+  var post = data.find(function (p) { return p.slug === slug; });
   if (!post) return;
 
   document.title = post.title + ' \u2014 UnconventionArt';
@@ -324,29 +308,10 @@ async function loadPost() {
   if (bodyEl) bodyEl.innerHTML = post.content;
 }
 
-// --- Re-observe reveals after dynamic content ---
-function reobserveReveals() {
-  document.querySelectorAll('.reveal:not(.visible)').forEach(function(el) {
-    new IntersectionObserver(function(entries, obs) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          obs.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1 }).observe(el);
-  });
-}
-
-// --- Auto-init based on page ---
-document.addEventListener('DOMContentLoaded', function() {
-  // Home page
+// --- Auto-init ---
+document.addEventListener('DOMContentLoaded', function () {
   if (document.getElementById('recentWorks')) loadRecentWorks();
   if (document.getElementById('recentNews')) loadRecentNews();
-
-  // News page
   if (document.getElementById('newsList')) loadNewsList();
-
-  // Post page
   if (document.getElementById('postBody')) loadPost();
 });

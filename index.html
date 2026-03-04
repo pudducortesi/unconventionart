@@ -12,63 +12,48 @@
   <header class="header">
     <div class="header__inner">
       <a href="index.html" class="header__logo">UnconventionArt</a>
-      <nav>
-        <ul class="header__nav" id="navMenu">
-          <li><a href="exhibitions.html">Exhibitions</a></li>
-          <li><a href="about.html">About</a></li>
-          <li><a href="journal.html">News</a></li>
-          <li><a href="contact.html">Contact</a></li>
-        </ul>
-      </nav>
-      <button class="header__toggle" id="navToggle" aria-label="Menu">
-        <span></span><span></span><span></span>
-      </button>
+      <div class="header__right">
+        <nav>
+          <ul class="header__nav" id="navMenu">
+            <li><a href="exhibitions.html">Works</a></li>
+            <li><a href="exhibitions.html#viewing-room">Viewing Room</a></li>
+            <li><a href="journal.html">Journal</a></li>
+            <li><a href="about.html">Biography</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </nav>
+        <button class="header__toggle" id="navToggle" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
     </div>
   </header>
 
-  <!-- Hero Slideshow -->
+  <!-- Hero — Full viewport -->
   <section class="hero">
-    <div class="hero__slides" id="heroSlides">
-      <div class="hero__slide active">
-        <img src="images/site/hero.svg" alt="Liminal Spaces">
-        <div class="hero__overlay"></div>
-        <div class="hero__info">
-          <p class="text-upper">Current Exhibition</p>
-          <h2>Liminal Spaces</h2>
-          <p>Exploring thresholds, absence, and the spaces between states of being.</p>
-        </div>
-      </div>
-      <div class="hero__slide">
-        <img src="images/exhibitions/featured.svg" alt="Materia">
-        <div class="hero__overlay"></div>
-        <div class="hero__info">
-          <p class="text-upper">Series</p>
-          <h2>Materia</h2>
-          <p>Textures revealing stories of transformation and decay.</p>
-        </div>
-      </div>
-      <div class="hero__slide">
-        <img src="images/site/duo.svg" alt="Presence / Absence">
-        <div class="hero__overlay"></div>
-        <div class="hero__info">
-          <p class="text-upper">Series</p>
-          <h2>Presence / Absence</h2>
-          <p>The feeling of being watched when no one is there.</p>
-        </div>
-      </div>
+    <img class="hero__media" src="images/site/hero.svg" alt="UnconventionArt">
+    <div class="hero__overlay"></div>
+    <div class="hero__content">
+      <p class="text-upper">Fine Art Photography</p>
+      <h1>UnconventionArt</h1>
+      <p>An invitation to see the tension between presence and absence, the staged and the spontaneous — through the collaboration of photographer and muse.</p>
+      <a href="exhibitions.html" class="btn btn--white">View Works</a>
     </div>
-    <div class="hero__dots" id="heroDots"></div>
+    <div class="hero__scroll">
+      <span>Scroll</span>
+      <div class="hero__scroll-line"></div>
+    </div>
   </section>
 
-  <!-- Current Exhibition -->
+  <!-- Featured Exhibition -->
   <section class="section">
     <div class="container">
-      <div class="exh-item reveal" style="border-bottom:none;padding:0;">
-        <div class="exh-item__img">
+      <div class="works-list__item reveal" style="border:none;padding:0;">
+        <div class="works-list__item-img">
           <a href="exhibitions.html"><img src="images/exhibitions/featured.svg" alt="Liminal Spaces"></a>
         </div>
-        <div class="exh-item__info">
-          <p class="text-upper">Now Showing</p>
+        <div class="works-list__item-info">
+          <p class="text-upper">Current Exhibition</p>
           <h3>Liminal Spaces</h3>
           <p>Our latest collaborative series explores the tension between presence and absence. Shot across abandoned industrial spaces in Northern Italy, each image is a dialogue between photographer and muse — capturing moments of transition, impermanence, and quiet revelation.</p>
           <a href="exhibitions.html" class="btn">View Exhibition</a>
@@ -79,14 +64,14 @@
 
   <hr class="divider">
 
-  <!-- Recent Works -->
+  <!-- Recent Works Grid -->
   <section class="section">
     <div class="container">
       <div class="reveal" style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:30px;">
         <h2>Recent Works</h2>
-        <a href="exhibitions.html" class="text-upper" style="color:var(--text);">View All</a>
+        <a href="exhibitions.html" class="text-upper" style="color:var(--white);">View All</a>
       </div>
-      <div class="exh-grid" id="recentWorks">
+      <div class="works-grid" id="recentWorks">
         <!-- Populated by JS -->
       </div>
     </div>
@@ -98,8 +83,8 @@
   <section class="section">
     <div class="container">
       <div class="reveal" style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:30px;">
-        <h2>News</h2>
-        <a href="journal.html" class="text-upper" style="color:var(--text);">View All</a>
+        <h2>The Journal</h2>
+        <a href="journal.html" class="text-upper" style="color:var(--white);">View All</a>
       </div>
       <div id="recentNews">
         <!-- Populated by JS -->
@@ -113,16 +98,17 @@
       <div class="footer__inner">
         <div class="footer__brand">
           <div class="footer__logo">UnconventionArt</div>
-          <p class="footer__tagline">Fine art photography duo — photographer and muse exploring unconventional visual narratives.</p>
+          <p class="footer__tagline">Fine art photography duo.</p>
           <p class="footer__tagline">Based in Italy &middot; Available Worldwide</p>
+          <p class="footer__tagline" style="margin-top:8px;">studio@unconventionart.com</p>
         </div>
         <div class="footer__col">
           <h4>Navigate</h4>
           <ul>
             <li><a href="index.html">Home</a></li>
-            <li><a href="exhibitions.html">Exhibitions</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="journal.html">News</a></li>
+            <li><a href="exhibitions.html">Works</a></li>
+            <li><a href="journal.html">Journal</a></li>
+            <li><a href="about.html">Biography</a></li>
             <li><a href="contact.html">Contact</a></li>
           </ul>
         </div>
@@ -130,19 +116,20 @@
           <h4>Follow</h4>
           <ul>
             <li><a href="#" target="_blank">Instagram</a></li>
+            <li><a href="#" target="_blank">Facebook</a></li>
           </ul>
         </div>
         <div class="footer__col">
           <h4>Mailing List</h4>
           <div class="newsletter">
             <input type="email" class="newsletter__input" placeholder="Email address">
-            <button class="newsletter__btn">Subscribe</button>
+            <button class="newsletter__btn">Join</button>
           </div>
         </div>
       </div>
       <div class="footer__bottom">
         <span>&copy; 2026 UnconventionArt. All rights reserved.</span>
-        <span>hello@unconventionart.com</span>
+        <span>Italy</span>
       </div>
     </div>
   </footer>
