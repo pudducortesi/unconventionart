@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About — UnconventionArt</title>
-  <meta name="description" content="About UnconventionArt — fine art photography duo, photographer and muse.">
+  <title>Biography — UnconventionArt</title>
+  <meta name="description" content="Biography — UnconventionArt, fine art photography duo.">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,39 +12,42 @@
   <header class="header">
     <div class="header__inner">
       <a href="index.html" class="header__logo">UnconventionArt</a>
-      <nav>
-        <ul class="header__nav" id="navMenu">
-          <li><a href="exhibitions.html">Exhibitions</a></li>
-          <li><a href="about.html" class="active">About</a></li>
-          <li><a href="journal.html">News</a></li>
-          <li><a href="contact.html">Contact</a></li>
-        </ul>
-      </nav>
-      <button class="header__toggle" id="navToggle" aria-label="Menu">
-        <span></span><span></span><span></span>
-      </button>
+      <div class="header__right">
+        <nav>
+          <ul class="header__nav" id="navMenu">
+            <li><a href="exhibitions.html">Works</a></li>
+            <li><a href="exhibitions.html#viewing-room">Viewing Room</a></li>
+            <li><a href="journal.html">Journal</a></li>
+            <li><a href="about.html" class="active">Biography</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </nav>
+        <button class="header__toggle" id="navToggle" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
     </div>
   </header>
 
   <div class="page-header">
     <div class="container">
-      <p class="text-upper">Gallery</p>
-      <h1>About</h1>
+      <p class="text-upper">About</p>
+      <h1>Biography</h1>
     </div>
   </div>
 
-  <!-- Main About Section -->
   <section class="section">
     <div class="container">
-      <div class="about-content reveal">
+      <div class="about-layout reveal">
+        <div class="about-image">
+          <img src="images/site/duo.svg" alt="UnconventionArt duo">
+        </div>
         <div class="about-text">
           <h2>The Duo</h2>
           <p>UnconventionArt is the collaborative practice of a photographer and muse who believe that the most powerful images emerge from the space between direction and instinct — where control gives way to presence and planning dissolves into revelation.</p>
           <p>Founded in Italy, the duo works across fine art, conceptual, and editorial photography. Their process is built on trust, improvisation, and a shared fascination with light, texture, and the human form in unconventional contexts.</p>
           <p>What began as a single experimental shoot became an ongoing artistic partnership. The work lives in the tension between the seen and unseen, the staged and spontaneous. Every image is co-authored — a third thing born from the intersection of two creative perspectives.</p>
-        </div>
-        <div class="about-image">
-          <img src="images/site/duo.svg" alt="UnconventionArt duo">
+          <p>Their work has been featured on Kavyar and various independent publications. They are available for editorial collaborations, gallery exhibitions, and commissioned projects.</p>
         </div>
       </div>
     </div>
@@ -52,20 +55,19 @@
 
   <hr class="divider">
 
-  <!-- Team -->
   <section class="section">
     <div class="container">
-      <div class="duo-section">
-        <div class="duo-member reveal">
-          <div class="duo-member__img">
+      <div class="duo-grid">
+        <div class="duo-card reveal">
+          <div class="duo-card__img">
             <img src="images/site/photographer.svg" alt="The Photographer">
           </div>
           <p class="text-upper">Photographer</p>
           <h3>[Photographer Name]</h3>
           <p>A self-taught photographer drawn to the interplay of light and shadow, decay and beauty. Influenced by the textures of Italian architecture and the stillness of abandoned spaces. Shoots primarily with natural light, favoring the quiet tension of early morning and late afternoon.</p>
         </div>
-        <div class="duo-member reveal">
-          <div class="duo-member__img">
+        <div class="duo-card reveal">
+          <div class="duo-card__img">
             <img src="images/site/muse.svg" alt="The Muse">
           </div>
           <p class="text-upper">Muse &amp; Model</p>
@@ -78,7 +80,6 @@
 
   <hr class="divider">
 
-  <!-- Process -->
   <section class="section">
     <div class="container container--narrow">
       <div class="reveal text-center mb-40">
@@ -98,16 +99,17 @@
       <div class="footer__inner">
         <div class="footer__brand">
           <div class="footer__logo">UnconventionArt</div>
-          <p class="footer__tagline">Fine art photography duo — photographer and muse.</p>
+          <p class="footer__tagline">Fine art photography duo.</p>
           <p class="footer__tagline">Based in Italy &middot; Available Worldwide</p>
+          <p class="footer__tagline" style="margin-top:8px;">studio@unconventionart.com</p>
         </div>
         <div class="footer__col">
           <h4>Navigate</h4>
           <ul>
             <li><a href="index.html">Home</a></li>
-            <li><a href="exhibitions.html">Exhibitions</a></li>
-            <li><a href="about.html">About</a></li>
-            <li><a href="journal.html">News</a></li>
+            <li><a href="exhibitions.html">Works</a></li>
+            <li><a href="journal.html">Journal</a></li>
+            <li><a href="about.html">Biography</a></li>
             <li><a href="contact.html">Contact</a></li>
           </ul>
         </div>
@@ -115,19 +117,20 @@
           <h4>Follow</h4>
           <ul>
             <li><a href="#" target="_blank">Instagram</a></li>
+            <li><a href="#" target="_blank">Facebook</a></li>
           </ul>
         </div>
         <div class="footer__col">
           <h4>Mailing List</h4>
           <div class="newsletter">
             <input type="email" class="newsletter__input" placeholder="Email address">
-            <button class="newsletter__btn">Subscribe</button>
+            <button class="newsletter__btn">Join</button>
           </div>
         </div>
       </div>
       <div class="footer__bottom">
         <span>&copy; 2026 UnconventionArt. All rights reserved.</span>
-        <span>hello@unconventionart.com</span>
+        <span>Italy</span>
       </div>
     </div>
   </footer>
