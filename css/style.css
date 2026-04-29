@@ -23,6 +23,7 @@
   --serif: 'Cormorant Garamond', 'EB Garamond', Georgia, serif;
   --sans:  'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --mono:  'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  --display: 'Anton', 'Impact', 'Helvetica Neue', sans-serif;
 
   /* Type scale */
   --t-eyebrow:  0.68rem;
@@ -90,13 +91,22 @@ a { color: inherit; text-decoration: none; transition: color var(--t-base) var(-
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 { color: var(--ink); font-weight: 300; line-height: 1.1; }
-h1 { font-family: var(--serif); font-size: var(--t-h1); letter-spacing: var(--tr-display); font-weight: 300; }
-h2 { font-family: var(--serif); font-size: var(--t-h2); letter-spacing: var(--tr-display); font-weight: 300; }
+h1 { font-family: var(--display); font-size: var(--t-h1); letter-spacing: 0.02em; font-weight: 400; text-transform: uppercase; line-height: 0.95; }
+h2 { font-family: var(--display); font-size: var(--t-h2); letter-spacing: 0.03em; font-weight: 400; text-transform: uppercase; line-height: 0.95; }
 h3 { font-family: var(--serif); font-size: var(--t-h3); letter-spacing: var(--tr-tight); font-weight: 400; }
 h4 { font-family: var(--sans);  font-size: var(--t-h4); letter-spacing: -0.005em; font-weight: 400; }
 h5 { font-family: var(--sans);  font-size: var(--t-h5); font-weight: 400; }
 h6 { font-family: var(--sans);  font-size: var(--t-h6); font-weight: 500; }
 em { font-style: italic; }
+
+/* When em appears inside display-font headings (Anton), italic doesn't render —
+   use a colour shift to preserve emphasis instead */
+h1 em, h2 em,
+.hero__title em,
+.section-head h2 em {
+  font-style: normal;
+  color: var(--ink-mute);
+}
 
 .eyebrow {
   font-family: var(--mono);
@@ -379,16 +389,18 @@ body.no-scroll { overflow: hidden; }
 }
 .hero__eyebrow { animation: fadeUp 0.8s 0.1s var(--ease-out) both; }
 .hero__title {
-  font-family: var(--serif);
-  font-size: var(--t-display);
-  font-weight: 300;
+  font-family: var(--display);
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: 400;
   line-height: 0.96;
-  letter-spacing: var(--tr-display);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   color: var(--ink);
   margin: 24px 0 30px;
-  max-width: 14ch;
+  max-width: 16ch;
 }
-.hero__title em { font-style: italic; color: var(--ink-mute); }
+.hero__title em { font-style: normal; color: var(--ink-mute); }
+.hero__title-accent { color: var(--ink-mute); }
 .hero__title .line { display: block; overflow: hidden; }
 .hero__title .reveal-line { display: inline-block; animation: slideUp 1s var(--ease-out) both; }
 .hero__title .line:nth-child(1) .reveal-line { animation-delay: 0.2s; }
@@ -806,11 +818,12 @@ body.no-scroll { overflow: hidden; }
 }
 .page-header .eyebrow { margin-bottom: 18px; }
 .page-header h1 {
-  font-family: var(--serif);
-  font-size: var(--t-h1);
-  font-weight: 300;
-  letter-spacing: var(--tr-display);
-  line-height: 1;
+  font-family: var(--display);
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 0.95;
   margin-bottom: 18px;
 }
 .page-header p {
@@ -959,7 +972,7 @@ body.no-scroll { overflow: hidden; }
 }
 .post-header h1 {
   font-size: clamp(2rem, 4.5vw, 3.4rem);
-  font-weight: 300;
+  font-weight: 400;
   margin: 0 auto 18px;
   max-width: 800px;
 }
