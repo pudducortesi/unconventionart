@@ -5,7 +5,7 @@
 (function () {
   'use strict';
 
-  // ---------- Header scroll state ----------
+  // Header scroll state
   var header = document.querySelector('.header');
   if (header) {
     var onScroll = function () {
@@ -16,7 +16,7 @@
     onScroll();
   }
 
-  // ---------- Mobile menu ----------
+  // Mobile menu
   var toggle = document.getElementById('navToggle');
   var mobileMenu = document.getElementById('mobileMenu');
 
@@ -36,7 +36,6 @@
       });
     });
 
-    // Close on Escape
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && mobileMenu.classList.contains('is-open')) {
         mobileMenu.classList.remove('is-open');
@@ -46,7 +45,7 @@
     });
   }
 
-  // ---------- Scroll reveal ----------
+  // Reveal
   var revealEls = document.querySelectorAll('.reveal');
   if (revealEls.length && 'IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (entries) {
@@ -79,10 +78,8 @@
     });
   }
 
-  // ---------- Helpers ----------
-  function fetchJSON(path) {
-    return fetch(path).then(function (r) { return r.json(); });
-  }
+  // Helpers
+  function fetchJSON(path) { return fetch(path).then(function (r) { return r.json(); }); }
 
   function formatDate(dateStr) {
     var d = new Date(dateStr);
@@ -100,7 +97,7 @@
 
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
 
-  // ---------- Markup builders ----------
+  // Markup builders
   function workGridItem(item, index) {
     return '<div class="works-grid__item reveal" data-index="' + index + '">' +
       '<span class="works-grid__item-num">N° ' + pad2(index + 1) + '</span>' +
@@ -137,11 +134,10 @@
     '</a>';
   }
 
-  // ---------- Lightbox ----------
+  // Lightbox
   var lbData = [];
   var lbIndex = 0;
   var touchStartX = 0;
-  var touchEndX = 0;
 
   function openLightbox(idx) {
     var lightbox = document.getElementById('lightbox');
@@ -154,21 +150,14 @@
     var metaEl = document.getElementById('lightboxMeta');
     var counterEl = document.getElementById('lightboxCounter');
 
-    if (imgEl) {
-      imgEl.src = item.image;
-      imgEl.alt = item.title;
-    }
+    if (imgEl) { imgEl.src = item.image; imgEl.alt = item.title; }
     if (titleEl) titleEl.textContent = item.title;
     if (metaEl) metaEl.textContent = (item.series || '') + (item.category ? ' — ' + item.category : '');
     if (counterEl) counterEl.textContent = pad2(idx + 1) + ' / ' + pad2(lbData.length);
 
     lightbox.classList.add('is-open');
     document.body.classList.add('no-scroll');
-
-    // Update URL hash for deep-link
-    if (item.id) {
-      history.replaceState(null, '', '#work-' + item.id);
-    }
+    if (item.id) history.replaceState(null, '', '#work-' + item.id);
   }
 
   function closeLightbox() {
@@ -183,8 +172,7 @@
 
   function navLightbox(dir) {
     if (!lbData.length) return;
-    var newIdx = (lbIndex + dir + lbData.length) % lbData.length;
-    openLightbox(newIdx);
+    openLightbox((lbIndex + dir + lbData.length) % lbData.length);
   }
 
   function setupLightbox(data) {
@@ -206,12 +194,10 @@
     if (prevBtn)  prevBtn.addEventListener('click', function () { navLightbox(-1); });
     if (nextBtn)  nextBtn.addEventListener('click', function () { navLightbox(1); });
 
-    // Click on backdrop closes
     lightbox.addEventListener('click', function (e) {
       if (e.target === lightbox) closeLightbox();
     });
 
-    // Keyboard
     document.addEventListener('keydown', function (e) {
       if (!lightbox.classList.contains('is-open')) return;
       if (e.key === 'Escape')      closeLightbox();
@@ -219,17 +205,14 @@
       else if (e.key === 'ArrowRight') navLightbox(1);
     });
 
-    // Swipe gestures (mobile)
     lightbox.addEventListener('touchstart', function (e) {
       touchStartX = e.changedTouches[0].screenX;
     }, { passive: true });
     lightbox.addEventListener('touchend', function (e) {
-      touchEndX = e.changedTouches[0].screenX;
-      var delta = touchEndX - touchStartX;
+      var delta = e.changedTouches[0].screenX - touchStartX;
       if (Math.abs(delta) > 50) navLightbox(delta > 0 ? -1 : 1);
     }, { passive: true });
 
-    // Deep-link: open via #work-<id> on load
     var match = location.hash.match(/#work-(\d+)/);
     if (match) {
       var targetId = parseInt(match[1], 10);
@@ -238,9 +221,7 @@
     }
   }
 
-  // ---------- Page loaders ----------
-
-  // Exhibition tabs (Works page)
+  // Exhibition tabs
   var tabsContainer = document.getElementById('exhTabs');
   if (tabsContainer) {
     var tabs = tabsContainer.querySelectorAll('a');
@@ -266,21 +247,15 @@
     if (!allContainer) return Promise.resolve(null);
 
     return fetchJSON('data/exhibitions.json').then(function (data) {
-      allContainer.innerHTML = data.map(function (item, i) {
-        return workGridItem(item, i);
-      }).join('');
+      allContainer.innerHTML = data.map(function (item, i) { return workGridItem(item, i); }).join('');
 
       if (currentContainer) {
         var current = data.filter(function (d) { return d.status === 'current'; });
-        currentContainer.innerHTML = current.map(function (item) {
-          return workGridItem(item, data.indexOf(item));
-        }).join('');
+        currentContainer.innerHTML = current.map(function (item) { return workGridItem(item, data.indexOf(item)); }).join('');
       }
       if (pastContainer) {
         var past = data.filter(function (d) { return d.status === 'past'; });
-        pastContainer.innerHTML = past.map(function (item) {
-          return workGridItem(item, data.indexOf(item));
-        }).join('');
+        pastContainer.innerHTML = past.map(function (item) { return workGridItem(item, data.indexOf(item)); }).join('');
       }
       if (vrContainer) {
         var series = {};
@@ -288,9 +263,7 @@
           if (!series[item.series]) series[item.series] = [];
           series[item.series].push(item);
         });
-        vrContainer.innerHTML = Object.keys(series).map(function (s) {
-          return vrCard(s, series[s]);
-        }).join('');
+        vrContainer.innerHTML = Object.keys(series).map(function (s) { return vrCard(s, series[s]); }).join('');
       }
 
       setupLightbox(data);
@@ -304,9 +277,7 @@
     if (!container) return Promise.resolve(null);
     return fetchJSON('data/exhibitions.json').then(function (data) {
       var recent = data.slice(0, 6);
-      container.innerHTML = recent.map(function (item, i) {
-        return workGridItem(item, i);
-      }).join('');
+      container.innerHTML = recent.map(function (item, i) { return workGridItem(item, i); }).join('');
       setupLightbox(recent);
       reobserveReveals();
       return data;
@@ -317,8 +288,7 @@
     var container = document.getElementById('recentNews');
     if (!container) return Promise.resolve(null);
     return fetchJSON('data/journal.json').then(function (data) {
-      var recent = data.slice(0, 2);
-      container.innerHTML = recent.map(newsItem).join('');
+      container.innerHTML = data.slice(0, 2).map(newsItem).join('');
       reobserveReveals();
       return data;
     });
@@ -362,7 +332,7 @@
     });
   }
 
-  // Newsletter (visual feedback only)
+  // Newsletter visual feedback
   document.querySelectorAll('.newsletter').forEach(function (form) {
     var btn = form.querySelector('.newsletter__btn');
     var input = form.querySelector('.newsletter__input');
@@ -380,7 +350,6 @@
     });
   });
 
-  // ---------- Auto-init ----------
   document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('recentWorks'))  loadRecentWorks();
     if (document.getElementById('recentNews'))   loadRecentNews();
