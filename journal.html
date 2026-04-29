@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0a0a0a">
+<link rel="icon" type="image/png" sizes="32x32" href="images/site/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="images/site/favicon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="images/site/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
@@ -17,8 +20,7 @@
 <header class="header" id="header">
   <div class="header__inner">
     <a href="index.html" class="header__logo" aria-label="UnconventionArt — home">
-      <span class="header__logo-mark">U</span>
-      <span class="header__logo-word">UnconventionArt</span>
+      <img src="images/site/logo-small.png" srcset="images/site/logo-small.png 1x, images/site/logo.png 2x" alt="UnconventionArt" class="header__logo-img">
     </a>
     <div class="header__right">
       <nav aria-label="Primary">
@@ -81,7 +83,9 @@
   <div class="container">
     <div class="footer__inner">
       <div class="footer__brand">
-        <div class="footer__logo">UnconventionArt</div>
+        <a href="index.html" class="footer__logo">
+          <img src="images/site/logo-small.png" srcset="images/site/logo-small.png 1x, images/site/logo.png 2x" alt="UnconventionArt" class="footer__logo-img">
+        </a>
         <p class="footer__tagline">Fine art photography duo.</p>
         <p class="footer__tagline">Based in Italy · Available worldwide</p>
         <p class="footer__tagline" style="margin-top:14px;">studio@unconventionart.com</p>

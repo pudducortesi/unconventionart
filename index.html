@@ -3,31 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" type="image/png" sizes="32x32" href="images/site/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="images/site/favicon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="images/site/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
 <title>UnconventionArt — Fine Art Photography Duo</title>
 <meta name="description" content="UnconventionArt — fine art photography duo. Photographer and muse exploring unconventional visual narratives through staged improvisation, decay and presence.">
-<meta name="theme-color" content="#0a0a0a">
 <link rel="canonical" href="https://unconventionart.com/">
 
-<!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="UnconventionArt — Fine Art Photography Duo">
 <meta property="og:description" content="Fine art photography duo. Photographer and muse, working between presence and absence.">
 <meta property="og:url" content="https://unconventionart.com/">
-<meta property="og:image" content="images/site/hero.svg">
+<meta property="og:image" content="images/site/og-image.png">
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="UnconventionArt — Fine Art Photography Duo">
 <meta name="twitter:description" content="Fine art photography duo. Photographer and muse, working between presence and absence.">
-<meta name="twitter:image" content="images/site/hero.svg">
+<meta name="twitter:image" content="images/site/og-image.png">
 
-<!-- Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="css/style.css">
-
-<!-- Schema.org -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -35,6 +33,7 @@
   "name": "UnconventionArt",
   "alternateName": "UnconventionArt Photography Duo",
   "url": "https://unconventionart.com",
+  "logo": "https://unconventionart.com/images/site/logo.png",
   "description": "Fine art photography duo working between staged direction and instinctive presence.",
   "sameAs": [
     "https://www.instagram.com/unconventionart",
@@ -49,21 +48,19 @@
 </head>
 <body>
 
-<!-- Header -->
 <header class="header" id="header">
   <div class="header__inner">
     <a href="index.html" class="header__logo" aria-label="UnconventionArt — home">
-      <span class="header__logo-mark">U</span>
-      <span class="header__logo-word">UnconventionArt</span>
+      <img src="images/site/logo-small.png" srcset="images/site/logo-small.png 1x, images/site/logo.png 2x" alt="UnconventionArt" class="header__logo-img">
     </a>
     <div class="header__right">
       <nav aria-label="Primary">
         <ul class="header__nav">
-          <li><a href="exhibitions.html">Works</a></li>
-          <li><a href="exhibitions.html#viewing-room">Viewing Room</a></li>
-          <li><a href="journal.html">Journal</a></li>
-          <li><a href="about.html">Biography</a></li>
-          <li><a href="contact.html">Contact</a></li>
+        <li><a href="exhibitions.html">Works</a></li>
+        <li><a href="exhibitions.html#viewing-room">Viewing Room</a></li>
+        <li><a href="journal.html">Journal</a></li>
+        <li><a href="about.html">Biography</a></li>
+        <li><a href="contact.html">Contact</a></li>
         </ul>
       </nav>
       <button class="header__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
@@ -73,7 +70,6 @@
   </div>
 </header>
 
-<!-- Mobile menu -->
 <div class="mobile-menu" id="mobileMenu" role="dialog" aria-label="Menu">
   <div class="mobile-menu__inner">
     <div class="mobile-menu__group">
@@ -99,7 +95,6 @@
   </div>
 </div>
 
-<!-- Hero -->
 <section class="hero">
   <img class="hero__media" src="images/site/hero.svg" alt="" aria-hidden="true">
   <div class="hero__overlay" aria-hidden="true"></div>
@@ -129,7 +124,6 @@
   <div class="hero__sidetag" aria-hidden="true">UnconventionArt · Italy</div>
 </section>
 
-<!-- Featured Exhibition -->
 <section class="section">
   <div class="container">
     <div class="featured-exh reveal">
@@ -148,7 +142,6 @@
 
 <hr class="divider">
 
-<!-- Recent Works -->
 <section class="section">
   <div class="container">
     <div class="section-head reveal">
@@ -158,15 +151,12 @@
       </div>
       <a href="exhibitions.html">View all →</a>
     </div>
-    <div class="works-grid" id="recentWorks" aria-live="polite">
-      <!-- populated by main.js -->
-    </div>
+    <div class="works-grid" id="recentWorks" aria-live="polite"></div>
   </div>
 </section>
 
 <hr class="divider">
 
-<!-- Journal preview -->
 <section class="section">
   <div class="container">
     <div class="section-head reveal">
@@ -176,33 +166,18 @@
       </div>
       <a href="journal.html">All entries →</a>
     </div>
-    <div class="news-list" id="recentNews" aria-live="polite">
-      <!-- populated by main.js -->
-    </div>
+    <div class="news-list" id="recentNews" aria-live="polite"></div>
   </div>
 </section>
 
-<!-- Lightbox (shared with works grid) -->
-<div class="lightbox" id="lightbox" role="dialog" aria-label="Artwork viewer">
-  <div class="lightbox__topbar">
-    <span class="lightbox__counter" id="lightboxCounter">01 / 01</span>
-    <button class="lightbox__close" id="lightboxClose" aria-label="Close">×</button>
-  </div>
-  <button class="lightbox__nav lightbox__nav--prev" id="lightboxPrev" aria-label="Previous">‹</button>
-  <button class="lightbox__nav lightbox__nav--next" id="lightboxNext" aria-label="Next">›</button>
-  <img class="lightbox__img" id="lightboxImg" src="" alt="">
-  <div class="lightbox__caption">
-    <p class="lightbox__caption-title" id="lightboxTitle"></p>
-    <p class="lightbox__caption-meta" id="lightboxMeta"></p>
-  </div>
-</div>
 
-<!-- Footer -->
 <footer class="footer">
   <div class="container">
     <div class="footer__inner">
       <div class="footer__brand">
-        <div class="footer__logo">UnconventionArt</div>
+        <a href="index.html" class="footer__logo">
+          <img src="images/site/logo-small.png" srcset="images/site/logo-small.png 1x, images/site/logo.png 2x" alt="UnconventionArt" class="footer__logo-img">
+        </a>
         <p class="footer__tagline">Fine art photography duo.</p>
         <p class="footer__tagline">Based in Italy · Available worldwide</p>
         <p class="footer__tagline" style="margin-top:14px;">studio@unconventionart.com</p>
