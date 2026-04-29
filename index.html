@@ -1,139 +1,247 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UnconventionArt | Fine Art Photography</title>
-  <meta name="description" content="UnconventionArt — Fine art photography duo. Photographer and muse exploring unconventional visual narratives.">
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UnconventionArt — Fine Art Photography Duo</title>
+<meta name="description" content="UnconventionArt — fine art photography duo. Photographer and muse exploring unconventional visual narratives through staged improvisation, decay and presence.">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="canonical" href="https://unconventionart.com/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="UnconventionArt — Fine Art Photography Duo">
+<meta property="og:description" content="Fine art photography duo. Photographer and muse, working between presence and absence.">
+<meta property="og:url" content="https://unconventionart.com/">
+<meta property="og:image" content="images/site/hero.svg">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="UnconventionArt — Fine Art Photography Duo">
+<meta name="twitter:description" content="Fine art photography duo. Photographer and muse, working between presence and absence.">
+<meta name="twitter:image" content="images/site/hero.svg">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+
+<!-- Schema.org -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "UnconventionArt",
+  "alternateName": "UnconventionArt Photography Duo",
+  "url": "https://unconventionart.com",
+  "description": "Fine art photography duo working between staged direction and instinctive presence.",
+  "sameAs": [
+    "https://www.instagram.com/unconventionart",
+    "https://www.facebook.com/unconventionart"
+  ],
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "IT"
+  }
+}
+</script>
 </head>
 <body>
 
-  <header class="header">
-    <div class="header__inner">
-      <a href="index.html" class="header__logo">UnconventionArt</a>
-      <div class="header__right">
-        <nav>
-          <ul class="header__nav" id="navMenu">
-            <li><a href="exhibitions.html">Works</a></li>
-            <li><a href="exhibitions.html#viewing-room">Viewing Room</a></li>
-            <li><a href="journal.html">Journal</a></li>
-            <li><a href="about.html">Biography</a></li>
-            <li><a href="contact.html">Contact</a></li>
-          </ul>
-        </nav>
-        <button class="header__toggle" id="navToggle" aria-label="Menu">
-          <span></span><span></span><span></span>
-        </button>
+<!-- Header -->
+<header class="header" id="header">
+  <div class="header__inner">
+    <a href="index.html" class="header__logo" aria-label="UnconventionArt — home">
+      <span class="header__logo-mark">U</span>
+      <span class="header__logo-word">UnconventionArt</span>
+    </a>
+    <div class="header__right">
+      <nav aria-label="Primary">
+        <ul class="header__nav">
+          <li><a href="exhibitions.html">Works</a></li>
+          <li><a href="exhibitions.html#viewing-room">Viewing Room</a></li>
+          <li><a href="journal.html">Journal</a></li>
+          <li><a href="about.html">Biography</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+      <button class="header__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-label="Menu">
+  <div class="mobile-menu__inner">
+    <div class="mobile-menu__group">
+      <span class="mobile-menu__group-label">Browse</span>
+      <a href="exhibitions.html" class="mobile-menu__link">Works</a>
+      <a href="exhibitions.html#viewing-room" class="mobile-menu__link">Viewing Room</a>
+      <a href="journal.html" class="mobile-menu__link">Journal</a>
+    </div>
+    <div class="mobile-menu__group">
+      <span class="mobile-menu__group-label">Studio</span>
+      <a href="about.html" class="mobile-menu__link">Biography</a>
+      <a href="contact.html" class="mobile-menu__link">Contact</a>
+    </div>
+    <div class="mobile-menu__group">
+      <span class="mobile-menu__group-label">Follow</span>
+      <a href="#" class="mobile-menu__sub">Instagram ↗</a>
+      <a href="#" class="mobile-menu__sub">Facebook ↗</a>
+    </div>
+    <div class="mobile-menu__contact">
+      studio@unconventionart.com<br>
+      Based in Italy · Available worldwide
+    </div>
+  </div>
+</div>
+
+<!-- Hero -->
+<section class="hero">
+  <img class="hero__media" src="images/site/hero.svg" alt="" aria-hidden="true">
+  <div class="hero__overlay" aria-hidden="true"></div>
+  <div class="hero__inner">
+    <span class="hero__eyebrow eyebrow">Fine Art Photography · Issue MMXXVI</span>
+    <h1 class="hero__title">
+      <span class="line"><span class="reveal-line">A duo working</span></span>
+      <span class="line"><span class="reveal-line">between <em>direction</em></span></span>
+      <span class="line"><span class="reveal-line">and instinct.</span></span>
+    </h1>
+    <div class="hero__bottom">
+      <p class="hero__desc">
+        UnconventionArt is the collaborative practice of photographer and muse — a slow body of work made of staged improvisation, abandoned spaces and the human form. Each image is co-authored.
+      </p>
+      <a href="exhibitions.html" class="hero__cta" aria-label="View works">
+        <span class="hero__cta-text">View Works</span>
+        <span class="hero__cta-arrow">
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </a>
+    </div>
+  </div>
+  <div class="hero__scroll" aria-hidden="true">
+    <span>Scroll</span>
+    <span class="hero__scroll-line"></span>
+  </div>
+  <div class="hero__sidetag" aria-hidden="true">UnconventionArt · Italy</div>
+</section>
+
+<!-- Featured Exhibition -->
+<section class="section">
+  <div class="container">
+    <div class="featured-exh reveal">
+      <a href="exhibitions.html" class="featured-exh__media" aria-label="View Liminal Spaces exhibition">
+        <img src="images/exhibitions/featured.svg" alt="Liminal Spaces — current exhibition">
+      </a>
+      <div class="featured-exh__text">
+        <span class="eyebrow">Current Exhibition</span>
+        <h3>Liminal <em>Spaces</em></h3>
+        <p>Our latest series explores the tension between presence and absence. Shot across abandoned industrial spaces in Northern Italy, each image is a dialogue between photographer and muse — moments of transition, impermanence and quiet revelation.</p>
+        <a href="exhibitions.html" class="btn btn--white">View Exhibition</a>
       </div>
     </div>
-  </header>
+  </div>
+</section>
 
-  <!-- Hero — Full viewport -->
-  <section class="hero">
-    <img class="hero__media" src="images/site/hero.svg" alt="UnconventionArt">
-    <div class="hero__overlay"></div>
-    <div class="hero__content">
-      <p class="text-upper">Fine Art Photography</p>
-      <h1>UnconventionArt</h1>
-      <p>An invitation to see the tension between presence and absence, the staged and the spontaneous — through the collaboration of photographer and muse.</p>
-      <a href="exhibitions.html" class="btn btn--white">View Works</a>
+<hr class="divider">
+
+<!-- Recent Works -->
+<section class="section">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <span class="eyebrow">Recent works</span>
+        <h2 style="margin-top:14px;">Selected <em>frames</em></h2>
+      </div>
+      <a href="exhibitions.html">View all →</a>
     </div>
-    <div class="hero__scroll">
-      <span>Scroll</span>
-      <div class="hero__scroll-line"></div>
+    <div class="works-grid" id="recentWorks" aria-live="polite">
+      <!-- populated by main.js -->
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- Featured Exhibition -->
-  <section class="section">
-    <div class="container">
-      <div class="works-list__item reveal" style="border:none;padding:0;">
-        <div class="works-list__item-img">
-          <a href="exhibitions.html"><img src="images/exhibitions/featured.svg" alt="Liminal Spaces"></a>
-        </div>
-        <div class="works-list__item-info">
-          <p class="text-upper">Current Exhibition</p>
-          <h3>Liminal Spaces</h3>
-          <p>Our latest collaborative series explores the tension between presence and absence. Shot across abandoned industrial spaces in Northern Italy, each image is a dialogue between photographer and muse — capturing moments of transition, impermanence, and quiet revelation.</p>
-          <a href="exhibitions.html" class="btn">View Exhibition</a>
-        </div>
+<hr class="divider">
+
+<!-- Journal preview -->
+<section class="section">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <span class="eyebrow">The journal</span>
+        <h2 style="margin-top:14px;">Notes from <em>the studio</em></h2>
       </div>
+      <a href="journal.html">All entries →</a>
     </div>
-  </section>
-
-  <hr class="divider">
-
-  <!-- Recent Works Grid -->
-  <section class="section">
-    <div class="container">
-      <div class="reveal" style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:30px;">
-        <h2>Recent Works</h2>
-        <a href="exhibitions.html" class="text-upper" style="color:var(--white);">View All</a>
-      </div>
-      <div class="works-grid" id="recentWorks">
-        <!-- Populated by JS -->
-      </div>
+    <div class="news-list" id="recentNews" aria-live="polite">
+      <!-- populated by main.js -->
     </div>
-  </section>
+  </div>
+</section>
 
-  <hr class="divider">
+<!-- Lightbox (shared with works grid) -->
+<div class="lightbox" id="lightbox" role="dialog" aria-label="Artwork viewer">
+  <div class="lightbox__topbar">
+    <span class="lightbox__counter" id="lightboxCounter">01 / 01</span>
+    <button class="lightbox__close" id="lightboxClose" aria-label="Close">×</button>
+  </div>
+  <button class="lightbox__nav lightbox__nav--prev" id="lightboxPrev" aria-label="Previous">‹</button>
+  <button class="lightbox__nav lightbox__nav--next" id="lightboxNext" aria-label="Next">›</button>
+  <img class="lightbox__img" id="lightboxImg" src="" alt="">
+  <div class="lightbox__caption">
+    <p class="lightbox__caption-title" id="lightboxTitle"></p>
+    <p class="lightbox__caption-meta" id="lightboxMeta"></p>
+  </div>
+</div>
 
-  <!-- News Preview -->
-  <section class="section">
-    <div class="container">
-      <div class="reveal" style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:30px;">
-        <h2>The Journal</h2>
-        <a href="journal.html" class="text-upper" style="color:var(--white);">View All</a>
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <div class="footer__logo">UnconventionArt</div>
+        <p class="footer__tagline">Fine art photography duo.</p>
+        <p class="footer__tagline">Based in Italy · Available worldwide</p>
+        <p class="footer__tagline" style="margin-top:14px;">studio@unconventionart.com</p>
       </div>
-      <div id="recentNews">
-        <!-- Populated by JS -->
+      <div class="footer__col">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="exhibitions.html">Works</a></li>
+          <li><a href="journal.html">Journal</a></li>
+          <li><a href="about.html">Biography</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
       </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer__inner">
-        <div class="footer__brand">
-          <div class="footer__logo">UnconventionArt</div>
-          <p class="footer__tagline">Fine art photography duo.</p>
-          <p class="footer__tagline">Based in Italy &middot; Available Worldwide</p>
-          <p class="footer__tagline" style="margin-top:8px;">studio@unconventionart.com</p>
-        </div>
-        <div class="footer__col">
-          <h4>Navigate</h4>
-          <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="exhibitions.html">Works</a></li>
-            <li><a href="journal.html">Journal</a></li>
-            <li><a href="about.html">Biography</a></li>
-            <li><a href="contact.html">Contact</a></li>
-          </ul>
-        </div>
-        <div class="footer__col">
-          <h4>Follow</h4>
-          <ul>
-            <li><a href="#" target="_blank">Instagram</a></li>
-            <li><a href="#" target="_blank">Facebook</a></li>
-          </ul>
-        </div>
-        <div class="footer__col">
-          <h4>Mailing List</h4>
-          <div class="newsletter">
-            <input type="email" class="newsletter__input" placeholder="Email address">
-            <button class="newsletter__btn">Join</button>
-          </div>
-        </div>
+      <div class="footer__col">
+        <h4>Follow</h4>
+        <ul>
+          <li><a href="#" target="_blank" rel="noopener">Instagram</a></li>
+          <li><a href="#" target="_blank" rel="noopener">Facebook</a></li>
+          <li><a href="#" target="_blank" rel="noopener">Kavyar</a></li>
+        </ul>
       </div>
-      <div class="footer__bottom">
-        <span>&copy; 2026 UnconventionArt. All rights reserved.</span>
-        <span>Italy</span>
+      <div class="footer__col">
+        <h4>Mailing list</h4>
+        <p style="font-size:0.82rem;color:var(--ink-mute);margin-bottom:14px;line-height:1.55;">Quiet updates. New series, exhibitions, occasional reflections.</p>
+        <form class="newsletter" onsubmit="return false;">
+          <input type="email" class="newsletter__input" placeholder="Email address" aria-label="Email address">
+          <button class="newsletter__btn" type="submit">Join</button>
+        </form>
       </div>
     </div>
-  </footer>
+    <div class="footer__bottom">
+      <span>© 2026 UnconventionArt</span>
+      <span>Italy</span>
+      <span>All rights reserved</span>
+    </div>
+  </div>
+</footer>
 
-  <script src="js/main.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
