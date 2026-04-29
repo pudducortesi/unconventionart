@@ -1,89 +1,130 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Journal — UnconventionArt</title>
-  <meta name="description" content="The Journal — news, process, and behind the scenes from UnconventionArt.">
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" type="image/png" sizes="32x32" href="images/site/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="images/site/favicon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="images/site/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<title>The Journal — UnconventionArt</title>
+<meta name="description" content="Notes on process, collaboration and the spaces we keep returning to.">
+
 </head>
 <body>
 
-  <header class="header">
-    <div class="header__inner">
-      <a href="index.html" class="header__logo">UnconventionArt</a>
-      <div class="header__right">
-        <nav>
-          <ul class="header__nav" id="navMenu">
-            <li><a href="exhibitions.html">Works</a></li>
-            <li><a href="exhibitions.html#viewing-room">Viewing Room</a></li>
-            <li><a href="journal.html" class="active">Journal</a></li>
-            <li><a href="about.html">Biography</a></li>
-            <li><a href="contact.html">Contact</a></li>
-          </ul>
-        </nav>
-        <button class="header__toggle" id="navToggle" aria-label="Menu">
-          <span></span><span></span><span></span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <div class="page-header">
-    <div class="container">
-      <h1>The Journal</h1>
+<header class="header" id="header">
+  <div class="header__inner">
+    <a href="index.html" class="header__logo" aria-label="UnconventionArt — home">
+      <img src="images/site/logo-small.png" srcset="images/site/logo-small.png 1x, images/site/logo.png 2x" alt="UnconventionArt" class="header__logo-img">
+    </a>
+    <div class="header__right">
+      <nav aria-label="Primary">
+        <ul class="header__nav">
+        <li><a href="exhibitions.html">Works</a></li>
+        <li><a href="exhibitions.html#viewing-room">Viewing Room</a></li>
+        <li><a href="journal.html" class="active">Journal</a></li>
+        <li><a href="about.html">Biography</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+      <button class="header__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
+</header>
 
-  <section class="section">
-    <div class="container">
-      <div class="news-list" id="newsList">
-        <!-- Populated by JS -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-label="Menu">
+  <div class="mobile-menu__inner">
+    <div class="mobile-menu__group">
+      <span class="mobile-menu__group-label">Browse</span>
+      <a href="exhibitions.html" class="mobile-menu__link">Works</a>
+      <a href="exhibitions.html#viewing-room" class="mobile-menu__link">Viewing Room</a>
+      <a href="journal.html" class="mobile-menu__link">Journal</a>
+    </div>
+    <div class="mobile-menu__group">
+      <span class="mobile-menu__group-label">Studio</span>
+      <a href="about.html" class="mobile-menu__link">Biography</a>
+      <a href="contact.html" class="mobile-menu__link">Contact</a>
+    </div>
+    <div class="mobile-menu__group">
+      <span class="mobile-menu__group-label">Follow</span>
+      <a href="#" class="mobile-menu__sub">Instagram ↗</a>
+      <a href="#" class="mobile-menu__sub">Facebook ↗</a>
+    </div>
+    <div class="mobile-menu__contact">
+      studio@unconventionart.com<br>
+      Based in Italy · Available worldwide
+    </div>
+  </div>
+</div>
+
+<div class="page-header">
+  <div class="container">
+    <span class="eyebrow">Reading</span>
+    <h1>The Journal</h1>
+    <p>Notes on process, collaboration, and the spaces we keep returning to.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="news-list" id="newsList"></div>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <a href="index.html" class="footer__logo">
+          <img src="images/site/logo-small.png" srcset="images/site/logo-small.png 1x, images/site/logo.png 2x" alt="UnconventionArt" class="footer__logo-img">
+        </a>
+        <p class="footer__tagline">Fine art photography duo.</p>
+        <p class="footer__tagline">Based in Italy · Available worldwide</p>
+        <p class="footer__tagline" style="margin-top:14px;">studio@unconventionart.com</p>
+      </div>
+      <div class="footer__col">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="exhibitions.html">Works</a></li>
+          <li><a href="journal.html">Journal</a></li>
+          <li><a href="about.html">Biography</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Follow</h4>
+        <ul>
+          <li><a href="#" target="_blank" rel="noopener">Instagram</a></li>
+          <li><a href="#" target="_blank" rel="noopener">Facebook</a></li>
+          <li><a href="#" target="_blank" rel="noopener">Kavyar</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Mailing list</h4>
+        <p style="font-size:0.82rem;color:var(--ink-mute);margin-bottom:14px;line-height:1.55;">Quiet updates. New series, exhibitions, occasional reflections.</p>
+        <form class="newsletter" onsubmit="return false;">
+          <input type="email" class="newsletter__input" placeholder="Email address" aria-label="Email address">
+          <button class="newsletter__btn" type="submit">Join</button>
+        </form>
       </div>
     </div>
-  </section>
-
-  <footer class="footer">
-    <div class="container">
-      <div class="footer__inner">
-        <div class="footer__brand">
-          <div class="footer__logo">UnconventionArt</div>
-          <p class="footer__tagline">Fine art photography duo.</p>
-          <p class="footer__tagline">Based in Italy &middot; Available Worldwide</p>
-          <p class="footer__tagline" style="margin-top:8px;">studio@unconventionart.com</p>
-        </div>
-        <div class="footer__col">
-          <h4>Navigate</h4>
-          <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="exhibitions.html">Works</a></li>
-            <li><a href="journal.html">Journal</a></li>
-            <li><a href="about.html">Biography</a></li>
-            <li><a href="contact.html">Contact</a></li>
-          </ul>
-        </div>
-        <div class="footer__col">
-          <h4>Follow</h4>
-          <ul>
-            <li><a href="#" target="_blank">Instagram</a></li>
-            <li><a href="#" target="_blank">Facebook</a></li>
-          </ul>
-        </div>
-        <div class="footer__col">
-          <h4>Mailing List</h4>
-          <div class="newsletter">
-            <input type="email" class="newsletter__input" placeholder="Email address">
-            <button class="newsletter__btn">Join</button>
-          </div>
-        </div>
-      </div>
-      <div class="footer__bottom">
-        <span>&copy; 2026 UnconventionArt. All rights reserved.</span>
-        <span>Italy</span>
-      </div>
+    <div class="footer__bottom">
+      <span>© 2026 UnconventionArt</span>
+      <span>Italy</span>
+      <span>All rights reserved</span>
     </div>
-  </footer>
+  </div>
+</footer>
 
-  <script src="js/main.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
