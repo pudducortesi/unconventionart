@@ -100,11 +100,21 @@
   // Markup builders
   function workGridItem(item, index) {
     return '<div class="works-grid__item reveal" data-index="' + index + '">' +
-      '<span class="works-grid__item-num">N° ' + pad2(index + 1) + '</span>' +
-      '<img src="' + escapeHTML(item.image) + '" alt="' + escapeHTML(item.title) + '" loading="lazy">' +
-      '<div class="works-grid__item-info">' +
-        '<h4>' + escapeHTML(item.title) + '</h4>' +
-        '<span>' + escapeHTML(item.series || '') + (item.category ? ' — ' + escapeHTML(item.category) : '') + '</span>' +
+      '<div class="works-grid__item-media">' +
+        '<img src="' + escapeHTML(item.image) + '" alt="' + escapeHTML(item.title) + '" loading="lazy">' +
+        '<span class="works-grid__item-logo" aria-hidden="true">' +
+          '<img src="images/site/logo-small.png" alt="">' +
+        '</span>' +
+        '<span class="works-grid__item-num">N° ' + pad2(index + 1) + '</span>' +
+      '</div>' +
+      '<div class="works-grid__item-plaque">' +
+        '<div class="works-grid__item-plaque__text">' +
+          '<p class="works-grid__item-plaque__title">' + escapeHTML(item.title) + '</p>' +
+          '<p class="works-grid__item-plaque__meta">' + escapeHTML(item.series || '') + (item.category ? ' · ' + escapeHTML(item.category) : '') + '</p>' +
+        '</div>' +
+        '<span class="works-grid__item-plaque__arrow" aria-hidden="true">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg>' +
+        '</span>' +
       '</div>' +
     '</div>';
   }
@@ -112,10 +122,21 @@
   function vrCard(series, items) {
     var first = items[0];
     return '<a href="exhibitions.html#' + encodeURIComponent(series) + '" class="vr-card reveal">' +
-      '<img src="' + escapeHTML(first.image) + '" alt="' + escapeHTML(series) + '" loading="lazy">' +
-      '<div class="vr-card__info">' +
-        '<h3>' + escapeHTML(series) + '</h3>' +
-        '<span>' + escapeHTML(first.date || '') + ' — ' + items.length + ' works</span>' +
+      '<div class="vr-card-media">' +
+        '<img src="' + escapeHTML(first.image) + '" alt="' + escapeHTML(series) + '" loading="lazy">' +
+        '<span class="vr-card-logo" aria-hidden="true">' +
+          '<img src="images/site/logo-small.png" alt="">' +
+        '</span>' +
+        '<span class="vr-card-tag">' + items.length + ' Works</span>' +
+      '</div>' +
+      '<div class="vr-card-plaque">' +
+        '<div class="vr-card-plaque__text">' +
+          '<p class="vr-card-plaque__title">' + escapeHTML(series) + '</p>' +
+          '<p class="vr-card-plaque__meta">' + escapeHTML(first.date || '') + ' — Series</p>' +
+        '</div>' +
+        '<span class="vr-card-plaque__arrow">' +
+          'View →' +
+        '</span>' +
       '</div>' +
     '</a>';
   }
