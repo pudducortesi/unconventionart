@@ -1,11 +1,50 @@
 /* ============================================================
-   UnconventionArt — Main JS (v2)
+   UnconventionArt — Main JS (v2 final)
    ============================================================ */
 
 (function () {
   'use strict';
 
-  // Header scroll state
+  /* -------------------------------------------------------------------------
+     Lenis smooth scroll (loaded from CDN via script tag in HTML)
+     If Lenis not present, fallback to native scroll silently.
+  ------------------------------------------------------------------------- */
+  function initLenis() {
+    if (typeof Lenis === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var lenis = new Lenis({
+      duration: 1.1,
+      easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
+      smoothWheel: true,
+      touchMultiplier: 1.5
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    // Expose for in-page anchor links
+    window.__lenis = lenis;
+
+    // Make in-page anchor links use Lenis
+    document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        var id = a.getAttribute('href');
+        if (id.length < 2) return;
+        var target = document.querySelector(id);
+        if (!target) return;
+        e.preventDefault();
+        lenis.scrollTo(target, { offset: -80 });
+      });
+    });
+  }
+
+  /* -------------------------------------------------------------------------
+     Header scroll state
+  ------------------------------------------------------------------------- */
   var header = document.querySelector('.header');
   if (header) {
     var onScroll = function () {
@@ -16,10 +55,11 @@
     onScroll();
   }
 
-  // Mobile menu
+  /* -------------------------------------------------------------------------
+     Mobile menu
+  ------------------------------------------------------------------------- */
   var toggle = document.getElementById('navToggle');
   var mobileMenu = document.getElementById('mobileMenu');
-
   if (toggle && mobileMenu) {
     toggle.addEventListener('click', function () {
       var open = mobileMenu.classList.toggle('is-open');
@@ -27,7 +67,6 @@
       document.body.classList.toggle('no-scroll', open);
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
-
     mobileMenu.querySelectorAll('a').forEach(function (link) {
       link.addEventListener('click', function () {
         mobileMenu.classList.remove('is-open');
@@ -35,7 +74,6 @@
         document.body.classList.remove('no-scroll');
       });
     });
-
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && mobileMenu.classList.contains('is-open')) {
         mobileMenu.classList.remove('is-open');
@@ -45,7 +83,9 @@
     });
   }
 
-  // Reveal
+  /* -------------------------------------------------------------------------
+     Reveal on scroll
+  ------------------------------------------------------------------------- */
   var revealEls = document.querySelectorAll('.reveal');
   if (revealEls.length && 'IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (entries) {
@@ -78,7 +118,9 @@
     });
   }
 
-  // Helpers
+  /* -------------------------------------------------------------------------
+     Helpers
+  ------------------------------------------------------------------------- */
   function fetchJSON(path) { return fetch(path).then(function (r) { return r.json(); }); }
 
   function formatDate(dateStr) {
@@ -97,13 +139,15 @@
 
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
 
-  // Markup builders
+  /* -------------------------------------------------------------------------
+     Card markup
+  ------------------------------------------------------------------------- */
   function workGridItem(item, index) {
     return '<div class="works-grid__item reveal" data-index="' + index + '">' +
       '<div class="works-grid__item-media">' +
         '<img src="' + escapeHTML(item.image) + '" alt="' + escapeHTML(item.title) + '" loading="lazy">' +
         '<span class="works-grid__item-logo" aria-hidden="true">' +
-          '<img src="images/site/logo-small.png" alt="">' +
+          '<img src="images/site/logo-tiny.png" alt="">' +
         '</span>' +
         '<span class="works-grid__item-num">N° ' + pad2(index + 1) + '</span>' +
       '</div>' +
@@ -125,7 +169,7 @@
       '<div class="vr-card-media">' +
         '<img src="' + escapeHTML(first.image) + '" alt="' + escapeHTML(series) + '" loading="lazy">' +
         '<span class="vr-card-logo" aria-hidden="true">' +
-          '<img src="images/site/logo-small.png" alt="">' +
+          '<img src="images/site/logo-tiny.png" alt="">' +
         '</span>' +
         '<span class="vr-card-tag">' + items.length + ' Works</span>' +
       '</div>' +
@@ -134,9 +178,7 @@
           '<p class="vr-card-plaque__title">' + escapeHTML(series) + '</p>' +
           '<p class="vr-card-plaque__meta">' + escapeHTML(first.date || '') + ' — Series</p>' +
         '</div>' +
-        '<span class="vr-card-plaque__arrow">' +
-          'View →' +
-        '</span>' +
+        '<span class="vr-card-plaque__arrow">View →</span>' +
       '</div>' +
     '</a>';
   }
@@ -155,7 +197,9 @@
     '</a>';
   }
 
-  // Lightbox
+  /* -------------------------------------------------------------------------
+     Lightbox
+  ------------------------------------------------------------------------- */
   var lbData = [];
   var lbIndex = 0;
   var touchStartX = 0;
@@ -178,6 +222,7 @@
 
     lightbox.classList.add('is-open');
     document.body.classList.add('no-scroll');
+    if (window.__lenis) window.__lenis.stop();
     if (item.id) history.replaceState(null, '', '#work-' + item.id);
   }
 
@@ -186,6 +231,7 @@
     if (!lightbox) return;
     lightbox.classList.remove('is-open');
     document.body.classList.remove('no-scroll');
+    if (window.__lenis) window.__lenis.start();
     if (location.hash.indexOf('#work-') === 0) {
       history.replaceState(null, '', location.pathname + location.search);
     }
@@ -242,7 +288,9 @@
     }
   }
 
-  // Exhibition tabs
+  /* -------------------------------------------------------------------------
+     Tabs (Works page)
+  ------------------------------------------------------------------------- */
   var tabsContainer = document.getElementById('exhTabs');
   if (tabsContainer) {
     var tabs = tabsContainer.querySelectorAll('a');
@@ -260,6 +308,9 @@
     });
   }
 
+  /* -------------------------------------------------------------------------
+     Page loaders
+  ------------------------------------------------------------------------- */
   function loadWorks() {
     var allContainer     = document.getElementById('allWorks');
     var currentContainer = document.getElementById('currentWorks');
@@ -269,7 +320,6 @@
 
     return fetchJSON('data/exhibitions.json').then(function (data) {
       allContainer.innerHTML = data.map(function (item, i) { return workGridItem(item, i); }).join('');
-
       if (currentContainer) {
         var current = data.filter(function (d) { return d.status === 'current'; });
         currentContainer.innerHTML = current.map(function (item) { return workGridItem(item, data.indexOf(item)); }).join('');
@@ -286,7 +336,6 @@
         });
         vrContainer.innerHTML = Object.keys(series).map(function (s) { return vrCard(s, series[s]); }).join('');
       }
-
       setupLightbox(data);
       reobserveReveals();
       return data;
@@ -353,7 +402,9 @@
     });
   }
 
-  // Newsletter visual feedback
+  /* -------------------------------------------------------------------------
+     Newsletter
+  ------------------------------------------------------------------------- */
   document.querySelectorAll('.newsletter').forEach(function (form) {
     var btn = form.querySelector('.newsletter__btn');
     var input = form.querySelector('.newsletter__input');
@@ -371,7 +422,11 @@
     });
   });
 
+  /* -------------------------------------------------------------------------
+     Boot
+  ------------------------------------------------------------------------- */
   document.addEventListener('DOMContentLoaded', function () {
+    initLenis();
     if (document.getElementById('recentWorks'))  loadRecentWorks();
     if (document.getElementById('recentNews'))   loadRecentNews();
     if (document.getElementById('allWorks'))     loadWorks();

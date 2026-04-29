@@ -1,12 +1,11 @@
 /* ============================================================
-   UnconventionArt — v2 (overhaul + logo integration)
+   UnconventionArt — v2 final (cards + marquee + smooth scroll)
    Fine art photography duo / Dark monochrome
    ============================================================ */
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  /* Color */
   --bg: #0a0a0a;
   --bg-2: #111111;
   --bg-card: #141414;
@@ -19,13 +18,11 @@
   --ink-dim: #555555;
   --ink-faint: #333333;
 
-  /* Type families */
   --serif: 'Cormorant Garamond', 'EB Garamond', Georgia, serif;
   --sans:  'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --mono:  'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
   --display: 'Anton', 'Impact', 'Helvetica Neue', sans-serif;
 
-  /* Type scale */
   --t-eyebrow:  0.68rem;
   --t-meta:     0.72rem;
   --t-body-sm:  0.86rem;
@@ -44,7 +41,6 @@
   --tr-tight:  -0.01em;
   --tr-display:-0.025em;
 
-  /* Layout */
   --w-narrow:   780px;
   --w-text:     1100px;
   --w-default:  1320px;
@@ -53,7 +49,6 @@
   --gutter-sm:  1.25rem;
   --header-h:   68px;
 
-  /* Motion */
   --ease:       cubic-bezier(0.2, 0.7, 0.2, 1);
   --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
   --t-fast:     0.18s;
@@ -61,7 +56,13 @@
   --t-slow:     0.6s;
 }
 
-html { font-size: 16px; scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+/* Lenis smooth scroll */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-scrolling iframe { pointer-events: none; }
 
 body {
   font-family: var(--sans);
@@ -97,10 +98,10 @@ h3 { font-family: var(--serif); font-size: var(--t-h3); letter-spacing: var(--tr
 h4 { font-family: var(--sans);  font-size: var(--t-h4); letter-spacing: -0.005em; font-weight: 400; }
 h5 { font-family: var(--sans);  font-size: var(--t-h5); font-weight: 400; }
 h6 { font-family: var(--sans);  font-size: var(--t-h6); font-weight: 500; }
+
 em { font-style: italic; }
 
-/* When em appears inside display-font headings (Anton), italic doesn't render —
-   use a colour shift to preserve emphasis instead */
+/* When em appears inside Anton headings, italic doesn't render */
 h1 em, h2 em,
 .hero__title em,
 .section-head h2 em {
@@ -145,7 +146,6 @@ h1 em, h2 em,
   color: var(--ink-soft);
 }
 
-/* legacy */
 .text-upper {
   font-family: var(--mono);
   font-size: var(--t-eyebrow);
@@ -190,7 +190,10 @@ h1 em, h2 em,
 }
 .section-head a:hover { color: var(--ink); border-bottom-color: var(--ink); }
 
-/* Header */
+/* ============================================================
+   Header
+   ============================================================ */
+
 .header {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -220,14 +223,13 @@ h1 em, h2 em,
 .header__logo {
   display: inline-flex;
   align-items: center;
-  position: relative;
-  height: 38px;
+  height: 40px;
   flex-shrink: 0;
   transition: opacity var(--t-base);
 }
 .header__logo:hover { opacity: 0.78; }
 .header__logo-img {
-  height: 38px;
+  height: 40px;
   width: auto;
   display: block;
 }
@@ -351,7 +353,10 @@ h1 em, h2 em,
 }
 body.no-scroll { overflow: hidden; }
 
-/* Hero */
+/* ============================================================
+   Hero
+   ============================================================ */
+
 .hero {
   position: relative;
   min-height: 100vh;
@@ -566,21 +571,68 @@ body.no-scroll { overflow: hidden; }
 }
 
 /* ============================================================
-   Works grid — editorial cards (photo + brand mark + plaque)
+   Marquee — horizontal scrolling brand text
+   ============================================================ */
+
+.marquee {
+  overflow: hidden;
+  width: 100%;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 28px 0;
+  position: relative;
+  z-index: 2;
+}
+.marquee__track {
+  display: flex;
+  gap: 60px;
+  white-space: nowrap;
+  animation: marqueeScroll 40s linear infinite;
+  width: max-content;
+}
+.marquee:hover .marquee__track { animation-play-state: paused; }
+.marquee__item {
+  font-family: var(--display);
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 60px;
+}
+.marquee__item::after {
+  content: "·";
+  font-size: 1em;
+  color: var(--ink-dim);
+}
+.marquee__item-em {
+  color: var(--ink-mute);
+  font-style: normal;
+}
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ============================================================
+   Works grid — editorial cards
    ============================================================ */
 
 .works-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 20px;
-  row-gap: 80px;
+  gap: 24px;
+  row-gap: 90px;
   grid-auto-flow: dense;
 }
 .works-grid__item {
   position: relative;
   cursor: pointer;
   grid-column: span 4;
-  padding-bottom: 50px; /* room for the plaque to descend */
+  padding-bottom: 56px;
 }
 .works-grid__item:nth-child(5n+1) { grid-column: span 6; }
 .works-grid__item:nth-child(7n+3) { grid-column: span 4; }
@@ -592,7 +644,6 @@ body.no-scroll { overflow: hidden; }
   overflow: hidden;
   background: var(--bg-card);
   aspect-ratio: 4 / 5;
-  transition: transform var(--t-base) var(--ease);
 }
 .works-grid__item:nth-child(5n+1) .works-grid__item-media { aspect-ratio: 16 / 11; }
 .works-grid__item:nth-child(7n+3) .works-grid__item-media { aspect-ratio: 3 / 4; }
@@ -610,20 +661,22 @@ body.no-scroll { overflow: hidden; }
   filter: contrast(1.1) saturate(0.9);
 }
 
-/* Brand mark — small logo overlaid top-left of the photo */
+/* Brand mark — small logo top-left, with scrim for legibility */
 .works-grid__item-logo {
   position: absolute;
-  top: 14px;
-  left: 14px;
-  width: 90px;
+  top: 0;
+  left: 0;
+  width: 130px;
+  padding: 14px 18px 18px;
   z-index: 3;
   pointer-events: none;
-  filter: drop-shadow(0 1px 8px rgba(0,0,0,0.45));
-  opacity: 0.92;
-  transition: opacity var(--t-base);
+  background: linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 75%);
 }
-.works-grid__item-logo img { width: 100%; height: auto; display: block; }
-.works-grid__item:hover .works-grid__item-logo { opacity: 1; }
+.works-grid__item-logo img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
 
 /* Number badge — top-right */
 .works-grid__item-num {
@@ -642,26 +695,25 @@ body.no-scroll { overflow: hidden; }
   z-index: 3;
 }
 
-/* Plaque — white card that hangs below the photo */
+/* Plaque — white card hanging below the photo */
 .works-grid__item-plaque {
   position: absolute;
-  left: 50%;
+  left: 24px;
+  right: 24px;
   bottom: 0;
-  transform: translateX(-50%);
-  width: calc(100% - 36px);
   background: #ffffff;
   color: #0a0a0a;
-  padding: 18px 22px 18px;
+  padding: 18px 22px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   transition: transform var(--t-base) var(--ease), box-shadow var(--t-base);
-  box-shadow: 0 6px 24px -8px rgba(0,0,0,0.4);
+  box-shadow: 0 6px 24px -8px rgba(0,0,0,0.5);
 }
 .works-grid__item:hover .works-grid__item-plaque {
-  transform: translateX(-50%) translateY(-4px);
-  box-shadow: 0 12px 32px -10px rgba(0,0,0,0.55);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px -10px rgba(0,0,0,0.65);
 }
 .works-grid__item-plaque__text { min-width: 0; flex: 1; }
 .works-grid__item-plaque__title {
@@ -700,7 +752,7 @@ body.no-scroll { overflow: hidden; }
   transform: translateX(4px);
 }
 
-/* Works list (legacy — used on detail layouts) */
+/* Works list */
 .works-list__item {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
@@ -728,20 +780,17 @@ body.no-scroll { overflow: hidden; }
   margin-bottom: 24px;
 }
 
-/* ============================================================
-   Viewing rooms (series cards) — same editorial card pattern
-   ============================================================ */
-
+/* Viewing rooms */
 .viewing-rooms {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 30px;
-  row-gap: 90px;
+  row-gap: 100px;
 }
 .vr-card {
   position: relative;
   cursor: pointer;
-  padding-bottom: 60px;
+  padding-bottom: 70px;
 }
 .vr-card-media {
   position: relative;
@@ -757,22 +806,18 @@ body.no-scroll { overflow: hidden; }
 }
 .vr-card:hover .vr-card-media img { transform: scale(1.04); }
 
-/* Brand mark for vr-card */
 .vr-card-logo {
   position: absolute;
-  top: 18px;
-  left: 18px;
-  width: 110px;
+  top: 0;
+  left: 0;
+  width: 160px;
+  padding: 18px 22px 22px;
   z-index: 3;
   pointer-events: none;
-  filter: drop-shadow(0 1px 8px rgba(0,0,0,0.45));
-  opacity: 0.92;
-  transition: opacity var(--t-base);
+  background: linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 75%);
 }
 .vr-card-logo img { width: 100%; height: auto; display: block; }
-.vr-card:hover .vr-card-logo { opacity: 1; }
 
-/* Series tag — top-right */
 .vr-card-tag {
   position: absolute;
   top: 18px;
@@ -789,7 +834,6 @@ body.no-scroll { overflow: hidden; }
   z-index: 3;
 }
 
-/* Plaque for vr-card */
 .vr-card-plaque {
   position: absolute;
   left: 40px;
@@ -803,11 +847,11 @@ body.no-scroll { overflow: hidden; }
   gap: 20px;
   align-items: center;
   transition: transform var(--t-base) var(--ease), box-shadow var(--t-base);
-  box-shadow: 0 6px 28px -10px rgba(0,0,0,0.45);
+  box-shadow: 0 6px 28px -10px rgba(0,0,0,0.55);
 }
 .vr-card:hover .vr-card-plaque {
   transform: translateY(-4px);
-  box-shadow: 0 14px 38px -12px rgba(0,0,0,0.6);
+  box-shadow: 0 14px 38px -12px rgba(0,0,0,0.7);
 }
 .vr-card-plaque__text { min-width: 0; }
 .vr-card-plaque__title {
@@ -1135,6 +1179,8 @@ body.no-scroll { overflow: hidden; }
   font-family: var(--serif);
   font-size: 1.7rem;
   font-weight: 300;
+  text-transform: none;
+  letter-spacing: 0;
   margin: 50px 0 18px;
 }
 .post-body blockquote {
@@ -1372,38 +1418,41 @@ body.no-scroll { overflow: hidden; }
   .section--lg { padding: 90px 0; }
   .header__nav { display: none; }
   .header__toggle { display: block; }
-  .header__logo { height: 30px; }
-  .header__logo-img { height: 30px; }
+  .header__logo { height: 32px; }
+  .header__logo-img { height: 32px; }
 
   .hero__inner { padding: 40px var(--gutter) 60px; }
   .hero__bottom { grid-template-columns: 1fr; gap: 28px; }
   .hero__sidetag { display: none; }
   .hero__title { max-width: none; }
 
-  .works-grid { grid-template-columns: repeat(6, 1fr); gap: 16px; row-gap: 70px; }
+  .marquee { padding: 18px 0; }
+
+  .works-grid { grid-template-columns: repeat(6, 1fr); gap: 18px; row-gap: 80px; }
   .works-grid__item,
   .works-grid__item:nth-child(5n+1),
   .works-grid__item:nth-child(7n+3),
   .works-grid__item:nth-child(11n+8),
-  .works-grid__item:nth-child(13n+9) { grid-column: span 6; padding-bottom: 44px; }
+  .works-grid__item:nth-child(13n+9) { grid-column: span 6; padding-bottom: 50px; }
   .works-grid__item-media,
   .works-grid__item:nth-child(5n+1) .works-grid__item-media,
   .works-grid__item:nth-child(7n+3) .works-grid__item-media,
   .works-grid__item:nth-child(11n+8) .works-grid__item-media,
   .works-grid__item:nth-child(13n+9) .works-grid__item-media { aspect-ratio: 4 / 5; }
-  .works-grid__item-logo { width: 70px; top: 12px; left: 12px; }
-  .works-grid__item-plaque { width: calc(100% - 28px); padding: 14px 18px; }
+  .works-grid__item-logo { width: 100px; padding: 12px 14px 16px; }
+  .works-grid__item-plaque { left: 16px; right: 16px; padding: 14px 18px; }
   .works-grid__item-plaque__title { font-size: 0.95rem; }
 
-  .viewing-rooms { grid-template-columns: 1fr; gap: 70px; }
-  .vr-card { padding-bottom: 50px; }
+  .viewing-rooms { grid-template-columns: 1fr; gap: 80px; }
+  .vr-card { padding-bottom: 60px; }
   .vr-card-plaque { left: 24px; right: 24px; padding: 18px 22px; }
   .vr-card-plaque__title { font-size: 1.3rem; }
-  .vr-card-logo { width: 80px; top: 14px; left: 14px; }
+  .vr-card-logo { width: 110px; padding: 14px 16px 18px; }
 
   .works-list__item,
   .works-list__item:nth-child(even) { grid-template-columns: 1fr; gap: 24px; }
   .works-list__item:nth-child(even) .works-list__item-img { order: 0; }
+
   .duo-grid { grid-template-columns: 1fr; gap: 36px; }
   .news-item { grid-template-columns: 1fr; gap: 18px; }
   .news-item__arrow { display: none; }
@@ -1438,7 +1487,6 @@ body.no-scroll { overflow: hidden; }
   .works-grid__item:nth-child(7n+3) .works-grid__item-media,
   .works-grid__item:nth-child(11n+8) .works-grid__item-media,
   .works-grid__item:nth-child(13n+9) .works-grid__item-media { aspect-ratio: 4 / 5; }
-  .works-grid__item-logo { width: 80px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1448,4 +1496,5 @@ body.no-scroll { overflow: hidden; }
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  .marquee__track { animation: none !important; }
 }
