@@ -3,8 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node tools/serve.mjs",
+    "dev": "node tools/vendor.mjs && node tools/serve.mjs",
     "build": "node tools/build.mjs",
-    "check": "node tools/check.mjs"
+    "check": "node tools/check.mjs && node --test tests/museum.test.mjs"
+  },
+  "dependencies": {
+    "three": "0.186.0"
   }
 }
