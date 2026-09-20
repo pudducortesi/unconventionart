@@ -163,12 +163,9 @@ try {
       if (card) $("#worlds-track").append(card);
     });
   if ($("#teaser-grid")) {
-    const selected = catalogue.works.filter((w) => w.image !== catalogue.hero);
-    $("#teaser-grid").append(
-      ...[selected[0], selected[Math.min(5, selected.length - 1)]]
-        .filter(Boolean)
-        .map(artCard),
-    );
+    const selected = catalogue.works.filter(w => w.image !== catalogue.hero);
+    const choices = selected.length ? selected : catalogue.works;
+    $("#teaser-grid").append(...choices.slice(0, 2).map(artCard));
   }
   renderArchive(catalogue);
   renderCollection(catalogue);

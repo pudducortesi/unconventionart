@@ -1,136 +1,22 @@
 {
-  "placeholder": true,
-  "hero": "images/exhibitions/01.svg",
+  "hero": "images/kavyar/01.jpg",
   "collections": [
     {
-      "id": "presenza",
-      "title": "Presenza",
-      "subtitle": "Il gesto. Lo sguardo.",
-      "description": "Il ritratto come spazio di incontro.",
-      "color": "#b7aa93"
-    },
-    {
-      "id": "materia",
-      "title": "Materia",
-      "subtitle": "La pelle. La luce.",
-      "description": "La forma prende un altro significato.",
-      "color": "#ab633d"
-    },
-    {
-      "id": "altrove",
-      "title": "Altrove",
-      "subtitle": "L’istinto. La trasformazione.",
-      "description": "Una possibilità diversa di guardare.",
-      "color": "#a5aaa1"
+      "id": "kavyar",
+      "title": "Kavyar",
+      "subtitle": "Il corpo, un altro linguaggio.",
+      "description": "Fotografia artistica, bodypainting e trasformazione.",
+      "color": "#b99363"
     }
   ],
   "works": [
     {
-      "id": "1",
-      "title": "Studio 01",
-      "collection": "presenza",
-      "image": "images/exhibitions/01.svg",
-      "alt": "Segnaposto del catalogo originale; fotografia da inserire",
-      "credit": "",
-      "variants": []
-    },
-    {
-      "id": "2",
-      "title": "Studio 02",
-      "collection": "presenza",
-      "image": "images/exhibitions/02.svg",
-      "alt": "Segnaposto del catalogo originale; fotografia da inserire",
-      "credit": "",
-      "variants": []
-    },
-    {
-      "id": "3",
-      "title": "Studio 03",
-      "collection": "presenza",
-      "image": "images/exhibitions/03.svg",
-      "alt": "Segnaposto del catalogo originale; fotografia da inserire",
-      "credit": "",
-      "variants": []
-    },
-    {
-      "id": "4",
-      "title": "Studio 04",
-      "collection": "presenza",
-      "image": "images/exhibitions/04.svg",
-      "alt": "Segnaposto del catalogo originale; fotografia da inserire",
-      "credit": "",
-      "variants": []
-    },
-    {
-      "id": "5",
-      "title": "Studio 05",
-      "collection": "materia",
-      "image": "images/exhibitions/05.svg",
-      "alt": "Segnaposto del catalogo originale; fotografia da inserire",
-      "credit": "",
-      "variants": []
-    },
-    {
-      "id": "6",
-      "title": "Studio 06",
-      "collection": "materia",
-      "image": "images/exhibitions/06.svg",
-      "alt": "Segnaposto del catalogo originale; fotografia da inserire",
-      "credit": "",
-      "variants": []
-    },
-    {
-      "id": "7",
-      "title": "Studio 07",
-      "collection": "materia",
-      "image": "images/exhibitions/07.svg",
-      "alt": "Segnaposto del catalogo originale; fotografia da inserire",
-      "credit": "",
-      "variants": []
-    },
-    {
-      "id": "8",
-      "title": "Studio 08",
-      "collection": "materia",
-      "image": "images/exhibitions/08.svg",
-      "alt": "Segnaposto del catalogo originale; fotografia da inserire",
-      "credit": "",
-      "variants": []
-    },
-    {
-      "id": "9",
-      "title": "Studio 09",
-      "collection": "altrove",
-      "image": "images/exhibitions/09.svg",
-      "alt": "Segnaposto del catalogo originale; fotografia da inserire",
-      "credit": "",
-      "variants": []
-    },
-    {
-      "id": "10",
-      "title": "Studio 10",
-      "collection": "altrove",
-      "image": "images/exhibitions/10.svg",
-      "alt": "Segnaposto del catalogo originale; fotografia da inserire",
-      "credit": "",
-      "variants": []
-    },
-    {
-      "id": "11",
-      "title": "Studio 11",
-      "collection": "altrove",
-      "image": "images/exhibitions/11.svg",
-      "alt": "Segnaposto del catalogo originale; fotografia da inserire",
-      "credit": "",
-      "variants": []
-    },
-    {
-      "id": "12",
-      "title": "Studio 12",
-      "collection": "altrove",
-      "image": "images/exhibitions/12.svg",
-      "alt": "Segnaposto del catalogo originale; fotografia da inserire",
-      "credit": "",
+      "id": "kavyar-01",
+      "title": "Kavyar / 01",
+      "collection": "kavyar",
+      "image": "images/kavyar/01.jpg",
+      "alt": "Ritratto artistico con bodypainting nero, perle bianche e mano sul viso.",
+      "credit": "UnconventionArt",
       "variants": []
     }
   ]
