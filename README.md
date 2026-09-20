@@ -41,7 +41,7 @@ tools/check.mjs    controllo collegamenti, catalogo e isolamento asset
 
 ## Fotografie e catalogo
 
-**Il catalogo pubblico è dimostrativo**: usa esclusivamente gli SVG già presenti nel repository originale. Le denominazioni Studio 01–12 sono etichette tecniche di questi segnaposto, non titoli di opere finali.
+Il catalogo pubblico contiene al momento una fotografia dell’album Kavyar, autorizzata per il sito. L’album completo contiene sei fotografie: le altre cinque attendono l’esportazione. Nessuna immagine ARGINE è inclusa nel catalogo pubblico.
 
 Le fotografie finali vanno aggiunte solo dopo averne confermato la pubblicazione. Il codice è pronto a riceverle attraverso `data/catalogue.json`: non serve modificare le pagine.
 
