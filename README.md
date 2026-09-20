@@ -1,45 +1,64 @@
 # UnconventionArt
 
-Fine art photography duo · Dark monochrome.
+Portfolio fotografico multipagina, scritto in HTML, CSS e JavaScript nativi.
+Nessun framework, dipendenza di runtime o servizio di hosting richiesto.
 
-## Stack
+## Avvio
 
-- Static HTML/CSS/JS — no framework, no build step
-- Cormorant Garamond + Inter + JetBrains Mono via Google Fonts
-- JSON-driven content (`data/exhibitions.json`, `data/journal.json`)
-- `tools/publish.py` — drop photos into a folder, get a published site
+Richiede Node.js 20 o successivo.
 
-## Local preview
-
-```bash
-python3 -m http.server 8000
-# open http://localhost:8000
+```sh
+npm run dev
+# http://localhost:4173
+npm run build
+npm run check
 ```
 
-## Adding new work
+Il comando build produce `dist/`, pubblicabile su un normale hosting statico anche in una sottocartella. Non pubblica automaticamente nulla. Non richiede installazione di pacchetti.
 
-```bash
-python3 tools/publish.py ./my-photos/ --series "Liminal Spaces" --status current --push
+## Pagine
+
+- `index.html`: ingresso tipografico, piano fotografico sensibile al puntatore, manifesto, attraversamento orizzontale delle serie durante lo scroll, selezione di opere.
+- `exhibitions.html`: archivio con filtri per serie, modalità galleria e indice. I filtri e la disposizione rimangono nell’URL.
+- `collection.html?series=presenza`: pagina autonoma per ogni serie, introduzione, fotografie e passaggio alla serie successiva.
+- `about.html`: visione artistica e approccio.
+- `contact.html`: composizione di un’email nel client dell’utente. Nessun invio simulato e nessun backend.
+- `journal.html` e `post.html`: mantengono raggiungibili i vecchi indirizzi, riportando alle opere senza ripubblicare articoli fittizi.
+
+## Struttura
+
+```text
+css/style.css       composizione, responsive, movimento ridotto
+js/main.js         navigazione, pagine, filtri, modulo contatto
+js/catalogue.js    caricamento dati e componenti fotografici
+js/motion.js       scroll, prospettiva, reveal, preferenza movimento
+js/viewer.js       visore, URL delle opere, tastiera, swipe, variazioni
+data/catalogue.json  catalogo pubblico
+tools/serve.mjs    server locale senza dipendenze
+tools/build.mjs    build statica
+tools/check.mjs    controllo collegamenti, catalogo e isolamento asset
 ```
 
-See `tools/publish.py --help` for all options.
+## Fotografie e catalogo
 
-## Structure
+**Il catalogo pubblico è dimostrativo**: usa esclusivamente gli SVG già presenti nel repository originale. Le denominazioni Studio 01–12 sono etichette tecniche di questi segnaposto, non titoli di opere finali.
 
-- `index.html` — Homepage (hero, featured exhibition, recent works, journal preview)
-- `exhibitions.html` — Catalogue with All/Current/Past tabs and Viewing Room
-- `about.html` — Biography with the brand mark
-- `journal.html` + `post.html` — Editorial entries
-- `contact.html` — Contact form
-- `css/style.css` — Single stylesheet, design tokens-based
-- `js/main.js` — Vanilla JS: lightbox, scroll reveal, mobile menu, content loaders
-- `data/` — JSON content
-- `images/` — All assets (SVG placeholders, brand mark, OG image, favicons)
-- `tools/publish.py` — Photo publishing pipeline (Pillow + git)
+Le fotografie finali vanno aggiunte solo dopo averne confermato la pubblicazione. Il codice è pronto a riceverle attraverso `data/catalogue.json`: non serve modificare le pagine.
 
-## Brand assets
+Ogni collezione ha `id`, `title`, `subtitle`, `description` e `color`. Ogni opera ha `id`, `title`, `collection`, `image`, `alt`, `credit` e l’eventuale array `variants`. `hero` identifica l’immagine d’ingresso. I percorsi sono relativi alla radice del sito.
 
-- `images/site/logo.png` — Master logo, 2000×776
-- `images/site/logo-small.png` — Smaller version, 600×232 (used in header/footer)
-- `images/site/og-image.png` — Open Graph image for social sharing, 1200×630
-- `images/site/favicon-32.png` / `favicon-192.png` / `apple-touch-icon.png` — Favicons
+Per lavorare localmente con fotografie non pubbliche si può usare `data/local-catalogue.json` con lo stesso schema e `images/private/`. Entrambi sono esclusi da Git e dalla build. L’override viene letto solo su localhost, 127.0.0.1 e terminal.local. La build usa sempre il catalogo pubblico.
+
+Le immagini sono mostrate intere con `object-fit: contain`: nessuna rielaborazione automatica. Il visore supporta frecce, Escape, swipe e variazioni della stessa opera. I collegamenti `exhibitions.html#work=1` aprono direttamente la fotografia.
+
+Lo script storico `tools/publish.py` appartiene al vecchio schema: non usarlo per aggiornare questo catalogo.
+
+## Movimento e accessibilità
+
+Scroll nativo senza intercettare la rotella. Su mobile la sala orizzontale diventa una sequenza verticale. Le animazioni rispettano `prefers-reduced-motion` e possono essere disattivate dal footer. I dialoghi nativi gestiscono il focus; la chiusura del visore torna al collegamento originale. Menu e visore funzionano da tastiera.
+
+## Verifica di questa revisione
+
+Eseguiti: controllo sintattico dei quattro moduli JavaScript, build statica, collegamenti locali delle sette pagine, unicità degli ID, integrità del catalogo e assenza degli asset privati da `dist/`.
+
+Da completare prima del rilascio: verifica visiva e interattiva in browser desktop/mobile con le fotografie definitive. L’ambiente di lavoro non ha consentito di collegare il browser al server locale; non viene dichiarata una verifica visiva completata.

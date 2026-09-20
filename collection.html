@@ -8,7 +8,7 @@
       name="description"
       content="UnconventionArt. Fotografia artistica, ritratti e trasformazioni. Entra nello spazio delle immagini."
     />
-    <title>Le opere — UnconventionArt</title>
+    <title>Una serie, un mondo — UnconventionArt</title>
     <link rel="icon" href="images/site/favicon-32.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <script type="module" src="js/main.js"></script>
   </head>
-  <body data-page="archive">
+  <body data-page="collection">
     <a class="skip" href="#main">Vai al contenuto</a>
     <header class="header">
       <a class="brand" href="index.html" aria-label="UnconventionArt, home"
@@ -47,32 +47,23 @@
       <p>Fotografia. Corpo. Trasformazione.</p>
     </dialog>
     <main id="main">
-      <section class="page-head">
-        <span class="eyebrow">INDICE VISIVO / UNCONVENTIONART</span>
-        <h1>Le <em>opere.</em></h1>
-        <div class="page-intro">
-          <p>
-            Segui un gesto. Fermati su uno sguardo.<br />Lascia che sia
-            l’immagine a trovarti.
-          </p>
-          <div
-            class="layout-controls"
-            role="group"
-            aria-label="Disposizione delle opere"
-          >
-            <button data-layout="gallery" aria-pressed="true">Galleria</button
-            ><button data-layout="index" aria-pressed="false">Indice</button>
-          </div>
+      <section class="collection-head">
+        <div>
+          <a class="eyebrow" href="exhibitions.html">← TUTTE LE OPERE</a>
+          <h1 id="collection-title">Le serie.</h1>
+          <p id="collection-description"></p>
+          <span class="eyebrow" id="collection-count"></span>
         </div>
+        <img id="collection-cover" alt="" fetchpriority="high" />
       </section>
-      <section class="archive section">
-        <div class="archive-toolbar">
-          <div id="filters" role="group" aria-label="Filtra per serie"></div>
-          <span id="result-count" class="eyebrow" aria-live="polite"></span>
-        </div>
-        <div id="archive-grid" class="archive-grid"></div>
+      <section class="section">
+        <div id="collection-grid" class="collection-grid"></div>
         <p id="catalogue-status" role="status"></p>
       </section>
+      <nav class="next-collection section" aria-label="Prossima serie">
+        <span class="eyebrow">CONTINUA IL VIAGGIO</span
+        ><a id="next-collection" href="exhibitions.html">Tutte le opere ↗</a>
+      </nav>
     </main>
     <footer>
       <a class="footer-invite" href="contact.html"

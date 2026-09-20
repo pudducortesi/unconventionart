@@ -1,0 +1,10 @@
+{
+  "name": "unconventionart",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node tools/serve.mjs",
+    "build": "node tools/build.mjs",
+    "check": "node tools/check.mjs"
+  }
+}

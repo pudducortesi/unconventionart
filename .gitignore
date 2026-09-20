@@ -1,0 +1,4 @@
+node_modules/
+dist/
+images/private/
+data/local-catalogue.json
