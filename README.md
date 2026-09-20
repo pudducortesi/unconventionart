@@ -75,3 +75,12 @@ Le sale si generano dal catalogo: massimo otto opere per sala e suddivisione per
 I movimenti non richiedono pointer lock o fullscreen. La navigazione click-to-walk evita la panca con una griglia di percorsi; tastiera e touch rispettano le collisioni. Il movimento ridotto usa spostamenti immediati. Il rendering si ferma quando la scena è immobile o la scheda è nascosta; risoluzione limitata a 1.5× per contenere il carico grafico.
 
 Se WebGL non è disponibile, l’ingresso spiega l’errore e mantiene il collegamento al catalogo. Il catalogo HTML resta accessibile anche dalla sala. Le sei verifiche automatiche della navigazione controllano limiti, ostacoli, percorsi e orientamento della camera. La verifica interattiva sul deploy resta subordinata all’accesso all’anteprima Vercel protetta.
+
+
+## Revisione off-white e mobile
+
+Sala, soffitto, pavimento, cornici e interfaccia adottano una palette off-white con luce neutra. La sala appare direttamente, senza la copertina a tutto schermo. Su telefono l’inquadratura iniziale mostra l’opera e il suo cartellino, dimensionando la distanza sul rapporto dello schermo.
+
+Ogni fotografia ha un cartellino fisico a destra, cliccabile tramite raycasting e un pulsante HTML ancorato alla sua posizione per touch e tastiera. Il cartellino apre descrizione, autore e i soli metadati realmente disponibili; su telefono la scheda è un pannello dal basso. Da lì si apre la foto intera o si chiede informazione sull’opera.
+
+Rimossi dalla vista i comandi direzionali e i pannelli invasivi. Trascinamento, tap sul pavimento e navigazione tra opere sono disponibili su touch; mouse e tastiera restano disponibili su desktop. Il canvas segue l’altezza dinamica dello schermo e l’area sicura iOS. Un settimo test verifica l’inquadratura su cinque formati, da 320×568 a 1440×900. Non sostituisce il collaudo visivo su dispositivi reali, ancora impedito dall’autenticazione dell’anteprima Vercel.

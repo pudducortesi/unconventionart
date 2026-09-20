@@ -119,3 +119,13 @@ export function findPath(start, destination) {
   if (!insideObstacle(goal.x, goal.z, 0.4)) path.push(goal);
   return path;
 }
+
+// Frame the entire photograph and its wall label in portrait and landscape viewports.
+export function viewingDistance(width, height, aspect, fov = 53) {
+  const tangent = Math.tan((fov * Math.PI) / 360);
+  return Math.max(
+    4.2,
+    (height + 0.5) / (2 * tangent * 0.62),
+    (width + 1.65) / (2 * tangent * Math.max(0.3, aspect) * 0.86),
+  );
+}

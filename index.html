@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width,initial-scale=1,viewport-fit=cover"
     />
-    <meta name="theme-color" content="#151613" />
+    <meta name="theme-color" content="#f4f3ee" />
     <title>La galleria — UnconventionArt</title>
     <meta
       name="description"
@@ -26,7 +26,7 @@
     <a class="skip" href="exhibitions.html">Vai al catalogo fotografico</a>
     <main id="museum" aria-label="Galleria fotografica tridimensionale">
       <div id="scene" aria-label="Spazio della galleria"></div>
-      <div class="vignette" aria-hidden="true"></div>
+      <div id="plaque-labels" aria-label="Cartellini delle opere"></div>
       <header class="museum-header">
         <a class="wordmark" href="index.html"
           >unconvention<span>art</span><sup>®</sup></a
@@ -40,7 +40,7 @@
       </header>
       <section class="invitation" id="invitation" aria-labelledby="title">
         <span class="eyebrow">UNCONVENTIONART / GALLERIA VIRTUALE</span>
-        <h1 id="title">L’arte è<br />un <em>luogo.</em></h1>
+        <h1 id="title">La galleria.</h1>
         <p>Attraversalo. Avvicinati.<br />Lascia fuori tutto il resto.</p>
         <div class="invitation-bottom">
           <button id="enter" disabled>
@@ -64,7 +64,7 @@
           </button>
         </div>
         <div class="point-label" id="point-label" hidden>
-          <span id="point-title"></span><small>CLICCA PER AVVICINARTI</small>
+          <span id="point-title"></span><small>TOCCA PER AVVICINARTI</small>
         </div>
         <div class="work-panel" id="work-panel" hidden>
           <span class="eyebrow" id="work-series"></span>
@@ -137,7 +137,8 @@
         </dd>
         <dt>Incontra una fotografia</dt>
         <dd>
-          Cliccala per avvicinarti. “Osserva l’opera” apre l’immagine intera.
+          Cliccala per avvicinarti. Il cartellino accanto alla cornice apre
+          descrizione e informazioni.
         </dd>
         <dt>Lasciati accompagnare</dt>
         <dd>
@@ -147,6 +148,24 @@
       <button class="dialog-primary" data-close="help">
         Ho capito, entriamo ↗</button
       ><a href="exhibitions.html">Preferisci il catalogo? Aprilo qui.</a>
+    </dialog>
+    <dialog id="work-details" aria-labelledby="details-title">
+      <button
+        class="dialog-close"
+        data-close="work-details"
+        aria-label="Chiudi descrizione"
+      >
+        ×</button
+      ><span class="eyebrow" id="details-series"></span>
+      <h2 id="details-title"></h2>
+      <p id="details-credit"></p>
+      <p id="details-description"></p>
+      <dl id="details-metadata"></dl>
+      <button class="dialog-primary" id="details-inspect">
+        Guarda la fotografia intera ↗</button
+      ><a id="details-contact" href="contact.html"
+        >Informazioni sull’opera ↗</a
+      >
     </dialog>
     <dialog id="artwork" aria-labelledby="artwork-title">
       <button
