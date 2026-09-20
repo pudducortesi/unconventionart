@@ -1,24 +1,26 @@
 # UnconventionArt
 
 Portfolio fotografico multipagina, scritto in HTML, CSS e JavaScript nativi.
-Nessun framework, dipendenza di runtime o servizio di hosting richiesto.
+Galleria 3D in Three.js e pagine editoriali in HTML/CSS/JavaScript. La libreria è installata da npm, bloccata nel lockfile e servita dallo stesso sito.
 
 ## Avvio
 
 Richiede Node.js 20 o successivo.
 
 ```sh
+npm ci
 npm run dev
 # http://localhost:4173
 npm run build
 npm run check
 ```
 
-Il comando build produce `dist/`, pubblicabile su un normale hosting statico anche in una sottocartella. Non pubblica automaticamente nulla. Non richiede installazione di pacchetti.
+Il comando build produce `dist/`, pubblicabile su un normale hosting statico anche in una sottocartella. Non pubblica automaticamente nulla. La build copia Three.js e la sua licenza in `dist/vendor/`.
 
 ## Pagine
 
-- `index.html`: ingresso tipografico, piano fotografico sensibile al puntatore, manifesto, attraversamento orizzontale delle serie durante lo scroll, selezione di opere.
+- `index.html`: galleria 3D percorribile, click per camminare, trascinamento per guardare, WASD/frecce, comandi touch, mappa, avvicinamento alle fotografie e visione integrale.
+- `editorial.html`: percorso editoriale fotografico precedente.
 - `exhibitions.html`: archivio con filtri per serie, modalità galleria e indice. I filtri e la disposizione rimangono nell’URL.
 - `collection.html?series=presenza`: pagina autonoma per ogni serie, introduzione, fotografie e passaggio alla serie successiva.
 - `about.html`: visione artistica e approccio.
@@ -62,3 +64,14 @@ Scroll nativo senza intercettare la rotella. Su mobile la sala orizzontale diven
 Eseguiti: controllo sintattico dei quattro moduli JavaScript, build statica, collegamenti locali delle sette pagine, unicità degli ID, integrità del catalogo e assenza degli asset privati da `dist/`.
 
 Da completare prima del rilascio: verifica visiva e interattiva in browser desktop/mobile con le fotografie definitive. L’ambiente di lavoro non ha consentito di collegare il browser al server locale; non viene dichiarata una verifica visiva completata.
+
+
+## Sala 3D
+
+`js/museum/architecture.js` costruisce la sala e le cornici. `navigation.js` gestisce geometria dei percorsi e collisioni. `main.js` collega rendering, catalogo e comandi; `css/museum.css` è indipendente dallo stile editoriale.
+
+Le sale si generano dal catalogo: massimo otto opere per sala e suddivisione per collezione. Una sola opera viene appesa al centro della parete di fondo. Non vengono duplicate fotografie per riempire lo spazio. I JPEG rimangono invariati e sono mostrati con il loro rapporto originale.
+
+I movimenti non richiedono pointer lock o fullscreen. La navigazione click-to-walk evita la panca con una griglia di percorsi; tastiera e touch rispettano le collisioni. Il movimento ridotto usa spostamenti immediati. Il rendering si ferma quando la scena è immobile o la scheda è nascosta; risoluzione limitata a 1.5× per contenere il carico grafico.
+
+Se WebGL non è disponibile, l’ingresso spiega l’errore e mantiene il collegamento al catalogo. Il catalogo HTML resta accessibile anche dalla sala. Le sei verifiche automatiche della navigazione controllano limiti, ostacoli, percorsi e orientamento della camera. La verifica interattiva sul deploy resta subordinata all’accesso all’anteprima Vercel protetta.

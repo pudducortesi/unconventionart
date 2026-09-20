@@ -1,0 +1,670 @@
+:root {
+  --ivory: #e9e3d5;
+  --muted: #aaa99e;
+  --gold: #cab58c;
+  --dark: #171815;
+  --line: #e9e3d529;
+  --sans: "Manrope", sans-serif;
+  --serif: "Cormorant Garamond", Georgia, serif;
+  --edge: clamp(22px, 4vw, 70px);
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #171815;
+  color: var(--ivory);
+  font-family: var(--sans);
+  font-size: 13px;
+  overflow: hidden;
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+a:focus-visible,
+button:focus-visible,
+canvas:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 5px;
+}
+button:hover,
+a:hover {
+  color: var(--gold);
+}
+h1,
+h2,
+p {
+  margin: 0;
+}
+button[hidden],
+[hidden] {
+  display: none !important;
+}
+.eyebrow {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  line-height: 1.8;
+}
+.sr-only,
+.skip:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+.skip:focus {
+  position: fixed;
+  z-index: 100;
+  padding: 15px;
+  background: var(--dark);
+}
+#museum,
+#scene {
+  position: fixed;
+  inset: 0;
+}
+#scene canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+}
+#scene canvas:active {
+  cursor: grabbing;
+}
+#scene canvas.over-art {
+  cursor: pointer;
+}
+.vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      #090b09aa,
+      transparent 19%,
+      transparent 77%,
+      #090b09bb
+    ),
+    radial-gradient(ellipse at 60% 45%, transparent 35%, #080a0840);
+  z-index: 1;
+}
+.museum-header {
+  position: absolute;
+  z-index: 6;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px var(--edge);
+  gap: 30px;
+}
+.wordmark {
+  font-size: 21px;
+  letter-spacing: -1.1px;
+}
+.wordmark span {
+  font-weight: 600;
+}
+.wordmark sup {
+  font-size: 8px;
+  margin-left: 4px;
+  vertical-align: top;
+}
+.header-caption {
+  font-size: 8px;
+  letter-spacing: 0.24em;
+  color: var(--muted);
+}
+.museum-header nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  font-size: 11px;
+}
+.museum-header nav button {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  font: italic 18px var(--serif);
+}
+.invitation {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 90px var(--edge) 60px;
+  background: linear-gradient(90deg, #10120fde, #10120f8f 40%, transparent 75%);
+  transition:
+    opacity 0.85s,
+    visibility 0.85s;
+}
+.invitation h1 {
+  font: 400 clamp(90px, 10.5vw, 180px) / 0.84 var(--serif);
+  letter-spacing: -0.055em;
+  margin: 36px 0 30px;
+  max-width: 700px;
+}
+.invitation h1 em {
+  font-weight: 400;
+  color: var(--gold);
+}
+.invitation > p:not(.loading-status) {
+  font-size: 12px;
+  line-height: 1.9;
+  color: #bbbcb1;
+}
+.invitation-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 18px;
+  margin-top: 40px;
+}
+.invitation-bottom > button {
+  background: var(--ivory);
+  color: #171815;
+  padding: 20px 25px;
+  min-width: 240px;
+  text-align: left;
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 35px;
+  transition: background 0.25s;
+}
+.invitation-bottom > button:hover {
+  background: var(--gold);
+}
+.button-arrow {
+  font-size: 24px;
+  line-height: 1;
+}
+.invitation-bottom > a {
+  font-size: 10px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 4px;
+}
+.loading-status {
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 12px;
+  max-width: 340px;
+  line-height: 1.6;
+}
+.exhibition-label {
+  position: absolute;
+  z-index: 3;
+  right: var(--edge);
+  bottom: 17%;
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+  gap: 10px;
+  pointer-events: none;
+}
+.exhibition-label strong {
+  font: 400 48px var(--serif);
+}
+.exhibition-label > span:last-child {
+  font-size: 9px;
+  color: var(--muted);
+}
+.museum-footer {
+  position: absolute;
+  bottom: 24px;
+  left: var(--edge);
+  right: var(--edge);
+  z-index: 6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  font-size: 9px;
+}
+.museum-footer > span {
+  color: var(--muted);
+  font-size: 8px;
+  letter-spacing: 0.15em;
+}
+.museum-footer button {
+  font-size: 9px;
+  padding: 0;
+}
+.exploring .invitation {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.exploring .exhibition-label {
+  display: none;
+}
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+.hud button,
+.hud a {
+  pointer-events: auto;
+}
+.room-tag {
+  position: absolute;
+  top: 108px;
+  left: var(--edge);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 8px;
+  letter-spacing: 0.15em;
+}
+.room-tag button {
+  font-size: 9px;
+  border-left: 1px solid var(--line);
+  padding-left: 18px;
+  margin-left: 9px;
+  letter-spacing: 0;
+}
+.live-dot {
+  width: 4px;
+  height: 4px;
+  background: var(--gold);
+  border-radius: 50%;
+}
+.map {
+  position: absolute;
+  right: var(--edge);
+  bottom: 130px;
+  width: 85px;
+  text-align: center;
+  opacity: 0.7;
+}
+.map svg {
+  width: 100%;
+  height: auto;
+}
+.map-outline {
+  fill: #15171555;
+  stroke: #e9e3d55a;
+  stroke-width: 1;
+}
+.map-art {
+  stroke: var(--gold);
+  stroke-width: 3;
+}
+#map-player {
+  fill: var(--ivory);
+}
+.map > span {
+  font-size: 7px;
+  letter-spacing: 0.15em;
+}
+.navigation-dock {
+  position: absolute;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  border: 1px solid var(--line);
+  background: #181b17c9;
+  backdrop-filter: blur(15px);
+  white-space: nowrap;
+}
+.navigation-dock button {
+  padding: 15px 20px;
+  font-size: 10px;
+  min-height: 48px;
+}
+.navigation-dock button + button {
+  border-left: 1px solid var(--line);
+}
+.navigation-dock button span {
+  padding-left: 25px;
+}
+.movement-hint {
+  position: absolute;
+  bottom: 61px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 7px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+.movement-hint i {
+  padding: 0 12px;
+}
+.work-panel {
+  position: absolute;
+  left: var(--edge);
+  bottom: 150px;
+  max-width: 360px;
+  background: #10130fde;
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--line);
+  padding: 26px 30px;
+}
+.work-panel h2 {
+  font: 400 42px/1.1 var(--serif);
+  margin: 9px 0 12px;
+}
+.work-panel > p {
+  color: var(--muted);
+  font-size: 10px;
+}
+.work-panel > div {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 17px;
+  margin-top: 25px;
+}
+.work-panel button {
+  font-size: 10px;
+  padding: 0;
+}
+.work-panel button:first-child {
+  border-bottom: 1px solid var(--gold);
+  padding-bottom: 6px;
+  color: var(--gold);
+}
+.point-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, 28px);
+  text-align: center;
+  background: #10130fbb;
+  padding: 10px 18px;
+  border: 1px solid var(--line);
+}
+.point-label span {
+  font: 22px var(--serif);
+  display: block;
+}
+.point-label small {
+  font-size: 7px;
+  letter-spacing: 0.1em;
+}
+.touch-pad {
+  display: none;
+  position: absolute;
+  bottom: 160px;
+  left: var(--edge);
+  width: 125px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+.touch-pad button {
+  height: 40px;
+  background: #151914ba;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  touch-action: none;
+  user-select: none;
+  font-size: 20px;
+}
+.touch-pad button:first-child {
+  grid-column: 2;
+}
+.touch-pad button:nth-child(2) {
+  grid-column: 1;
+}
+.touch-pad button:active {
+  background: #81775a;
+}
+dialog {
+  border: 1px solid var(--line);
+  background: #1c1f1b;
+  color: var(--ivory);
+  max-width: 620px;
+  width: calc(100% - 40px);
+  padding: 55px;
+  max-height: 85dvh;
+  overflow: auto;
+}
+dialog::backdrop {
+  background: #080a08bc;
+  backdrop-filter: blur(12px);
+}
+.dialog-close {
+  position: absolute;
+  top: 13px;
+  right: 20px;
+  font-size: 30px;
+  font-weight: 400;
+}
+#help h2 {
+  font: 48px var(--serif);
+  margin: 10px 0 28px;
+}
+dl {
+  margin: 0;
+}
+dt {
+  font-size: 12px;
+  margin-top: 22px;
+  color: var(--gold);
+}
+dd {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--muted);
+  margin: 6px 0 0;
+}
+.dialog-primary {
+  display: block;
+  background: var(--ivory);
+  color: var(--dark);
+  width: 100%;
+  padding: 17px;
+  margin-top: 32px;
+}
+#help > a {
+  font-size: 10px;
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+}
+#artwork {
+  max-width: none;
+  max-height: none;
+  width: 100%;
+  height: 100dvh;
+  inset: 0;
+  margin: 0;
+  border: 0;
+  background: #10120f;
+  padding: 50px 6vw 25px;
+}
+#artwork > img {
+  display: block;
+  width: 100%;
+  height: calc(100dvh - 160px);
+  object-fit: contain;
+}
+#artwork > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+#artwork h2 {
+  font: 32px var(--serif);
+}
+#artwork a {
+  font-size: 11px;
+}
+.no-script {
+  position: fixed;
+  z-index: 50;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #171815;
+  padding: 25px;
+  text-align: center;
+}
+.no-script a {
+  color: var(--gold);
+}
+@media (pointer: coarse) {
+  .touch-pad {
+    display: grid;
+  }
+  .movement-hint {
+    display: none;
+  }
+  .work-panel {
+    bottom: 215px;
+  }
+  .navigation-dock {
+    bottom: 80px;
+  }
+}
+@media (max-width: 700px) {
+  .museum-header {
+    padding-top: 23px;
+    gap: 12px;
+  }
+  .wordmark {
+    font-size: 18px;
+  }
+  .header-caption {
+    display: none;
+  }
+  .museum-header nav {
+    gap: 18px;
+    font-size: 10px;
+  }
+  .invitation {
+    padding-top: 120px;
+    padding-bottom: 90px;
+    justify-content: center;
+    background:
+      linear-gradient(90deg, #10120fc9, transparent),
+      linear-gradient(0deg, #10120f9c, transparent 65%);
+  }
+  .invitation h1 {
+    font-size: clamp(85px, 20vw, 140px);
+    margin-top: 25px;
+  }
+  .invitation > .eyebrow {
+    font-size: 8px;
+  }
+  .invitation-bottom {
+    margin-top: 28px;
+  }
+  .invitation-bottom > button {
+    padding: 17px 22px;
+    min-width: 215px;
+  }
+  .exhibition-label {
+    bottom: 130px;
+    right: 22px;
+  }
+  .exhibition-label strong {
+    font-size: 28px;
+  }
+  .exhibition-label .eyebrow {
+    font-size: 7px;
+  }
+  .museum-footer {
+    bottom: max(20px, env(safe-area-inset-bottom));
+    font-size: 9px;
+  }
+  .museum-footer > span {
+    display: none;
+  }
+  .room-tag {
+    top: 88px;
+  }
+  .map {
+    width: 60px;
+    bottom: 160px;
+  }
+  .navigation-dock {
+    bottom: 77px;
+  }
+  .navigation-dock button {
+    padding: 13px 15px;
+    font-size: 9px;
+  }
+  .navigation-dock button span {
+    padding-left: 12px;
+  }
+  .work-panel {
+    left: 22px;
+    right: 22px;
+    bottom: 150px;
+    max-width: 310px;
+    padding: 18px 22px;
+  }
+  .work-panel h2 {
+    font-size: 30px;
+  }
+  .work-panel > div {
+    margin-top: 17px;
+    gap: 14px;
+  }
+  .viewing .touch-pad,
+  .viewing .map {
+    display: none;
+  }
+  .movement-hint {
+    display: none;
+  }
+  .point-label {
+    display: none;
+  }
+  .touch-pad {
+    bottom: 165px;
+  }
+  dialog {
+    padding: 45px 28px;
+  }
+  #help h2 {
+    font-size: 38px;
+  }
+  #artwork {
+    padding: 65px 20px 25px;
+  }
+  #artwork > img {
+    height: calc(100dvh - 190px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
