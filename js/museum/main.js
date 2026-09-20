@@ -7,6 +7,7 @@ import {
   shortestAngle,
   layoutWorks,
   findPath,
+  viewingDistance,
 } from "./navigation.js";
 const $ = (selector) => document.querySelector(selector);
 const root = $("#scene"),
@@ -36,6 +37,7 @@ let frame = 0,
   disposed = false,
   roomGeneration = 0;
 const player = { x: -2.8, z: 5.8 };
+const plaqueButtons = new Map();
 const initial = { x: -2.8, y: 1.7, z: 5.8 };
 let introLook = orientation(initial, { x: 0, y: 2.8, z: -8.6 });
 yaw = introLook.yaw;
@@ -51,8 +53,13 @@ function updateMotion() {
     Object.assign(player, path.at(-1));
     path = [];
     if (finalLook) {
-      const target = orientation({ x: player.x, y: 1.7, z: player.z }, finalLook);
-      yaw = target.yaw; pitch = target.pitch; finalLook = null;
+      const target = orientation(
+        { x: player.x, y: 1.7, z: player.z },
+        finalLook,
+      );
+      yaw = target.yaw;
+      pitch = target.pitch;
+      finalLook = null;
     }
     if (renderer) invalidate();
   }
@@ -145,6 +152,80 @@ function walkTo(destination, look = null) {
   }
   invalidate();
 }
+function focusPosition(art) {
+  const distance = viewingDistance(
+    art.width,
+    art.height,
+    camera.aspect,
+    camera.fov,
+  );
+  const right = new T.Vector3(
+    Math.cos(art.slot.rotation),
+    0,
+    -Math.sin(art.slot.rotation),
+  );
+  const target = art.target.clone().addScaledVector(right, 0.35);
+  const position = target.clone().addScaledVector(art.normal, distance);
+  position.y = 1.7;
+  return { position, target };
+}
+function positionPlaques() {
+  if (!entered) return;
+  camera.updateMatrixWorld();
+  scene.updateMatrixWorld();
+  const rect = root.getBoundingClientRect();
+  for (const art of artworks) {
+    const button = plaqueButtons.get(art.slot.work.id);
+    if (!button) continue;
+    const world = art.label.getWorldPosition(new T.Vector3());
+    const facing =
+      new T.Vector3().subVectors(camera.position, world).dot(art.normal) > 0;
+    const projected = world.clone().project(camera);
+    const visible =
+      facing &&
+      projected.z > -1 &&
+      projected.z < 1 &&
+      Math.abs(projected.x) < 0.92 &&
+      Math.abs(projected.y) < 0.72 &&
+      camera.position.distanceTo(world) < 15;
+    button.hidden = !visible;
+    if (visible) {
+      button.style.left = `${((projected.x + 1) * rect.width) / 2}px`;
+      button.style.top = `${((1 - projected.y) * rect.height) / 2}px`;
+    }
+  }
+}
+function describeWork(index) {
+  if (!artworks[index]) return;
+  selected = index;
+  stop();
+  const work = artworks[index].slot.work;
+  $("#details-title").textContent = work.title;
+  $("#details-series").textContent = rooms[roomIndex].collection.title;
+  $("#details-credit").textContent = work.credit || "UnconventionArt";
+  $("#details-description").textContent =
+    work.description || work.alt || rooms[roomIndex].collection.description;
+  $("#details-metadata").replaceChildren();
+  for (const [label, value] of [
+    ["Tecnica", work.medium],
+    ["Anno", work.year],
+    ["Edizione", work.edition],
+  ]) {
+    if (!value) continue;
+    const dt = document.createElement("dt"),
+      dd = document.createElement("dd");
+    dt.textContent = label;
+    dd.textContent = value;
+    $("#details-metadata").append(dt, dd);
+  }
+  $("#details-contact").href =
+    `contact.html?work=${encodeURIComponent(work.title)}`;
+  $("#work-details").showModal();
+}
+$("#details-inspect").addEventListener("click", () => {
+  $("#work-details").close();
+  inspect();
+});
 function focusWork(index) {
   if (!artworks.length || loadingRoom) return;
   selected = (index + artworks.length) % artworks.length;
@@ -157,7 +238,8 @@ function focusWork(index) {
   $("#next-work").firstChild.textContent =
     artworks.length > 1 ? "Opera successiva " : "Torna all’opera ";
   announce(`Avvicinamento a ${art.slot.work.title}.`);
-  walkTo(art.focus, art.target);
+  const framing = focusPosition(art);
+  walkTo(framing.position, framing.target);
 }
 function inspect() {
   const art = artworks[selected];
@@ -204,6 +286,8 @@ async function loadRoom(index) {
     art.dispose();
   }
   artworks = [];
+  plaqueButtons.clear();
+  $("#plaque-labels").replaceChildren();
   roomIndex = index;
   const room = rooms[index];
   const loaded = await Promise.allSettled(
@@ -215,7 +299,24 @@ async function loadRoom(index) {
   }
   const failed = loaded.filter((r) => r.status === "rejected").length;
   artworks = loaded.filter((r) => r.status === "fulfilled").map((r) => r.value);
-  artworks.forEach((art) => scene.add(art.group));
+  artworks.forEach((art, index) => {
+    scene.add(art.group);
+    const button = document.createElement("button");
+    button.className = "wall-plaque";
+    button.hidden = true;
+    button.setAttribute(
+      "aria-label",
+      `Leggi il cartellino: ${art.slot.work.title}`,
+    );
+    const title = document.createElement("strong");
+    title.textContent = art.slot.work.title;
+    const hint = document.createElement("span");
+    hint.textContent = "Informazioni ↗";
+    button.append(title, hint);
+    button.addEventListener("click", () => describeWork(index));
+    plaqueButtons.set(art.slot.work.id, button);
+    $("#plaque-labels").append(button);
+  });
   if (!artworks.length)
     throw new Error("Non è stato possibile caricare le fotografie.");
   $("#exhibition-name").textContent = room.collection.title;
@@ -236,7 +337,7 @@ async function loadRoom(index) {
     dot.setAttribute("cx", 12 + ((art.slot.x + 7) / 14) * 116);
     dot.setAttribute("cy", 12 + ((art.slot.z + 9) / 18) * 156);
     dot.setAttribute("r", "2.5");
-    dot.setAttribute("fill", "#cab58c");
+    dot.setAttribute("fill", "#53594b");
     $("#map-art").append(dot);
   }
   player.x = initial.x;
@@ -244,6 +345,17 @@ async function loadRoom(index) {
   yaw = introLook.yaw;
   pitch = introLook.pitch;
   loadingRoom = false;
+  if (innerWidth <= 700 && artworks.length) {
+    const framing = focusPosition(artworks[0]);
+    Object.assign(player, { x: framing.position.x, z: framing.position.z });
+    const look = orientation(
+      { x: player.x, y: 1.7, z: player.z },
+      framing.target,
+    );
+    yaw = look.yaw;
+    pitch = look.pitch;
+    selected = 0;
+  }
   invalidate();
   announce(
     `${room.collection.title}, ${artworks.length} opere.${failed ? " Alcune immagini non sono disponibili." : ""}`,
@@ -323,6 +435,7 @@ function render(time) {
   }
   setView();
   renderer.render(scene, camera);
+  positionPlaques();
   if (moving) invalidate();
 }
 function attachControls() {
@@ -337,7 +450,7 @@ function attachControls() {
   const marker = new T.Mesh(
     new T.RingGeometry(0.17, 0.195, 40),
     new T.MeshBasicMaterial({
-      color: 0xd5c09b,
+      color: 0x74796c,
       transparent: true,
       opacity: 0.8,
       side: T.DoubleSide,
@@ -355,7 +468,10 @@ function attachControls() {
     );
     raycaster.setFromCamera(coords, camera);
     return raycaster.intersectObjects(
-      [architecture.floor, ...artworks.map((art) => art.photograph)],
+      [
+        architecture.floor,
+        ...artworks.flatMap((art) => [art.photograph, art.label]),
+      ],
       false,
     )[0];
   }
@@ -386,8 +502,15 @@ function attachControls() {
       )
         pointer.dragged = true;
       if (pointer.dragged) {
-        yaw -= dx * 0.0035;
-        pitch = Math.max(-0.9, Math.min(0.85, pitch - dy * 0.0035));
+        clearSelection();
+        yaw -= dx * (event.pointerType === "touch" ? 0.0025 : 0.0035);
+        pitch = Math.max(
+          -0.9,
+          Math.min(
+            0.85,
+            pitch - dy * (event.pointerType === "touch" ? 0.0025 : 0.0035),
+          ),
+        );
         $("#point-label").hidden = true;
         marker.visible = false;
       }
@@ -419,9 +542,11 @@ function attachControls() {
     const target = hit(event);
     if (!target) return;
     const work = target.object.userData.work;
-    if (work)
-      focusWork(artworks.findIndex((art) => art.slot.work.id === work.id));
-    else {
+    if (work) {
+      const index = artworks.findIndex((art) => art.slot.work.id === work.id);
+      if (target.object.userData.isPlaque) describeWork(index);
+      else focusWork(index);
+    } else {
       clearSelection();
       walkTo(target.point);
     }
@@ -517,12 +642,25 @@ function attachControls() {
 }
 function resize() {
   if (!renderer) return;
-  camera.aspect = innerWidth / innerHeight;
+  const rect = root.getBoundingClientRect();
+  camera.aspect = rect.width / rect.height;
   camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
+  renderer.setSize(rect.width, rect.height);
+  if (selected >= 0 && artworks[selected] && !pointer && !keys.size) {
+    stop();
+    const framing = focusPosition(artworks[selected]);
+    Object.assign(player, { x: framing.position.x, z: framing.position.z });
+    const look = orientation(
+      { x: player.x, y: 1.7, z: player.z },
+      framing.target,
+    );
+    yaw = look.yaw;
+    pitch = look.pitch;
+  }
   invalidate();
 }
 addEventListener("resize", resize);
+window.visualViewport?.addEventListener("resize", resize);
 document.addEventListener("visibilitychange", () => {
   stop();
   if (document.hidden && frame) {
@@ -550,14 +688,19 @@ try {
     alpha: false,
     powerPreference: "default",
   });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  renderer.setPixelRatio(
+    Math.min(
+      devicePixelRatio,
+      matchMedia("(pointer:coarse)").matches ? 1.25 : 1.5,
+    ),
+  );
   renderer.setSize(innerWidth, innerHeight);
   renderer.outputColorSpace = T.SRGBColorSpace;
   renderer.toneMapping = T.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
   scene = new T.Scene();
-  scene.background = new T.Color(0x262d26);
-  scene.fog = new T.FogExp2(0x262d26, 0.022);
+  scene.background = new T.Color(0xf4f3ee);
+  scene.fog = null;
   camera = new T.PerspectiveCamera(53, innerWidth / innerHeight, 0.05, 70);
   root.append(renderer.domElement);
   architecture = createArchitecture(scene, renderer);
@@ -581,6 +724,14 @@ try {
   arrow.textContent = "↗";
   entry.append(arrow);
   status.textContent = "";
+  entered = true;
+  document.body.classList.add("exploring");
+  $("#hud").hidden = false;
+  $(".movement-hint").textContent =
+    innerWidth <= 700
+      ? "Trascina per guardare · Tocca il pavimento per camminare"
+      : "Trascina per guardare · Clicca sul pavimento per camminare · WASD / frecce";
+  resize();
   invalidate();
 } catch (error) {
   fail(

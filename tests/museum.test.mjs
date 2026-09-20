@@ -67,3 +67,21 @@ test("camera faces artworks and takes the short rotation across +/- pi", () => {
   );
   assert(Math.abs(shortestAngle(Math.PI - 0.1, -Math.PI + 0.1) - 0.2) < 1e-8);
 });
+
+test("portrait phone framing fits both photograph and wall label", async () => {
+  const { viewingDistance } = await import("../js/museum/navigation.js");
+  for (const [w, h] of [
+    [320, 568],
+    [390, 844],
+    [430, 932],
+    [844, 390],
+    [1440, 900],
+  ]) {
+    const aspect = w / h,
+      distance = viewingDistance(2.4, 3.6, aspect),
+      tangent = Math.tan((53 * Math.PI) / 360);
+    assert((2.4 + 1.65) / (2 * distance * tangent * aspect) <= 0.86 + 1e-9);
+    assert((3.6 + 0.5) / (2 * distance * tangent) <= 0.62 + 1e-9);
+    assert(distance < 16, "viewpoint remains inside the room");
+  }
+});
