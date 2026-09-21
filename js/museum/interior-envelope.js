@@ -5,20 +5,23 @@ import { BUILDING, HALLS } from './layout.js';
 // Architectural finishes; each texel is data generated here, not an artwork.
 function floorFinish(own, kind, anisotropy) {
   const size = 512, pixels = new Uint8Array(size * size * 4);
-  let seed = 781;
+  // A seamless 3 x 3 m module: 16 staggered 18.75 cm boards, 1.5 m long.
+  // Grain and joints live in one shared texture, without extra floor geometry.
   for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
-    const random = seed / 4294967296;
-    const cloud = Math.sin(x * .043) * Math.sin(y * .027) * 1.4;
-    let value = 242 + cloud + (random - .5) * 3;
-    if (kind === 'terrazzo' && random > .94) value -= 10 + random * 8;
-    if (kind === 'stone') value += Math.sin(x * .025 + Math.sin(y * .02) * 3) * 2;
-    // 3m module; 6mm recessed seam with a quiet bevel, no overlapping geometry.
-    const edge = Math.min(x, y, size - 1 - x, size - 1 - y);
-    if (kind !== 'resin' && edge < 1) value = 212;
-    else if (kind !== 'resin' && edge < 2) value -= 5;
+    const row = Math.floor(x / 32), across = x % 32;
+    const along = (y + (row % 2) * 128) % 256;
+    const segment = Math.floor(((y + (row % 2) * 128) % 512) / 256);
+    const board = Math.sin(row * 37.1 + segment * 19.7) * 6;
+    const wave = Math.sin(y * Math.PI / 256 + row) * 1.4;
+    const grain = Math.sin(across * 2.3 + wave) * 2.3 + Math.sin(across * .65 + wave) * 3;
+    const pore = Math.sin(x * 41.3 + y * 17.7) * 1.2;
+    const joint = across === 0 || along === 0;
+    const bevel = across === 1 || across === 31 || along === 1 || along === 255;
+    const variation = board + grain + pore - (bevel ? 5 : 0);
     const index = (y * size + x) * 4;
-    pixels[index] = pixels[index+1] = pixels[index+2] = value;
+    pixels[index] = joint ? 32 : 85 + variation;
+    pixels[index+1] = joint ? 16 : 42 + variation * .62;
+    pixels[index+2] = joint ? 12 : 28 + variation * .4;
     pixels[index+3] = 255;
   }
   const map = own(new T.DataTexture(pixels, size, size, T.RGBAFormat));
@@ -29,14 +32,13 @@ function floorFinish(own, kind, anisotropy) {
   map.generateMipmaps = true;
   map.anisotropy = anisotropy;
   map.needsUpdate = true;
-  const ecru = { terrazzo: 0xfbf7ef, stone: 0xf7f2e7, resin: 0xfaf5eb };
-  return own(new T.MeshStandardMaterial({ map, color: ecru[kind],
-    roughness: kind === 'resin' ? .48 : kind === 'stone' ? .58 : .36, metalness: 0 }));
+  return own(new T.MeshStandardMaterial({ map, color: 0xffffff,
+    bumpMap: map, bumpScale: .003, roughness: .48, metalness: 0 }));
 }
 
 export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, renderer }) {
   const anisotropy = Math.min(8, renderer.capabilities?.getMaxAnisotropy?.() ?? 1);
-  const finishes = Object.fromEntries(['terrazzo', 'stone', 'resin'].map(kind => [kind, floorFinish(own, kind, anisotropy)]));
+  const finishes = Object.fromEntries(['mahogany'].map(kind => [kind, floorFinish(own, kind, anisotropy)]));
   const floors = [];
   const surface = (width, depth, x, z, kind, name, colour) => {
     const geometry = own(new T.PlaneGeometry(width, depth));
@@ -52,7 +54,7 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
     mesh.userData.walkable = true;
     room.add(mesh); floors.push(mesh);
   };
-  surface(10, 140, 0, -60, 'stone', 'promenade-stone-floor');
+  surface(10, 140, 0, -60, 'mahogany', 'promenade-mahogany-floor');
   const plans = [
     ['terrazzo', 'coffers'], ['stone', 'fins'], ['resin', 'coffers'],
     ['resin', 'rafts'], ['terrazzo', 'rafts'], ['resin', 'rafts'],
@@ -66,7 +68,7 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
     const { x, z } = hall.center;
     const palette = ROOM_FINISHES[hall.index];
     const finish = palette.finish, ceiling = plans[hall.index][1];
-    surface(22, 26, x, z, finish, `${hall.id}-${finish}-floor`, palette.floor);
+    surface(22, 26, x, z, finish, `${hall.id}-${finish}-floor`);
     const wallPaint = own(plaster.clone()); wallPaint.color.setHex(palette.wall);
     const accentPaint = own(plaster.clone()); accentPaint.color.setHex(palette.accent);
     const ceilingPaint = own(plaster.clone()); ceilingPaint.color.setHex(palette.ceiling);
