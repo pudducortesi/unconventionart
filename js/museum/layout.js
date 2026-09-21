@@ -21,6 +21,7 @@ export const INITIAL_TARGET = { x: -26.7, y: HANGING_CENTER, z: -10.9 };
 export const HALLS = [];
 export const WALLS = [];
 export const FURNITURE = [];
+export const RUGS = [];
 const rectangle = (x, z, width, depth, extra = {}) => ({
   minX: x - width / 2,
   maxX: x + width / 2,
@@ -126,6 +127,40 @@ for (const index of [1, 3, 7, 9]) {
   const { x, z } = HALLS[index].center;
   FURNITURE.push(rectangle(x - 3, z - 4.5, 2.8, 1.4, { kind: 'editorial', hallIndex: index }));
 }
+// Complete living compositions inside the protected exhibition perimeter.
+for (const hall of HALLS) {
+  const { x, z } = hall.center;
+  const hallIndex = hall.index;
+  const add = (dx, dz, width, depth, kind, extra = {}) => FURNITURE.push(
+    rectangle(x + dx, z + dz, width, depth, { kind, hallIndex, ...extra }));
+  const cinema = [3, 5].includes(hallIndex);
+  const reading = [1, 7].includes(hallIndex);
+  RUGS.push(rectangle(x, z - (hallIndex === 0 ? 6 : 0), 7.6, hallIndex === 0 ? 5.3 : 4.8));
+  RUGS.push(rectangle(x, z + 5.2, 8.2, 5.6));
+  if (reading) {
+    add(0, 5, 3.6, 1.3, 'reading');
+    for (const dx of [-0.9, 0.9]) {
+      add(dx, 7.0, 1.2, 1.2, 'lounge', { model: 'cantilever' });
+      add(dx, 3.1, 1.2, 1.2, 'lounge', { model: 'cantilever', rotation: Math.PI });
+    }
+  } else {
+    add(0, 6.3, 3.4, 1.3, 'lounge', { model: 'sofa' });
+    if (!cinema) {
+      add(0, 4.3, 1.36, 0.48, 'lowtable');
+      add(-3.1, 5.2, 1.1, 1.1, 'ottoman');
+      add(3.1, 5.2, 1.1, 1.1, 'ottoman');
+    } else {
+      add(0, 0.1, 1.36, 0.48, 'lowtable');
+    }
+  }
+  add(4.7, -5.2, 2.4, 0.65, 'console');
+  add(-3.2, 7.4, 0.65, 0.65, 'lamp');
+}
+FURNITURE.push(rectangle(23, 5, 2.4, 0.7, { kind: 'consultation' }));
+for (const x of [22.3, 23.7]) FURNITURE.push(rectangle(x, 3.7, 0.5, 0.5, { kind: 'temu' }));
+RUGS.push(rectangle(-16, 5.2, 10, 5.8));
+FURNITURE.push(rectangle(16.5, 8.4, 5.2, 0.65, { kind: 'console' }));
+FURNITURE.push(rectangle(17.5, 7, 1.2, 1.2, { kind: 'lounge', model: 'cantilever' }));
 // Reserved exhibition envelopes: 3.8m along the wall, 4m clear in front.
 // These are planning constraints, not barriers for visitors.
 export const EXHIBITION_ZONES = HALLS.flatMap(hall => hall.slots.map(slot => {
