@@ -92,11 +92,6 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   for (const piece of FURNITURE) {
     const { x, z, width: w, depth: d } = piece;
     if (piece.kind === "reception") {
-      box(w * 0.96, 0.16, d * 0.9, x, 0.53, z, fabric);
-      box(w * 0.96, 0.5, 0.24, x, 0.71, z + d * 0.4, fabric);
-      for (const side of [-1, 1])
-        box(0.16, 0.36, d * 0.8, x + side * w * 0.46, 0.61, z, fabric);
-    } else if (piece.kind === "reception") {
       box(w * 0.9, 0.12, d * 0.82, x, 0.06, z, recess);
       box(w, 1.04, d, x, 0.64, z, lacquer);
       box(w + 0.04, 0.06, d + 0.04, x, 1.19, z, stone);
