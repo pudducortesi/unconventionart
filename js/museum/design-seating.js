@@ -18,18 +18,27 @@ export function createDesignSeating(room, own) {
   let leather = palette.black, frame = palette.chrome,
     lacquer = palette.darkWood, seam = palette.darkSeam;
   const cube = own(new T.BoxGeometry(1, 1, 1));
-  const pillow = own(new T.BoxGeometry(1, 1, 1, 4, 4, 4));
+  // Sample the bevel densely while keeping the broad flat faces sparse.
+  // Analytic normals agree at duplicated face vertices, avoiding shading seams.
+  const pillow = own(new T.BoxGeometry(1, 1, 1, 6, 6, 6));
   const position = pillow.attributes.position;
-  const v = new T.Vector3(), inner = new T.Vector3();
+  const normals = pillow.attributes.normal;
+  const bevelSamples = [-0.5, -0.46, -0.40, 0, 0.40, 0.46, 0.5];
+  const sample = (value) => bevelSamples[Math.round((value + 0.5) * 6)];
+  const v = new T.Vector3(), inner = new T.Vector3(), normal = new T.Vector3();
   for (let i = 0; i < position.count; i++) {
     v.fromBufferAttribute(position, i);
+    v.set(sample(v.x), sample(v.y), sample(v.z));
     inner.copy(v).clampScalar(-0.38, 0.38);
-    v.sub(inner).normalize().multiplyScalar(0.12).add(inner);
+    normal.copy(v).sub(inner).normalize();
+    v.copy(inner).addScaledVector(normal, 0.12);
     position.setXYZ(i, v.x, v.y, v.z);
+    normals.setXYZ(i, normal.x, normal.y, normal.z);
   }
-  pillow.computeVertexNormals();
-  const cylinder = own(new T.CylinderGeometry(1, 1, 1, 24));
-  const sphere = own(new T.SphereGeometry(1, 12, 8));
+  position.needsUpdate = true;
+  normals.needsUpdate = true;
+  const cylinder = own(new T.CylinderGeometry(1, 1, 1, 48));
+  const sphere = own(new T.SphereGeometry(1, 24, 16));
   const geometries = new Map();
   const batches = new Map();
   let origin;
@@ -44,7 +53,7 @@ export function createDesignSeating(room, own) {
   const pad = (x,y,z,w,h,d,rx=0) => add(pillow,leather,x,y,z,w,h,d,rx);
   const tube = (name, points, radius=0.022) => {
     if (!geometries.has(name)) geometries.set(name, own(new T.TubeGeometry(
-      new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p))), 32, radius, 8, false)));
+      new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p))), 48, radius, 12, false)));
     add(geometries.get(name), frame, 0,0,0);
   };
   const legs = (w,d,h) => {for(const x of [-w/2,w/2]) for(const z of [-d/2,d/2]) box(x,h/2,z,0.035,h,0.035);};
@@ -60,7 +69,7 @@ export function createDesignSeating(room, own) {
       for(const y of [0.72,1.02]) {
         const points=[[-0.5,y,-0.3],[-0.53,y,0.12],[-0.40,y,0.39],[0,y,0.46],[0.40,y,0.39],[0.53,y,0.12],[0.5,y,-0.3]];
         const key=`roll-${y}`;
-        if (!geometries.has(key)) geometries.set(key, own(new T.TubeGeometry(new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p))),40,0.16,12,false)));
+        if (!geometries.has(key)) geometries.set(key, own(new T.TubeGeometry(new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p))),64,0.16,24,false)));
         const geometry=geometries.get(key);
         add(geometry,leather,0,0,0);
         for(const x of [-0.5,0.5]) add(sphere,leather,x,y,-0.3,0.16,0.16,0.06);
