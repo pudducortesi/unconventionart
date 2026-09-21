@@ -1,13 +1,14 @@
 /** Catalogue can be replaced without changing page templates or interactions. */
-export async function loadCatalogue() {
+export async function loadCatalogue({ publicOnly = false } = {}) {
   // Local photographs are excluded from both git and the production build.
   // Only the local development server supports this preview override.
   const local = ["localhost", "127.0.0.1", "terminal.local"].includes(
     location.hostname,
   );
-  const paths = local
-    ? ["data/local-catalogue.json", "data/catalogue.json"]
-    : ["data/catalogue.json"];
+  const paths =
+    local && !publicOnly
+      ? ["data/local-catalogue.json", "data/catalogue.json"]
+      : ["data/catalogue.json"];
   for (const path of paths) {
     try {
       const response = await fetch(path);

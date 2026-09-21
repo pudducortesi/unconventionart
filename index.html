@@ -6,112 +6,143 @@
       name="viewport"
       content="width=device-width,initial-scale=1,viewport-fit=cover"
     />
-    <meta name="theme-color" content="#f4f3ee" />
-    <title>La galleria — UnconventionArt</title>
+    <meta name="theme-color" content="#ffffff" />
+    <title>UnconventionArt — lo spazio, lo sguardo</title>
     <meta
       name="description"
-      content="Entra nella galleria UnconventionArt. Uno spazio tridimensionale da attraversare, fotografie da incontrare da vicino."
+      content="Una galleria contemporanea da attraversare. Entra nello spazio UnconventionArt, avvicinati alle fotografie e incontra le opere."
     />
     <link rel="icon" href="images/site/favicon-32.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
     <link rel="stylesheet" href="css/museum.css" />
     <script type="module" src="js/museum/main.js"></script>
   </head>
   <body>
-    <a class="skip" href="exhibitions.html">Vai al catalogo fotografico</a>
     <main id="museum" aria-label="Galleria fotografica tridimensionale">
-      <div id="scene" aria-label="Spazio della galleria"></div>
+      <h1 class="sr-only">UnconventionArt — galleria immersiva</h1>
+      <div id="scene"></div>
       <div id="plaque-labels" aria-label="Cartellini delle opere"></div>
       <header class="museum-header">
-        <a class="wordmark" href="index.html"
-          >unconvention<span>art</span><sup>®</sup></a
-        ><span class="header-caption">SPAZIO PER ALTRI SGUARDI</span>
-        <nav aria-label="Navigazione">
-          <a href="exhibitions.html">Catalogo ↗</a
-          ><button id="help-open" aria-label="Apri i comandi della galleria">
+        <button
+          class="wordmark"
+          data-open="about"
+          aria-label="Informazioni su UnconventionArt"
+        >
+          unconvention<span>art</span><sup>®</sup>
+        </button>
+        <span class="header-caption">GALLERIA CONTEMPORANEA</span>
+        <nav aria-label="Comandi della visita">
+          <button
+            id="collection-open"
+            data-open="collection"
+            aria-label="Apri l’indice delle opere"
+          >
+            Opere <span id="work-count">01</span>
+          </button>
+          <button
+            id="help-open"
+            class="round-button"
+            aria-label="Come muoversi nella galleria"
+          >
             ?
           </button>
         </nav>
       </header>
-      <section class="invitation" id="invitation" aria-labelledby="title">
-        <span class="eyebrow">UNCONVENTIONART / GALLERIA VIRTUALE</span>
-        <h1 id="title">La galleria.</h1>
-        <p>Attraversalo. Avvicinati.<br />Lascia fuori tutto il resto.</p>
-        <div class="invitation-bottom">
-          <button id="enter" disabled>
-            Prepariamo la sala<span class="button-arrow">↗</span></button
-          ><a href="exhibitions.html">Oppure sfoglia le fotografie</a>
-        </div>
-        <p id="loading-status" class="loading-status" role="status">
-          Caricamento della galleria…
-        </p>
+      <section
+        id="invitation"
+        class="loading-screen"
+        aria-label="Caricamento"
+        aria-live="polite"
+      >
+        <div class="loading-ring" aria-hidden="true"></div>
+        <p id="loading-status">Stai entrando nella galleria.</p>
+        <button id="fallback-open" data-open="collection" hidden>
+          Guarda le opere
+        </button>
       </section>
-      <div class="exhibition-label">
-        <span class="eyebrow">IN QUESTO SPAZIO</span
-        ><strong id="exhibition-name">Kavyar</strong
-        ><span id="exhibition-count"></span>
-      </div>
       <div class="hud" id="hud" hidden>
         <div class="room-tag">
-          <span class="live-dot"></span><span id="room-label">SALA 01</span
-          ><button id="entrance" title="Torna all’ingresso">
-            ↶ <span>Ingresso</span>
-          </button>
+          <span class="live-dot"></span
+          ><span id="room-label">SALA 01 / KAVYAR</span>
         </div>
-        <div class="point-label" id="point-label" hidden>
-          <span id="point-title"></span><small>TOCCA PER AVVICINARTI</small>
-        </div>
-        <div class="work-panel" id="work-panel" hidden>
-          <span class="eyebrow" id="work-series"></span>
-          <h2 id="work-title"></h2>
-          <p id="work-credit"></p>
-          <div>
-            <button id="inspect-work">Osserva l’opera ↗</button
-            ><button id="leave-work" aria-label="Allontanati dall’opera">
-              ← Torna nella sala
-            </button>
-          </div>
+        <div id="point-label" class="point-label" hidden>
+          <span id="point-title"></span><small>CLICCA PER AVVICINARTI</small>
         </div>
         <aside class="map" aria-label="Mappa della sala">
           <svg
-            id="map-svg"
             viewBox="0 0 140 180"
             role="img"
             aria-label="La tua posizione nella galleria"
           >
             <path class="map-outline" d="M12 12H128V168H12Z" />
+            <path
+              class="map-furniture"
+              d="M74 86h19v10H74zM20 120h22v11H20zM98 137h21v11H98z"
+            />
             <g id="map-art"></g>
             <g id="map-player">
-              <path d="M0 -10L-5 3L0 0L5 3Z" />
+              <path d="M0 -9L-5 4L0 1L5 4Z" />
               <circle r="2" />
             </g></svg
           ><span>SEI QUI</span>
         </aside>
         <div class="navigation-dock">
-          <button id="previous-work" aria-label="Vai all’opera precedente">
-            ←</button
-          ><button id="next-work">Avvicinati all’opera <span>↗</span></button
-          ><button id="next-room" hidden>Sala successiva →</button>
+          <button
+            id="entrance"
+            class="round-button"
+            aria-label="Torna all’ingresso"
+            title="Torna all’ingresso"
+          >
+            ↶
+          </button>
+          <button
+            id="previous-work"
+            class="round-button"
+            aria-label="Vai all’opera precedente"
+          >
+            ←
+          </button>
+          <button id="next-work">Avvicinati all’opera <span>↗</span></button>
+          <button id="next-room" hidden>Sala successiva →</button>
         </div>
-        <p class="movement-hint">
-          TRASCINA PER GUARDARE <i>·</i> CLICCA A TERRA PER MUOVERTI
-          <i>·</i> WASD / FRECCE
+        <div id="work-panel" class="work-panel" hidden>
+          <div>
+            <span class="eyebrow" id="work-series"></span>
+            <h2 id="work-title"></h2>
+            <span id="work-credit" class="sr-only"></span>
+          </div>
+          <button
+            id="describe-work"
+            aria-label="Leggi il cartellino dell’opera selezionata"
+          >
+            Cartellino ↗
+          </button>
+          <button id="inspect-work" aria-label="Guarda la fotografia intera">
+            ⤢
+          </button>
+          <button id="leave-work" aria-label="Chiudi i comandi dell’opera">
+            ×
+          </button>
+        </div>
+        <p class="movement-hint" id="movement-hint">
+          TRASCINA PER GUARDARE · CLICCA A TERRA PER CAMMINARE · WASD / FRECCE
         </p>
-        <div class="touch-pad" role="group" aria-label="Muoviti nella galleria">
-          <button data-move="forward" aria-label="Avanti">↑</button
-          ><button data-move="left" aria-label="Sinistra">←</button
-          ><button data-move="back" aria-label="Indietro">↓</button
-          ><button data-move="right" aria-label="Destra">→</button>
+        <div class="touch-controls" aria-label="Comandi touch">
+          <div
+            class="joystick"
+            id="joystick"
+            role="group"
+            aria-label="Joystick: trascina per camminare"
+          >
+            <span class="joystick-track"></span><span id="joystick-knob"></span
+            ><span class="joystick-caption">MUOVITI</span>
+          </div>
+          <div class="look-hint" aria-hidden="true">
+            <span>↔</span>TRASCINA<br />PER GUARDARE
+          </div>
         </div>
       </div>
       <footer class="museum-footer">
-        <a href="about.html">La visione</a
-        ><span>FOTOGRAFIA / CORPO / TRASFORMAZIONE</span
+        <button data-open="about">Dentro lo spazio</button
         ><button id="motion-toggle" aria-pressed="true">
           Movimento fluido
         </button>
@@ -124,48 +155,81 @@
         data-close="help"
         aria-label="Chiudi i comandi"
       >
-        ×</button
-      ><span class="eyebrow">ESPLORA AL TUO RITMO</span>
-      <h2 id="help-title">Come muoversi.</h2>
-      <dl>
-        <dt>Guardati intorno</dt>
-        <dd>Trascina il mouse, oppure un dito sullo schermo.</dd>
-        <dt>Cammina</dt>
+        ×
+      </button>
+      <span class="eyebrow">VISITA LIBERA</span>
+      <h2 id="help-title">Prenditi il tuo spazio.</h2>
+      <dl class="instructions">
+        <dt>01 / Guardati intorno</dt>
+        <dd>Trascina il mouse o un dito sullo schermo.</dd>
+        <dt>02 / Cammina</dt>
         <dd>
-          Clicca sul pavimento o usa W A S D e le frecce. Sul telefono usa i
-          pulsanti direzionali.
+          Da computer usa W A S D, le frecce oppure clicca a terra. Dal telefono
+          trascina il joystick in basso a sinistra; con l’altra mano puoi
+          guardarti intorno.
         </dd>
-        <dt>Incontra una fotografia</dt>
+        <dt>03 / Incontra le opere</dt>
         <dd>
-          Cliccala per avvicinarti. Il cartellino accanto alla cornice apre
-          descrizione e informazioni.
-        </dd>
-        <dt>Lasciati accompagnare</dt>
-        <dd>
-          Usa il pulsante in basso per passare da un’opera alla successiva.
+          Tocca una fotografia per avvicinarti. Il cartellino accanto alla
+          cornice apre la descrizione. Puoi anche scegliere un’opera dall’indice
+          in alto.
         </dd>
       </dl>
       <button class="dialog-primary" data-close="help">
-        Ho capito, entriamo ↗</button
-      ><a href="exhibitions.html">Preferisci il catalogo? Aprilo qui.</a>
+        Riprendi la visita ↗
+      </button>
+    </dialog>
+    <dialog id="collection" aria-labelledby="collection-title">
+      <button
+        class="dialog-close"
+        data-close="collection"
+        aria-label="Chiudi l’indice"
+      >
+        ×</button
+      ><span class="eyebrow">INDICE DELLA GALLERIA</span>
+      <h2 id="collection-title">Le opere.</h2>
+      <p class="collection-intro">
+        Scegli una fotografia. Ti accompagniamo nella sala.
+      </p>
+      <div id="collection-list"></div>
+    </dialog>
+    <dialog id="about" aria-labelledby="about-title">
+      <button
+        class="dialog-close"
+        data-close="about"
+        aria-label="Chiudi le informazioni"
+      >
+        ×</button
+      ><span class="eyebrow">UNCONVENTIONART</span>
+      <h2 id="about-title">Un altro modo<br />di abitare lo sguardo.</h2>
+      <p>
+        Uno spazio dedicato alla fotografia artistica, al ritratto e alla
+        trasformazione. Le immagini sono presenze da incontrare, da vicino, con
+        il proprio tempo.
+      </p>
+      <p>
+        La visita comincia qui. Muoviti liberamente nella sala, osserva le opere
+        e apri i cartellini per leggerne le storie.
+      </p>
+      <button class="dialog-primary" data-close="about">
+        Torna nello spazio ↗
+      </button>
     </dialog>
     <dialog id="work-details" aria-labelledby="details-title">
       <button
         class="dialog-close"
         data-close="work-details"
-        aria-label="Chiudi descrizione"
+        aria-label="Chiudi il cartellino"
       >
         ×</button
       ><span class="eyebrow" id="details-series"></span>
       <h2 id="details-title"></h2>
-      <p id="details-credit"></p>
+      <p id="details-credit" class="credit"></p>
       <p id="details-description"></p>
       <dl id="details-metadata"></dl>
       <button class="dialog-primary" id="details-inspect">
-        Guarda la fotografia intera ↗</button
-      ><a id="details-contact" href="contact.html"
-        >Informazioni sull’opera ↗</a
-      >
+        Guarda la fotografia intera ↗
+      </button>
     </dialog>
     <dialog id="artwork" aria-labelledby="artwork-title">
       <button
@@ -175,18 +239,24 @@
       >
         ×</button
       ><img id="artwork-image" alt="" />
-      <div>
+      <div class="artwork-caption">
         <div>
           <span class="eyebrow" id="artwork-series"></span>
           <h2 id="artwork-title"></h2>
         </div>
-        <a id="artwork-contact" href="contact.html">Parliamone ↗</a>
+        <button id="artwork-details">Leggi il cartellino ↗</button>
       </div>
     </dialog>
     <noscript
       ><div class="no-script">
-        Per attraversare la sala serve JavaScript.
-        <a href="exhibitions.html">Apri il catalogo fotografico →</a>
+        La visita interattiva richiede JavaScript.
+        <figure>
+          <img
+            src="images/kavyar/01.jpg"
+            alt="Kavyar / 01, ritratto artistico con bodypainting nero e perle bianche"
+          />
+          <figcaption>Kavyar / 01 — UnconventionArt</figcaption>
+        </figure>
       </div></noscript
     >
   </body>

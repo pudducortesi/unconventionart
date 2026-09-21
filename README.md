@@ -1,9 +1,8 @@
 # UnconventionArt
 
-Portfolio fotografico multipagina, scritto in HTML, CSS e JavaScript nativi.
-Galleria 3D in Three.js e pagine editoriali in HTML/CSS/JavaScript. La libreria è installata da npm, bloccata nel lockfile e servita dallo stesso sito.
+Un’unica pagina HTML, CSS e JavaScript: una galleria contemporanea 3D percorribile in prima persona. Pareti, soffitto, pavimento, cornici, sedute e reception sono bianchi. La profondità deriva da geometria, luce e ombre. Three.js è installato con versione bloccata e servito dallo stesso dominio.
 
-## Avvio
+## Avvio e build
 
 Richiede Node.js 20 o successivo.
 
@@ -15,72 +14,34 @@ npm run build
 npm run check
 ```
 
-Il comando build produce `dist/`, pubblicabile su un normale hosting statico anche in una sottocartella. Non pubblica automaticamente nulla. La build copia Three.js e la sua licenza in `dist/vendor/`.
+`dist/` contiene esclusivamente la galleria, il catalogo pubblico e i suoi asset. Le precedenti pagine editoriali restano nel repository come sorgenti storici: non sono pubblicate dalla build. Vercel riscrive i vecchi indirizzi HTML verso la galleria.
 
-## Pagine
+## Visita
 
-- `index.html`: galleria 3D percorribile, click per camminare, trascinamento per guardare, WASD/frecce, comandi touch, mappa, avvicinamento alle fotografie e visione integrale.
-- `editorial.html`: percorso editoriale fotografico precedente.
-- `exhibitions.html`: archivio con filtri per serie, modalità galleria e indice. I filtri e la disposizione rimangono nell’URL.
-- `collection.html?series=presenza`: pagina autonoma per ogni serie, introduzione, fotografie e passaggio alla serie successiva.
-- `about.html`: visione artistica e approccio.
-- `contact.html`: composizione di un’email nel client dell’utente. Nessun invio simulato e nessun backend.
-- `journal.html` e `post.html`: mantengono raggiungibili i vecchi indirizzi, riportando alle opere senza ripubblicare articoli fittizi.
+La pagina si apre direttamente all’ingresso della sala, senza copertina o pulsante “entra”. Su desktop: trascina per guardare, WASD/frecce per camminare, oppure clicca sul pavimento. Su touch: joystick a sinistra per muoverti e trascinamento con l’altra mano per guardarti intorno. È disponibile anche il tap sul pavimento. Non servono pointer lock, fullscreen o permessi del dispositivo.
 
-## Struttura
+Toccando una fotografia ci si avvicina. Il cartellino fisico accanto alla cornice apre descrizione e metadati disponibili; un pulsante HTML ancorato alla sua posizione rende il bersaglio utilizzabile con touch e tastiera. Il cartellino viene nascosto se occluso dall’architettura. Foto intera, informazioni, aiuto e indice sono dialoghi interni alla stessa pagina.
 
-```text
-css/style.css       composizione, responsive, movimento ridotto
-js/main.js         navigazione, pagine, filtri, modulo contatto
-js/catalogue.js    caricamento dati e componenti fotografici
-js/motion.js       scroll, prospettiva, reveal, preferenza movimento
-js/viewer.js       visore, URL delle opere, tastiera, swipe, variazioni
-data/catalogue.json  catalogo pubblico
-tools/serve.mjs    server locale senza dipendenze
-tools/build.mjs    build statica
-tools/check.mjs    controllo collegamenti, catalogo e isolamento asset
-```
+Collisioni e percorsi aggirano tutti e tre gli arredi. Il cambio orientamento del telefono conserva la posizione. Le distanze di osservazione si adattano allo schermo e restano entro la stanza. Il movimento ridotto usa spostamenti immediati; il rendering si ferma quando la scena è immobile o la scheda è nascosta. Risoluzione massima 1,25× su touch e 1,5× su desktop; ombre statiche riutilizzate.
 
-## Fotografie e catalogo
+## Codice
 
-Il catalogo pubblico contiene al momento una fotografia dell’album Kavyar, autorizzata per il sito. L’album completo contiene sei fotografie: le altre cinque attendono l’esportazione. Nessuna immagine ARGINE è inclusa nel catalogo pubblico.
+- `index.html`: unica pagina, comandi e dialoghi.
+- `css/museum.css`: interfaccia, touch, aree sicure e movimento ridotto.
+- `js/museum/architecture.js`: geometrie della sala, arredi, luci e opere.
+- `js/museum/navigation.js`: collisioni, percorsi e punti di osservazione sicuri.
+- `js/museum/main.js`: scena, catalogo, joystick, mouse e tastiera.
+- `data/catalogue.json`: fotografie, descrizioni e metadati.
+- `tools/build.mjs`: build con elenco esplicito degli asset pubblici.
 
-Le fotografie finali vanno aggiunte solo dopo averne confermato la pubblicazione. Il codice è pronto a riceverle attraverso `data/catalogue.json`: non serve modificare le pagine.
+## Fotografie
 
-Ogni collezione ha `id`, `title`, `subtitle`, `description` e `color`. Ogni opera ha `id`, `title`, `collection`, `image`, `alt`, `credit` e l’eventuale array `variants`. `hero` identifica l’immagine d’ingresso. I percorsi sono relativi alla radice del sito.
+Il catalogo pubblico contiene una fotografia Kavyar. Le altre cinque dell’album attendono ancora l’esportazione. Le fotografie non vengono duplicate per riempire le pareti; non sono incluse immagini ARGINE. I JPEG rimangono inalterati, con rapporto originale e senza applicazione del tone mapping alla fotografia.
 
-Per lavorare localmente con fotografie non pubbliche si può usare `data/local-catalogue.json` con lo stesso schema e `images/private/`. Entrambi sono esclusi da Git e dalla build. L’override viene letto solo su localhost, 127.0.0.1 e terminal.local. La build usa sempre il catalogo pubblico.
+Aggiungere le immagini autorizzate in `images/kavyar/` e i relativi record in `data/catalogue.json`. Le sale vengono generate per collezione, fino a otto opere per sala. I campi opzionali `description`, `medium`, `year`, `edition` alimentano il cartellino. La galleria legge lo stesso catalogo pubblico anche durante lo sviluppo locale.
 
-Le immagini sono mostrate intere con `object-fit: contain`: nessuna rielaborazione automatica. Il visore supporta frecce, Escape, swipe e variazioni della stessa opera. I collegamenti `exhibitions.html#work=1` aprono direttamente la fotografia.
+## Verifiche
 
-Lo script storico `tools/publish.py` appartiene al vecchio schema: non usarlo per aggiornare questo catalogo.
+Eseguiti: build, sintassi JavaScript, integrità del catalogo, corrispondenza tra controller e ID HTML, unica pagina nella build e isolamento degli asset privati. Dodici test della navigazione controllano collisioni, percorsi continui, tre arredi, bordi, orientamento e punti di osservazione su formati diversi.
 
-## Movimento e accessibilità
-
-Scroll nativo senza intercettare la rotella. Su mobile la sala orizzontale diventa una sequenza verticale. Le animazioni rispettano `prefers-reduced-motion` e possono essere disattivate dal footer. I dialoghi nativi gestiscono il focus; la chiusura del visore torna al collegamento originale. Menu e visore funzionano da tastiera.
-
-## Verifica di questa revisione
-
-Eseguiti: controllo sintattico dei quattro moduli JavaScript, build statica, collegamenti locali delle sette pagine, unicità degli ID, integrità del catalogo e assenza degli asset privati da `dist/`.
-
-Da completare prima del rilascio: verifica visiva e interattiva in browser desktop/mobile con le fotografie definitive. L’ambiente di lavoro non ha consentito di collegare il browser al server locale; non viene dichiarata una verifica visiva completata.
-
-
-## Sala 3D
-
-`js/museum/architecture.js` costruisce la sala e le cornici. `navigation.js` gestisce geometria dei percorsi e collisioni. `main.js` collega rendering, catalogo e comandi; `css/museum.css` è indipendente dallo stile editoriale.
-
-Le sale si generano dal catalogo: massimo otto opere per sala e suddivisione per collezione. Una sola opera viene appesa al centro della parete di fondo. Non vengono duplicate fotografie per riempire lo spazio. I JPEG rimangono invariati e sono mostrati con il loro rapporto originale.
-
-I movimenti non richiedono pointer lock o fullscreen. La navigazione click-to-walk evita la panca con una griglia di percorsi; tastiera e touch rispettano le collisioni. Il movimento ridotto usa spostamenti immediati. Il rendering si ferma quando la scena è immobile o la scheda è nascosta; risoluzione limitata a 1.5× per contenere il carico grafico.
-
-Se WebGL non è disponibile, l’ingresso spiega l’errore e mantiene il collegamento al catalogo. Il catalogo HTML resta accessibile anche dalla sala. Le sei verifiche automatiche della navigazione controllano limiti, ostacoli, percorsi e orientamento della camera. La verifica interattiva sul deploy resta subordinata all’accesso all’anteprima Vercel protetta.
-
-
-## Revisione off-white e mobile
-
-Sala, soffitto, pavimento, cornici e interfaccia adottano una palette off-white con luce neutra. La sala appare direttamente, senza la copertina a tutto schermo. Su telefono l’inquadratura iniziale mostra l’opera e il suo cartellino, dimensionando la distanza sul rapporto dello schermo.
-
-Ogni fotografia ha un cartellino fisico a destra, cliccabile tramite raycasting e un pulsante HTML ancorato alla sua posizione per touch e tastiera. Il cartellino apre descrizione, autore e i soli metadati realmente disponibili; su telefono la scheda è un pannello dal basso. Da lì si apre la foto intera o si chiede informazione sull’opera.
-
-Rimossi dalla vista i comandi direzionali e i pannelli invasivi. Trascinamento, tap sul pavimento e navigazione tra opere sono disponibili su touch; mouse e tastiera restano disponibili su desktop. Il canvas segue l’altezza dinamica dello schermo e l’area sicura iOS. Un settimo test verifica l’inquadratura su cinque formati, da 320×568 a 1440×900. Non sostituisce il collaudo visivo su dispositivi reali, ancora impedito dall’autenticazione dell’anteprima Vercel.
+Questi controlli non equivalgono a un collaudo visivo o touch. La verifica del rendering e delle interazioni su browser/dispositivi reali resta da completare: l’anteprima Vercel richiede autenticazione non disponibile nella sessione di verifica.
