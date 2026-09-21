@@ -27,7 +27,15 @@
           data-open="about"
           aria-label="Informazioni su UnconventionArt"
         >
-          <img src="images/site/brand-original.svg" class="brand-image" width="860" height="335" alt="WE ARE — UNCONVENTIONART" />
+          <svg class="brand-image" xmlns="http://www.w3.org/2000/svg" width="860" height="335" viewBox="0 0 860 335" role="img" aria-label="WE ARE — UNCONVENTIONART">
+            <defs>
+              <filter id="brand-transparent-ink" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+                <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  .2126 .7152 .0722 0 0" />
+                <feComponentTransfer><feFuncA type="linear" slope="1.04" intercept="-.02" /></feComponentTransfer>
+              </filter>
+            </defs>
+            <image href="images/site/brand-original.svg" width="860" height="335" filter="url(#brand-transparent-ink)" />
+          </svg>
         </button>
         <span class="header-caption">GALLERIA CONTEMPORANEA</span>
         <nav aria-label="Comandi della visita">
