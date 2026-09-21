@@ -496,6 +496,10 @@ function tap(event) {
   ];
   const hit = ray.intersectObjects(targets, false)[0];
   if (!hit) return;
+  if (hit.object.userData.dialog) {
+    openDialog(hit.object.userData.dialog);
+    return;
+  }
   const work = hit.object.userData.work;
   if (work) {
     const index = slots.findIndex((slot) => slot.work.id === work.id);

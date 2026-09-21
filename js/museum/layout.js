@@ -86,6 +86,19 @@ for (let row = 0; row < 5; row++) {
 }
 FURNITURE.push(rectangle(17.5, 5, 4.4, 1.6, { kind: "reception" }));
 FURNITURE.push(rectangle(-16, 5, 4.4, 1.5, { kind: "bench" }));
+// Furnished islands keep the central promenade and artwork viewing bands clear.
+FURNITURE.push(rectangle(-22, 5, 1.6, 1.6, { kind: "ottoman" }));
+FURNITURE.push(rectangle(-11.5, 5, 1.6, 1.6, { kind: "ottoman" }));
+FURNITURE.push(rectangle(-8, 5, 1.3, 0.7, { kind: "directory" }));
+FURNITURE.push(rectangle(9, 5, 3.4, 1.8, { kind: "editorial" }));
+for (const index of [0, 5]) {
+  const { x, z } = HALLS[index].center;
+  FURNITURE.push(rectangle(x, z - 2, 5.8, 0.5, { kind: "screen", hallIndex: index }));
+}
+for (const index of [1, 3, 7, 9]) {
+  const { x, z } = HALLS[index].center;
+  FURNITURE.push(rectangle(x - 3, z - 4, 2.8, 1.4, { kind: "editorial", hallIndex: index }));
+}
 export const OBSTACLES = [...WALLS, ...FURNITURE];
 export function locateHall(position) {
   const hall = HALLS.find(
