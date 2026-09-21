@@ -59,7 +59,8 @@ let movementPixelRatio = Math.min(devicePixelRatio, mobile ? 1.1 : 1.5);
 let detailArtwork = null;
 let focusRequest = 0;
 let realistic = true;
-let advanced = true;
+// Prefer restrained contact shading; the HBAO profile remains opt-in.
+let advanced = false;
 let photoRender = null, photoBusy = false, photoToken = 0;
 const player = { x: INITIAL.x, z: INITIAL.z };
 const initialLook = orientation(INITIAL, INITIAL_TARGET);

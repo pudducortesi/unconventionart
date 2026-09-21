@@ -10,13 +10,13 @@ export class GalleryHBAOPass extends Pass {
     this.beauty = new T.WebGLRenderTarget(1,1,{type:T.HalfFloatType});
     this.beauty.depthTexture = new T.DepthTexture(1,1,T.UnsignedIntType);
     this.effect = new HBAOEffect({depthTexture:this.beauty.depthTexture, passes:[]},camera,scene,
-      {resolutionScale: mobile ? .5 : 1, spp: mobile ? 8 : 16, distance:.65, power:1.4,
-        iterations:1, samples:8, radius:4, useNormalPass:false});
+      {resolutionScale: 1, spp: mobile ? 16 : 24, distance:.22, power:.7,
+        iterations:1, samples:16, radius:6, useNormalPass:false});
     this.material = new T.ShaderMaterial({
       depthWrite:false, depthTest:false, toneMapped:false,
-      uniforms:{tDiffuse:{value:this.beauty.texture}, aoTexture:{value:null}, depthTexture:{value:this.beauty.depthTexture}, power:{value:1.4}},
+      uniforms:{tDiffuse:{value:this.beauty.texture}, aoTexture:{value:null}, depthTexture:{value:this.beauty.depthTexture}, power:{value:.7}},
       vertexShader:'varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
-      fragmentShader:'varying vec2 vUv; uniform sampler2D tDiffuse, aoTexture, depthTexture; uniform float power; void main(){vec4 base=texture2D(tDiffuse,vUv);float depth=texture2D(depthTexture,vUv).r;float ao=depth>.9999?1.0:pow(clamp(texture2D(aoTexture,vUv).a,0.0,1.0),power);gl_FragColor=vec4(base.rgb*ao,base.a);}',
+      fragmentShader:'varying vec2 vUv; uniform sampler2D tDiffuse, aoTexture, depthTexture; uniform float power; void main(){vec4 base=texture2D(tDiffuse,vUv);float depth=texture2D(depthTexture,vUv).r;float ao=depth>.9999?1.0:pow(clamp(texture2D(aoTexture,vUv).a,0.0,1.0),power);gl_FragColor=vec4(base.rgb*mix(1.0,ao,0.22),base.a);}',
     });
     this.quad = new FullScreenQuad(this.material);
   }
