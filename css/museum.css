@@ -1037,9 +1037,20 @@ dialog dd {
   }
 }
 
-/* Original artwork, with only its outer black margins excluded from the viewport. */
-.wordmark { flex-shrink: 0; line-height: 0; }
-.brand-image { display: block; width: 180px; height: auto; }
+/* Use the original white lettering as a luminance mask: black ink, transparent ground. */
+.wordmark { position: relative; flex-shrink: 0; line-height: 0; }
+.wordmark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #161616;
+  mask-image: var(--brand-mask);
+  mask-mode: luminance;
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  pointer-events: none;
+}
+.brand-image { display: block; width: 180px; height: auto; opacity: 0; }
 @media (max-width: 700px) {
   .brand-image { width: clamp(112px, 33vw, 145px); }
 }
