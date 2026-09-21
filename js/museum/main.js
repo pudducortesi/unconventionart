@@ -297,7 +297,7 @@ updateMotion();
 function fail(message) {
   stop();
   entered = false;
-  $("#loading-status").textContent = message;
+  $("#loading-status").textContent = /WebGL|context/i.test(message) ? "La visita 3D non è disponibile in questo browser. Puoi esplorare le opere e lo Studio." : message;
   $("#fallback-open").hidden = !catalogue;
   document.body.classList.add("failed");
   document.body.classList.remove("exploring");

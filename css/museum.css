@@ -1185,3 +1185,7 @@ dialog dd {
 .vision-controls { display:flex;flex-wrap:wrap;justify-content:center;gap:8px; }
 #collector-studio .vision-controls button { border-color:#ffffff55;color:#eee8dd; }
 .vision-room .studio-fineprint { color:#b2b7ad; }
+/* Comfortable targets above browser safe areas, including the WebGL fallback. */
+.museum-footer { z-index:12; bottom:8px; }
+.museum-footer button { min-height:44px; padding:8px 12px; font-size:11px; }
+@media(max-width:700px) { .museum-footer { padding-left:10px;padding-right:10px;bottom:0; } }
