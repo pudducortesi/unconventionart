@@ -57,6 +57,7 @@ let movementPixelRatio = Math.min(devicePixelRatio, mobile ? 1.1 : 1.5);
 let detailArtwork = null;
 let focusRequest = 0;
 let realistic = true;
+let advanced = true;
 let photoRender = null, photoBusy = false, photoToken = 0;
 const player = { x: INITIAL.x, z: INITIAL.z };
 const initialLook = orientation(INITIAL, INITIAL_TARGET);
@@ -112,6 +113,19 @@ $("#tour-pause").addEventListener("click", () => { if (guide.state().paused) gui
 $("#tour-end").addEventListener("click", () => { stop(); guide.end(); controls?.focus(); });
 for (const id of ["entrance", "next-work", "previous-work"]) $("#" + id).addEventListener("click", () => guide.pause(), { capture: true });
 
+$("#advanced-toggle").addEventListener("click", () => {
+  if (!effects) return;
+  advanced = !advanced;
+  try {
+    effects.setAdvanced(advanced); realistic = true;
+    $("#advanced-toggle").setAttribute("aria-pressed", String(advanced));
+    $("#advanced-toggle").textContent = advanced ? "Ombre: profonde" : "Ombre: morbide";
+    $("#graphics-toggle").textContent = "Grafica: realistica";
+    $("#graphics-toggle").setAttribute("aria-pressed", "true");
+    $("#graphics-status").textContent = advanced ? "Ombre profonde e riduzione del rumore attive." : "Ombre morbide attive.";
+  } catch (error) { advanced=false; effects.setAdvanced(false); announce("Ombre morbide ripristinate."); }
+  invalidate();
+});
 $("#graphics-toggle").addEventListener("click", () => {
   realistic = !realistic;
   $("#graphics-toggle").textContent = realistic ? "Grafica: realistica" : "Grafica: standard";
@@ -703,11 +717,20 @@ function render(time) {
     try {
       renderer.debug.onShaderError = () => { throw new Error('Shader grafico non supportato'); };
       effects.render(delta);
+      if (effects.needsFrame()) invalidate();
     } catch (error) {
-      realistic = false;
-      $("#graphics-toggle").textContent = "Grafica: standard";
-      $("#graphics-toggle").setAttribute("aria-pressed", "false");
-      $("#graphics-status").textContent = "Effetti non disponibili su questo dispositivo. Visita standard attiva.";
+      if (advanced) {
+        advanced = false; effects.setAdvanced(false);
+        $("#advanced-toggle").textContent = "Ombre: morbide";
+        $("#advanced-toggle").setAttribute("aria-pressed", "false");
+        $("#graphics-status").textContent = "Ombre profonde non supportate: ombre morbide ripristinate.";
+        invalidate();
+      } else {
+        realistic = false;
+        $("#graphics-toggle").textContent = "Grafica: standard";
+        $("#graphics-toggle").setAttribute("aria-pressed", "false");
+        $("#graphics-status").textContent = "Effetti non disponibili su questo dispositivo. Visita standard attiva.";
+      }
       console.warn('Postprocessing unavailable:', error);
       renderer.setRenderTarget(null); renderer.render(scene, camera);
     } finally { renderer.debug.onShaderError = previousError; }
@@ -830,6 +853,13 @@ try {
   try {
     const { createRealisticRenderer } = await import('../../vendor/gallery-effects.js');
     effects = createRealisticRenderer(renderer, scene, camera, mobile);
+    try { effects.setAdvanced(advanced); } catch (error) {
+      advanced = false; effects.setAdvanced(false);
+      $("#advanced-toggle").textContent = "Ombre: morbide";
+      $("#advanced-toggle").setAttribute("aria-pressed", "false");
+      console.warn('HBAO initialization unavailable:', error);
+    }
+    $("#advanced-toggle").disabled = false;
     $("#graphics-toggle").disabled = false;
     $("#graphics-status").textContent = "Ombre di contatto e bordi più morbidi attivi.";
   } catch (error) {

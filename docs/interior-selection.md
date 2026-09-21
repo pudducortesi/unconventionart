@@ -157,3 +157,25 @@ Validated clean bundle imports, production build, 36 automated checks including
 snapshot instance transforms, room filtering and disposal ownership. Actual
 shader rendering and device FPS remain unverified because the available cloud
 browser has no WebGL context. No claim of Unreal-equivalent visual quality.
+
+## realism-effects compatibility correction (supersedes exclusion above)
+
+The pinned 1.1.2 ESM is adapted reproducibly at build time by
+`tools/compat/realism-effects.mjs`. The removed WebGLMultipleRenderTargets API
+is translated to WebGLRenderTarget({count}); old attachment-array access uses
+.textures, preserving modern .texture semantics. Invalid magnification filters
+are replaced with LinearFilter. No engine downgrade or node_modules mutation.
+Original MIT license is distributed beside the generated bundle.
+
+HBAOEffect and its Poisson denoiser are now used by the live rendering pipeline,
+through a Three Pass adapter owning its beauty/depth targets. This avoids stale
+legacy composer depth APIs. Default 'Ombre profonde' selects HBAO; 'Ombre morbide'
+selects N8AO, never both together. SMAA and OutputPass remain shared. Mobile
+HBAO operates at half resolution. Shader failure falls back to N8AO, then to
+standard rendering if necessary. Async noise loading requests bounded redraws.
+
+38 tests pass, including full adapted ESM import, MRT attachment resize, HBAO
+construction/depth binding/denoiser composition and disposal with a renderer
+stub. Actual GPU shader compilation and appearance remain unverified. This
+integration activates HBAO, not SSGI/TRAA; importing those exports is not proof
+that their separate material/temporal pipelines work with current Three.js.
