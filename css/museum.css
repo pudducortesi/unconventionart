@@ -1189,3 +1189,12 @@ dialog dd {
 .museum-footer { z-index:12; bottom:8px; }
 .museum-footer button { min-height:44px; padding:8px 12px; font-size:11px; }
 @media(max-width:700px) { .museum-footer { padding-left:10px;padding-right:10px;bottom:0; } }
+
+.collector-inquiry {display:grid;gap:14px;margin:24px 0;padding-top:20px;border-top:1px solid #cfc9bd}
+.collector-inquiry h4 {font-size:20px;margin:0}
+.collector-inquiry label {display:grid;gap:6px;font-size:13px}
+.collector-inquiry input:not([type=checkbox]),.collector-inquiry textarea {width:100%;box-sizing:border-box;border:1px solid #aaa69c;background:#fff;padding:12px;color:#222;font:inherit;border-radius:8px}
+.collector-inquiry textarea {min-height:110px;resize:vertical}
+.collector-inquiry label:has(input[type=checkbox]),.curator-opt-in {display:block;font-size:13px;line-height:1.5}
+.collector-inquiry input[type=checkbox],.curator-opt-in input {width:22px;height:22px;vertical-align:middle;margin-right:8px}
+.curator-opt-in {margin:16px 0;max-width:650px}

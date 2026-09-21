@@ -8,3 +8,8 @@ build-meta.json
 build-report.json
 
 models/*.glb
+
+.env
+.env.*
+!*.example
+server/storage/
