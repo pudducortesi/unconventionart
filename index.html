@@ -66,6 +66,14 @@
         </button>
       </section>
       <div class="hud" id="hud" hidden>
+        <div id="reticle" class="reticle" aria-hidden="true"><span></span></div>
+        <button id="interact" class="game-interact" aria-label="Interagisci con ciò che inquadri" disabled><kbd>E</kbd><span id="interact-label">Inquadra un’opera</span></button>
+        <section id="tour-panel" class="tour-panel" aria-label="Visita guidata" hidden>
+          <div class="tour-heading"><span id="tour-count"></span><button id="tour-end" aria-label="Termina la visita guidata">×</button></div>
+          <h2 id="tour-title"></h2><p id="tour-description"></p>
+          <div class="tour-actions"><button id="tour-previous" aria-label="Tappa precedente">←</button><button id="tour-pause">Pausa</button><button id="tour-next">Prossima tappa →</button></div>
+          <p id="tour-status" role="status"></p>
+        </section>
         <div class="room-tag">
           <span class="live-dot"></span
           ><span id="room-label">SALA 01 / KAVYAR</span>
@@ -103,8 +111,9 @@
           >
             ←
           </button>
-          <button id="next-work">Vai all’opera <span>↗</span></button>
-          <button id="next-room">Esplora le sale</button>
+          <button id="next-work">Opere <span>↗</span></button>
+          <button id="next-room">Mappa</button>
+          <button id="tour-open" data-open="guided-tours">Visita guidata</button>
         </div>
         <div id="work-panel" class="work-panel" hidden>
           <div>
@@ -126,7 +135,7 @@
           </button>
         </div>
         <p class="movement-hint" id="movement-hint">
-          TRASCINA PER GUARDARE · CLICCA A TERRA PER CAMMINARE · WASD / FRECCE
+          WASD / FRECCE · TRASCINA PER GUARDARE · E INTERAGISCI · ESC FERMA
         </p>
         <div class="touch-controls" aria-label="Comandi touch">
           <div
@@ -139,7 +148,7 @@
             ><span class="joystick-caption">MUOVITI</span>
           </div>
           <div class="look-hint" aria-hidden="true">
-            <span>↔</span>TRASCINA<br />PER GUARDARE
+            <span>⊹</span>SGUARDO<br />Trascina qui
           </div>
         </div>
       </div>
@@ -148,6 +157,13 @@
       </footer>
       <p class="sr-only" id="announcement" aria-live="polite"></p>
     </main>
+    <dialog id="guided-tours">
+      <button class="dialog-close" data-close="guided-tours" aria-label="Chiudi">×</button>
+      <span class="eyebrow">SCEGLI IL TUO PERCORSO</span><h2>Lasciati accompagnare.</h2>
+      <p>Ti accompagniamo tra le tappe. Fermati quanto vuoi: decidi tu quando continuare. Se prendi i comandi, la guida va in pausa.</p>
+      <button id="tour-spaces" class="tour-choice"><strong>Le dieci anime</strong><span>10 sale · architettura, arredi e atmosfere</span></button>
+      <button id="tour-art" class="tour-choice"><strong>Le fotografie</strong><span id="tour-art-count">Le opere attualmente esposte</span></button>
+    </dialog>
     <dialog id="help" aria-labelledby="help-title">
       <button
         class="dialog-close"
@@ -176,6 +192,7 @@
           in alto.
         </dd>
       </dl>
+      <p>Premi <strong>E</strong> per interagire con l’opera al centro del mirino. Da telefono usa il pulsante a destra. Con <strong>Visita guidata</strong> scegli un percorso: la guida va in pausa quando riprendi i comandi.</p>
       <button id="motion-toggle" aria-pressed="true">Movimento fluido</button>
       <button class="dialog-primary" data-close="help">
         Riprendi la visita ↗

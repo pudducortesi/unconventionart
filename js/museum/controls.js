@@ -380,6 +380,9 @@ export function createControls({
       onKeyboardAction("escape");
       return;
     }
+    if (event.code === "KeyE" && !event.repeat) {
+      event.preventDefault(); onKeyboardAction("interact"); return;
+    }
     const action = KEY_ACTIONS.get(event.code);
     if (!action) return;
     event.preventDefault();

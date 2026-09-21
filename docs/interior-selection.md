@@ -88,3 +88,21 @@ Walls use warm écru #F3EEE3. Floor finish tints are terrazzo #FBF7EF,
 stone #F7F2E7 and resin #FAF5EB, multiplied by their existing surface textures.
 These are material inputs, not guaranteed screen colours under scene lighting.
 Ceilings, furniture colours and photographic textures retain their existing finishes.
+
+
+## Exploration interface and guided visits
+
+Compact graphite HUD, gold interaction accents, central contextual reticle and E
+interaction key. Touch keeps left movement stick, right swipe-to-look region,
+right interaction button and a separate bottom navigation bar, with safe-area
+insets. Desktop mouse retains drag-to-look and click-to-walk; hovering over
+interactive artwork changes the cursor. No pointer-lock dependency.
+
+Two text-guided itineraries: all ten spatial identities, or only actual public
+photographs. Navigation uses the existing collision-aware paths and respects
+reduced motion. Visitors explicitly advance each stop, return, pause/resume or
+exit. Manual movement, destination selection, dialogs and backgrounding pause
+the guide; asynchronous artwork focus is invalidated when interrupted.
+No voice narration or invented photographic catalogue. State transitions and
+keyboard focus/repeat handling are covered by tests. End-to-end GPU rendering
+and physical iPhone layout/performance remain unverified.
