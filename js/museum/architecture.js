@@ -1,4 +1,5 @@
 import * as T from "../../vendor/three.module.js";
+import { furnishGallery } from "./furnishings.js";
 import { BUILDING, HALLS, WALLS, FURNITURE } from "./layout.js";
 
 /** Ten connected white halls. Repeated construction is instanced by material,
@@ -93,7 +94,7 @@ export function createArchitecture(scene, renderer, { mobile = false } = {}) {
       box(w * 0.96, 0.5, 0.24, x, 0.71, z + d * 0.4, fabric);
       for (const side of [-1, 1])
         box(0.16, 0.36, d * 0.8, x + side * w * 0.46, 0.61, z, fabric);
-    } else {
+    } else if (piece.kind === "reception") {
       box(w * 0.9, 0.12, d * 0.82, x, 0.06, z, recess);
       box(w, 1.04, d, x, 0.64, z, lacquer);
       box(w + 0.04, 0.06, d + 0.04, x, 1.19, z, stone);
@@ -101,8 +102,10 @@ export function createArchitecture(scene, renderer, { mobile = false } = {}) {
     }
   }
 
+  const features = furnishGallery({ room, own, box, plaster, stone, lacquer, recess, glow });
+
   // Include the real floor so the same raycast list supports tap-to-walk.
-  const occluders = [floor];
+  const occluders = [floor, ...features];
   const transform = new T.Object3D();
   for (const [surface, instances] of batches) {
     const mesh = new T.InstancedMesh(boxGeometry, surface, instances.length);
