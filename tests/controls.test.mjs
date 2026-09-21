@@ -134,7 +134,7 @@ test("short look smoothing preserves the whole gesture without ongoing drift", (
 });
 
 test("analog stick has a quiet center and a bounded diagonal", () => {
-  assert.deepEqual(normalizeStick(2, 1, 40), { x: 0, y: 0 });
+  assert.deepEqual(normalizeStick(1, 1, 40), { x: 0, y: 0 });
   const diagonal = normalizeStick(60, -60, 40);
   assert(Math.abs(Math.hypot(diagonal.x, diagonal.y) - 1) < 1e-12);
   assert(normalizeStick(20, 0, 40).x < normalizeStick(30, 0, 40).x);
@@ -143,6 +143,7 @@ test("analog stick has a quiet center and a bounded diagonal", () => {
 test("the second touch with button -1 can look while the first thumb walks", () => {
   const f = fixture();
   f.fire(f.stick, "pointerdown", { clientX: 60, clientY: 20, pointerId: 1 });
+  f.fire(f.stick, "pointermove", { clientX: 60, clientY: 0, pointerId: 1 });
   f.fire(f.canvas, "pointerdown", { pointerId: 2, isPrimary: false });
   f.fire(f.canvas, "pointermove", { pointerId: 2, clientX: 230, clientY: 410 });
   const input = f.control.sample(1 / 60);
@@ -180,6 +181,7 @@ test("cancelled and lost joystick captures release movement and center the knob"
   for (const ending of ["pointercancel", "lostpointercapture"]) {
     const f = fixture();
     f.fire(f.stick, "pointerdown", { clientX: 60, clientY: 20 });
+    f.fire(f.stick, "pointermove", { clientX: 60, clientY: 0 });
     assert(f.control.sample(1 / 60).forward > 0);
     f.fire(f.stick, ending);
     for (let i = 0; i < 60; i++) f.control.sample(1 / 60);
@@ -193,6 +195,7 @@ test("focus loss, hidden document and a modal gate clear velocity immediately", 
   for (const reason of ["blur", "hidden", "disabled"]) {
     const f = fixture();
     f.fire(f.stick, "pointerdown", { clientX: 60, clientY: 20 });
+    f.fire(f.stick, "pointermove", { clientX: 60, clientY: 0 });
     f.control.sample(1 / 60);
     if (reason === "blur") f.fire(f.win, "blur");
     if (reason === "hidden") {
@@ -238,4 +241,41 @@ test("right mouse button and disposed controls cannot start new input", () => {
   f.control.dispose();
   f.fire(f.stick, "pointerdown", { clientX: 60, clientY: 20 });
   assert.equal(f.control.sample(1 / 60).active, false);
+});
+
+test("touch joystick starts at the thumb without a jump and responds to a short drag", () => {
+  const f = fixture();
+  f.fire(f.stick, "pointerdown", { clientX: 95, clientY: 25 });
+  assert.equal(f.control.sample(1 / 60).forward, 0);
+  assert.equal(f.control.sample(1 / 60).sideways, 0);
+  f.fire(f.stick, "pointermove", { clientX: 95, clientY: 15 });
+  assert(f.control.sample(1 / 60).forward > 0);
+  f.control.dispose();
+});
+
+test("Safari height-only resize preserves a held gesture; rotation releases it", () => {
+  const f = fixture();
+  f.fire(f.stick, "pointerdown", { clientX: 60, clientY: 60 });
+  f.fire(f.stick, "pointermove", { clientX: 60, clientY: 35 });
+  f.canvas.clientHeight = 760;
+  f.fire(f.win, "resize");
+  assert(f.control.sample(1 / 60).forward > 0);
+  f.canvas.clientWidth = 844;
+  f.fire(f.win, "resize");
+  assert.equal(f.control.sample(1 / 60).active, false);
+  f.control.dispose();
+});
+
+test("small touch drags respond, ease out and never become floor taps", () => {
+  const f = fixture();
+  f.fire(f.canvas, "pointerdown");
+  f.fire(f.canvas, "pointermove", { clientX: 204 });
+  const first = f.control.sample(1 / 60);
+  assert(first.lookX > 0);
+  f.fire(f.canvas, "pointerup", { clientX: 204, timeStamp: 160 });
+  assert(f.control.sample(1 / 60).lookX > 0, "bounded follow-through");
+  for (let i = 0; i < 60; i++) f.control.sample(1 / 60);
+  assert.equal(f.control.sample(1 / 60).active, false);
+  assert.equal(f.taps.length, 0);
+  f.control.dispose();
 });
