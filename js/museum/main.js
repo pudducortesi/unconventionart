@@ -1,3 +1,4 @@
+import { createResolutionPolicy } from "./resolution-policy.js";
 import { createGuidedVisit } from "./guided-visit.js";
 import { createEnvironment } from "./environment.js";
 import * as T from "../../vendor/three.module.js";
@@ -56,6 +57,7 @@ let frame = 0,
   qualityFrames = 0;
 let viewport = { width: innerWidth, height: innerHeight };
 let movementPixelRatio = Math.min(devicePixelRatio, mobile ? 1.1 : 1.5);
+const resolutionPolicy = createResolutionPolicy({ wake: invalidate });
 let detailArtwork = null;
 let focusRequest = 0;
 let realistic = true;
@@ -705,11 +707,10 @@ function render(time) {
       lastStream = time;
     }
   }
-  // Recover Retina detail when standing still; keep motion at its cheaper
-  // adaptive resolution rather than permanently leaving the scene blurred.
-  const desiredPixelRatio = moving
-    ? movementPixelRatio
-    : Math.min(devicePixelRatio, 2);
+  // Restore detail only after a settled pause, not between consecutive swipes.
+  const desiredPixelRatio = resolutionPolicy.sample(
+    moving, movementPixelRatio, Math.min(devicePixelRatio, 2),
+  );
   if (Math.abs(renderer.getPixelRatio() - desiredPixelRatio) > 0.01) {
     renderer.setPixelRatio(desiredPixelRatio);
   }
@@ -784,6 +785,7 @@ document.addEventListener("visibilitychange", () => {
   guide.pause();
   stop();
   if (document.hidden) {
+    resolutionPolicy.suspend();
     cancelAnimationFrame(frame);
     frame = 0;
     lastTime = 0;
@@ -791,6 +793,7 @@ document.addEventListener("visibilitychange", () => {
 });
 addEventListener("blur", () => guide.pause());
 addEventListener("pagehide", (event) => {
+  resolutionPolicy.suspend();
   guide.pause();
   stop();
   if (event.persisted) return;

@@ -16,7 +16,8 @@ export function createRealisticRenderer(renderer, scene, camera, mobile) {
   const aa = new SMAAPass();
   const output = new OutputPass();
   composer.addPass(ao); composer.addPass(aa); composer.addPass(output);
-  let width=0, height=0, ratio=0;
+  let width=0, height=0, ratio=renderer.getPixelRatio();
+  const size = new T.Vector2();
   return {
     setAdvanced(enabled) {
       if (enabled && !hbao) { hbao = new GalleryHBAOPass(scene,camera,mobile); composer.insertPass(hbao,1); }
@@ -25,11 +26,16 @@ export function createRealisticRenderer(renderer, scene, camera, mobile) {
     },
     needsFrame() { return !!(hbao?.enabled && hbao.needsFrame()); },
     render(delta) {
-      const size = renderer.getSize(new T.Vector2());
+      renderer.getSize(size);
       const dpr = renderer.getPixelRatio();
-      if (size.x !== width || size.y !== height || dpr !== ratio) {
-        width=size.x; height=size.y; ratio=dpr;
-        composer.setPixelRatio(dpr); composer.setSize(width,height);
+      if (dpr !== ratio) {
+        ratio=dpr;
+        // setPixelRatio already resizes every pass. Do not repeat that work.
+        composer.setPixelRatio(dpr);
+      }
+      if (size.x !== width || size.y !== height) {
+        width=size.x; height=size.y;
+        composer.setSize(width,height);
       }
       composer.render(delta);
     },
