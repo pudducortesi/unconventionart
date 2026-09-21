@@ -1037,20 +1037,10 @@ dialog dd {
   }
 }
 
-/* Use the original white lettering as a luminance mask: black ink, transparent ground. */
-.wordmark { position: relative; flex-shrink: 0; line-height: 0; }
-.wordmark::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: #161616;
-  mask-image: var(--brand-mask);
-  mask-mode: luminance;
-  mask-size: 100% 100%;
-  mask-repeat: no-repeat;
-  pointer-events: none;
-}
-.brand-image { display: block; width: 180px; height: auto; opacity: 0; }
+/* Invert the original lettering, then blend the white ground into the scene.
+   Keep the actual image visible; no external mask or generated pseudo-element. */
+.wordmark { position: relative; flex-shrink: 0; line-height: 0; mix-blend-mode: multiply; }
+.brand-image { display: block; width: 180px; height: auto; filter: invert(1); }
 @media (max-width: 700px) {
   .brand-image { width: clamp(112px, 33vw, 145px); }
 }
