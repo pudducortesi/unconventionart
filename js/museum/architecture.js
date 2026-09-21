@@ -317,6 +317,43 @@ export async function createArtwork(slot, renderer, { mobile = false } = {}) {
   );
   const focus = group.position.clone().addScaledVector(normal, 4.8);
   focus.y = 1.7;
+  let detailTexture = null,
+    detailRequest = null,
+    detailWanted = false,
+    disposed = false;
+  // Only the photograph being observed gets an additional full-detail texture.
+  // Distant works retain their small texture, preserving the mobile GPU budget.
+  function setDetail(enabled) {
+    detailWanted = enabled;
+    if (!enabled || disposed) {
+      photograph.material.map = texture;
+      if (detailTexture) {
+        resources.delete(detailTexture);
+        detailTexture.dispose();
+        detailTexture = null;
+      }
+      return Promise.resolve();
+    }
+    if (detailTexture) return Promise.resolve();
+    if (detailRequest) return detailRequest;
+    detailRequest = new T.TextureLoader()
+      .loadAsync(slot.work.image)
+      .then((full) => {
+        if (disposed || !detailWanted) {
+          full.dispose();
+          return;
+        }
+        full.colorSpace = T.SRGBColorSpace;
+        full.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+        detailTexture = full;
+        resources.add(full);
+        photograph.material.map = full;
+      })
+      .finally(() => {
+        detailRequest = null;
+      });
+    return detailRequest;
+  }
   return {
     group,
     photograph,
@@ -327,7 +364,10 @@ export async function createArtwork(slot, renderer, { mobile = false } = {}) {
     slot,
     focus,
     target: group.position.clone(),
+    setDetail,
     dispose() {
+      disposed = true;
+      detailWanted = false;
       for (const resource of resources) resource.dispose();
     },
   };

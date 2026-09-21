@@ -49,6 +49,8 @@ let frame = 0,
   frameAverage = 16.7,
   qualityFrames = 0;
 let viewport = { width: innerWidth, height: innerHeight };
+let movementPixelRatio = Math.min(devicePixelRatio, mobile ? 1.1 : 1.5);
+let detailArtwork = null;
 const player = { x: INITIAL.x, z: INITIAL.z };
 const initialLook = orientation(INITIAL, INITIAL_TARGET);
 let yaw = initialLook.yaw,
@@ -155,6 +157,31 @@ function mapPoint(position) {
   };
 }
 function updateHud() {
+  let nearest = null,
+    nearestDistance = 12;
+  for (const [index, art] of stream.values()) {
+    const distance = Math.hypot(player.x - art.slot.x, player.z - art.slot.z);
+    if (index === selected) {
+      nearest = art;
+      break;
+    }
+    if (distance < nearestDistance) {
+      nearest = art;
+      nearestDistance = distance;
+    }
+  }
+  if (nearest !== detailArtwork) {
+    detailArtwork?.setDetail(false);
+    detailArtwork = nearest;
+    nearest
+      ?.setDetail(true)
+      .then(invalidate)
+      .catch(() => {
+        announce(
+          "Il dettaglio della foto non è disponibile. Apri la fotografia intera dal cartellino.",
+        );
+      });
+  }
   const point = mapPoint(player);
   $("#map-player").setAttribute(
     "transform",
@@ -548,10 +575,18 @@ function render(time) {
       lastStream = time;
     }
   }
+  // Recover Retina detail when standing still; keep motion at its cheaper
+  // adaptive resolution rather than permanently leaving the scene blurred.
+  const desiredPixelRatio = moving
+    ? movementPixelRatio
+    : Math.min(devicePixelRatio, 2);
+  if (Math.abs(renderer.getPixelRatio() - desiredPixelRatio) > 0.01) {
+    renderer.setPixelRatio(desiredPixelRatio);
+  }
   setView();
   renderer.render(scene, camera);
   positionPlaques(time);
-  if (time - lastHud > 80) {
+  if (!moving || time - lastHud > 80) {
     updateHud();
     lastHud = time;
   }
@@ -561,10 +596,9 @@ function render(time) {
     if (
       ++qualityFrames > 150 &&
       frameAverage > 27 &&
-      renderer.getPixelRatio() > 0.8
+      movementPixelRatio > 0.8
     ) {
-      renderer.setPixelRatio(Math.max(0.8, renderer.getPixelRatio() - 0.1));
-      renderer.setSize(viewport.width, viewport.height, false);
+      movementPixelRatio = Math.max(0.8, movementPixelRatio - 0.1);
       qualityFrames = 0;
     }
   }
@@ -627,7 +661,7 @@ try {
     alpha: false,
     powerPreference: "high-performance",
   });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.1 : 1.5));
+  renderer.setPixelRatio(movementPixelRatio);
   renderer.outputColorSpace = T.SRGBColorSpace;
   renderer.toneMapping = T.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;

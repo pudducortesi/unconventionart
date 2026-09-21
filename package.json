@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "node tools/vendor.mjs && node tools/serve.mjs",
     "build": "node tools/build.mjs",
-    "check": "node tools/check.mjs && node --test tests/*.test.mjs"
+    "check": "node tools/vendor.mjs && node tools/check.mjs && node --test tests/*.test.mjs"
   },
   "dependencies": {
     "three": "0.186.0"
