@@ -1107,3 +1107,17 @@ dialog dd {
 .artwork-actions a, .artwork-actions button { display:inline-flex; align-items:center; min-height:44px; font-size:12px; }
 #artwork-load-status { position:absolute; left:20px; right:20px; top:16px; text-align:center; font-size:12px; pointer-events:none; }
 @media(max-width:700px) { .artwork-actions { flex-direction:column; gap:0; align-items:flex-end; } .artwork-caption { gap:10px; } }
+
+/* Personal curation stays in the DOM: no extra scene meshes or animation loop. */
+.selection-toolbar { display:flex; flex-wrap:wrap; gap:8px; margin:20px 0 12px; }
+.selection-toolbar button { min-height:44px; padding:10px 16px; border:1px solid #7776; border-radius:24px; }
+.selection-toolbar button[aria-pressed="true"] { background:#303531; color:#fff; }
+.selection-toolbar button:disabled { opacity:.45; cursor:default; }
+#selection-status { font-size:13px; line-height:1.6; }
+#selection-link { width:100%; padding:12px; margin-bottom:16px; border:1px solid #999; font:inherit; }
+#artwork-save[aria-pressed="true"] { color:#b99363; }
+@media(max-width:700px) {
+  #artwork { padding-bottom:220px; }
+  .artwork-caption { bottom:max(20px, env(safe-area-inset-bottom)); flex-wrap:wrap; }
+  .artwork-actions { flex-direction:row; justify-content:flex-start; gap:4px 16px; }
+}
