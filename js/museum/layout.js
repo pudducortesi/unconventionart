@@ -1,3 +1,4 @@
+import { ROOM_PROFILES } from "./room-profiles.js";
 // One continuous museum: ten exhibition halls linked by a central promenade.
 // Architecture, pathfinding and the plan all use these same dimensions.
 export const CAPACITY = 200;
@@ -49,7 +50,8 @@ for (let row = 0; row < 5; row++) {
     const hall = {
       id: `hall-${index + 1}`,
       index,
-      title: `Sala ${String(index + 1).padStart(2, "0")}`,
+      title: `Sala ${String(index + 1).padStart(2, "0")} · ${ROOM_PROFILES[index].name}`,
+      profile: ROOM_PROFILES[index],
       side,
       center: { x, z },
       bounds: { minX, maxX, minZ: z - 13, maxZ: z + 13 },
@@ -135,8 +137,8 @@ for (const hall of HALLS) {
     rectangle(x + dx, z + dz, width, depth, { kind, hallIndex, ...extra }));
   const cinema = [3, 5].includes(hallIndex);
   const reading = [1, 7].includes(hallIndex);
-  RUGS.push(rectangle(x, z - (hallIndex === 0 ? 6 : 0), 7.6, hallIndex === 0 ? 5.3 : 4.8));
-  RUGS.push(rectangle(x, z + 5.2, 8.2, 5.6));
+  RUGS.push(rectangle(x, z - (hallIndex === 0 ? 6 : 0), 7.6, hallIndex === 0 ? 5.3 : 4.8, { hallIndex, shape: hall.profile.shape }));
+  RUGS.push(rectangle(x, z + 5.2, 8.2, 5.6, { hallIndex, shape: hall.profile.shape }));
   if (reading) {
     add(0, 5, 3.6, 1.3, 'reading');
     for (const dx of [-0.9, 0.9]) {
@@ -144,11 +146,17 @@ for (const hall of HALLS) {
       add(dx, 3.1, 1.2, 1.2, 'lounge', { model: 'cantilever', rotation: Math.PI });
     }
   } else {
-    add(0, 6.3, 3.4, 1.3, 'lounge', { model: 'sofa' });
+    add(0, 6.3, 3.4, 1.3, 'lounge', { model: hall.profile.seat });
     if (!cinema) {
       add(0, 4.3, 1.36, 0.48, 'lowtable');
-      add(-3.1, 5.2, 1.1, 1.1, 'ottoman');
-      add(3.1, 5.2, 1.1, 1.1, 'ottoman');
+      if ([0, 2, 6, 8].includes(hallIndex)) {
+        const model = { 0: 'sling', 2: 'geometric', 6: 'cantilever', 8: 'bibendum' }[hallIndex];
+        add(-3.1, 5.2, 1.6, 1.6, 'lounge', { model, rotation: -Math.PI / 2 });
+        add(3.1, 5.2, 1.6, 1.6, 'lounge', { model, rotation: Math.PI / 2 });
+      } else {
+        add(-3.1, 5.2, 1.1, 1.1, 'ottoman');
+        add(3.1, 5.2, 1.1, 1.1, 'ottoman');
+      }
     } else {
       add(0, 0.1, 1.36, 0.48, 'lowtable');
     }

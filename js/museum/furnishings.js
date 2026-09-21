@@ -1,4 +1,5 @@
 import * as T from "../../vendor/three.module.js";
+import { ROOM_PROFILES } from "./room-profiles.js";
 import { FURNITURE, HALLS, BUILDING, RUGS } from "./layout.js";
 
 // Static exhibition fittings: shared box batches and a handful of text panels.
@@ -68,35 +69,55 @@ export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess
   };
   // Coloured woven rugs establish rooms within each large exhibition hall.
   // They are walkable floor finishes; their height stays below contact shadows.
-  const rugColors = [0xb87358, 0x47717a, 0x949774, 0xc3a165];
-  const weaveColors = [0xd8997b, 0x70959b, 0xb3b68e, 0xe0c18c];
+  const rugColors = ROOM_PROFILES.map(profile => profile.rug);
+  const weaveColors = ROOM_PROFILES.map(profile => profile.weave);
   const rugs = rugColors.map(color => own(new T.MeshStandardMaterial({ color, roughness: 1 })));
   const weaves = weaveColors.map(color => own(new T.MeshStandardMaterial({ color, roughness: 1 })));
   for (const surface of [...rugs, ...weaves]) surface.userData.walkable = true;
-  for (const [index, island] of RUGS.entries()) {
-    const rug = rugs[Math.floor(index / 2) % rugs.length];
-    const weave = weaves[Math.floor(index / 2) % weaves.length];
+  const ovalGeometry = own(new T.CircleGeometry(1, 64));
+  for (const island of RUGS) {
+    const rug = rugs[island.hallIndex ?? 0];
+    const weave = weaves[island.hallIndex ?? 0];
+    if (island.shape === 'oval') {
+      const mat = new T.Mesh(ovalGeometry, rug);
+      mat.position.set(island.x, 0.001, island.z);
+      mat.rotation.x = -Math.PI / 2;
+      mat.scale.set(island.width / 2, island.depth / 2, 1);
+      mat.userData.walkable = true;
+      room.add(mat); targets.push(mat);
+      continue;
+    }
     box(island.width, 0.003, island.depth, island.x, 0, island.z, rug);
     for (let dz = -island.depth / 2 + 0.12; dz < island.depth / 2; dz += 0.18)
       box(island.width - 0.16, 0.0008, 0.018, island.x, 0.002, island.z + dz, weave);
     for (const edge of [-1, 1])
       box(0.035, 0.001, island.depth - 0.12, island.x + edge * (island.width / 2 - 0.08), 0.002, island.z, weave);
   }
-  const accents = [0x245b68, 0x994b36, 0x626b45, 0xb68a37].map(color =>
+  const accents = ROOM_PROFILES.map(profile => profile.color).map(color =>
     own(new T.MeshStandardMaterial({ color, roughness: 0.38 })));
   const dark = own(new T.MeshStandardMaterial({ color: 0x262626, roughness: 0.65 }));
   const ceramic = own(new T.MeshStandardMaterial({ color: 0xf7f6f2, roughness: 0.28 }));
   const dome = own(new T.SphereGeometry(0.46, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2));
-  const lampDome = (x, y, z) => {
-    const shade = new T.Mesh(dome, accents[3]);
+  const lampDome = (x, y, z, accent) => {
+    const shade = new T.Mesh(dome, accent);
     shade.position.set(x, y, z); room.add(shade); targets.push(shade);
     cylinder(0.42, 0.018, x, y, z, glow);
   };
   for (const hall of HALLS) {
     const { x, z } = hall.center;
-    // Suspensions belong to the lounge, never to the artwork viewing band.
-    cylinder(0.012, BUILDING.height - 3.2, x, (BUILDING.height + 3.2) / 2, z + 4.8, chrome);
-    lampDome(x, 3.2, z + 4.8);
+    const accent = accents[hall.index];
+    if (hall.profile.light === 'linear') {
+      box(3.4, 0.055, 0.12, x, 3.2, z + 4.8, accent);
+      box(3.25, 0.015, 0.09, x, 3.16, z + 4.8, glow);
+      for (const dx of [-1.3, 1.3]) cylinder(0.009, BUILDING.height - 3.2, x + dx, (BUILDING.height + 3.2) / 2, z + 4.8, chrome);
+    } else {
+      const positions = hall.profile.light === 'cluster' ? [[-0.8, 3.5, 4.6], [0.3, 3.1, 5.2], [1, 3.8, 4.4]] :
+        hall.profile.light === 'pair' ? [[-1.1, 3.4, 4.8], [1.1, 3.4, 4.8]] : [[0, 3.0, 4.8]];
+      for (const [dx, height, dz] of positions) {
+        cylinder(0.012, BUILDING.height - height, x + dx, (BUILDING.height + height) / 2, z + dz, chrome);
+        lampDome(x + dx, height, z + dz, accent);
+      }
+    }
   }
   for (const piece of FURNITURE) {
     const { x, z, width: w, depth: d } = piece;

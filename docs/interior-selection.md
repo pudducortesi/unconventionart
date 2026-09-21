@@ -37,3 +37,7 @@ The cloud browser cannot render WebGL. Visual quality and mobile frame rate are 
 ## Colour update
 
 Architecture remains white. New sofas, rugs, ottomans and sideboards use coordinated terracotta, petrol blue, olive and ochre; pendant shades use mustard. Reference furniture retains its established colours. These are project finishes, not claims about manufacturer availability.
+
+## Room identities
+
+The current ten spatial profiles are defined in js/museum/room-profiles.js: Soglia, Atelier, Contrasto, Movimento, Corpo, Notturno, Materia, Archivio, Intimo, Orizzonte. Each controls its palette, rug geometry and pendant arrangement. Secondary seating is selected per room; facing chairs replace repeated ottomans in four rooms. Names and spatial descriptions appear in the floor plan. These are proposed spatial identities, not claims about photographic collections already installed. Architecture and shared gallery lighting remain white; Notturno refers to the upholstery palette, not a darkened room.
