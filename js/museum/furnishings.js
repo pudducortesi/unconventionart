@@ -64,6 +64,8 @@ export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess
     const mesh = new T.Mesh(round, material);
     mesh.scale.set(radius, height, radius);
     mesh.position.set(x, y, z);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
     room.add(mesh);
     targets.push(mesh);
   };
@@ -84,6 +86,7 @@ export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess
       mat.rotation.x = -Math.PI / 2;
       mat.scale.set(island.width / 2, island.depth / 2, 1);
       mat.userData.walkable = true;
+      mat.receiveShadow = true;
       room.add(mat); targets.push(mat);
       continue;
     }
