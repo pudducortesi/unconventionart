@@ -125,3 +125,35 @@ area; their positions follow its actual fixture arrangement and they switch off
 in the promenade. This is local illumination, not global illumination or ray tracing.
 Construction, pool size, corridor deactivation and cleanup are tested. Physical
 iPhone frame rate and WebGL visual output remain unverified in this environment.
+
+## Installed rendering add-ons
+
+Pinned npm dependencies: n8ao 2.0.1, postprocessing 6.39.5,
+realism-effects 1.1.2, three-gpu-pathtracer 0.0.24 and its peer dependencies.
+Browser bundles share the existing Three.js 0.186 module; no duplicate engine.
+
+Default visit now renders through N8AO, SMAA and OutputPass. AO radius 0.6m,
+intensity 1.7, medium desktop / performance half-resolution mobile. A help-menu
+switch compares standard and realistic rendering. Photographs and their labels
+are excluded from AO; the full photograph viewer retains its original image.
+The output pass applies the scene's ACES tone mapping to the composed 3D view.
+Initialization/render exceptions return to standard rendering with visible status.
+
+Help also offers a frozen high-quality view. It builds a separate snapshot of
+nearby room geometry, expands instanced furniture correctly and traces up to 32
+samples at reduced resolution. It is opt-in, blocks movement until exited, owns
+its copied materials/geometries, and restores normal rendering when resized.
+No HDR environment is passed as a CubeUV PMREM to the path tracer: the snapshot
+uses actual emissive surfaces and copied supported lights. This mode may be
+slower/noisier on phones; it is not the default navigation renderer.
+
+realism-effects is installed but intentionally not imported by the live site:
+its published ESM requests WebGLMultipleRenderTargets, removed from Three.js.
+The repository peer declaration and published npm metadata differ; successful
+npm installation alone does not establish runtime compatibility. SSGI/TRAA from
+that package are NOT active. Avoid downgrading the working engine to enable it.
+
+Validated clean bundle imports, production build, 36 automated checks including
+snapshot instance transforms, room filtering and disposal ownership. Actual
+shader rendering and device FPS remain unverified because the available cloud
+browser has no WebGL context. No claim of Unreal-equivalent visual quality.

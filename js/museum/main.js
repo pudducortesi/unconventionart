@@ -36,6 +36,7 @@ let renderer,
   camera,
   architecture,
   environment,
+  effects,
   controls,
   stream,
   catalogue,
@@ -55,6 +56,8 @@ let viewport = { width: innerWidth, height: innerHeight };
 let movementPixelRatio = Math.min(devicePixelRatio, mobile ? 1.1 : 1.5);
 let detailArtwork = null;
 let focusRequest = 0;
+let realistic = true;
+let photoRender = null, photoBusy = false, photoToken = 0;
 const player = { x: INITIAL.x, z: INITIAL.z };
 const initialLook = orientation(INITIAL, INITIAL_TARGET);
 let yaw = initialLook.yaw,
@@ -109,6 +112,41 @@ $("#tour-pause").addEventListener("click", () => { if (guide.state().paused) gui
 $("#tour-end").addEventListener("click", () => { stop(); guide.end(); controls?.focus(); });
 for (const id of ["entrance", "next-work", "previous-work"]) $("#" + id).addEventListener("click", () => guide.pause(), { capture: true });
 
+$("#graphics-toggle").addEventListener("click", () => {
+  realistic = !realistic;
+  $("#graphics-toggle").textContent = realistic ? "Grafica: realistica" : "Grafica: standard";
+  $("#graphics-toggle").setAttribute("aria-pressed", String(realistic));
+  $("#graphics-status").textContent = realistic ? "Ombre di contatto e antialiasing attivi." : "Effetti disattivati per confrontare la resa.";
+  invalidate();
+});
+function leavePhotoRender() {
+  photoToken++; photoBusy = false;
+  photoRender?.dispose(); photoRender = null;
+  $("#photo-render-panel").hidden = true;
+  renderer?.setRenderTarget(null);
+  controls?.focus(); invalidate();
+}
+$("#photo-render-exit").addEventListener("click", leavePhotoRender);
+$("#photo-render-start").addEventListener("click", async () => {
+  if (!entered || photoBusy || photoRender) return;
+  guide.pause(); stop();
+  $("#help").close();
+  photoBusy = true; const token = ++photoToken;
+  $("#photo-render-panel").hidden = false;
+  $("#photo-render-status").textContent = "Preparazione della vista…";
+  try {
+    const { createPhotoRender } = await import('../../vendor/gallery-photo-render.js');
+    if (token !== photoToken || disposed) return;
+    const hall = HALLS[locateHall(player)];
+    if (!hall) throw new Error('Scegli prima una sala dalla mappa.');
+    photoRender = createPhotoRender(renderer,scene,camera,hall.bounds,mobile);
+    photoBusy = false; invalidate();
+  } catch (error) {
+    photoBusy = false;
+    $("#photo-render-status").textContent = `Vista non disponibile. ${error.message || ''}`;
+    console.warn('Photo render unavailable:', error);
+  }
+});
 function invalidate() {
   if (renderer && camera && !frame && !disposed && !document.hidden) {
     if (!lastTime) lastTime = performance.now();
@@ -357,6 +395,8 @@ function buildCollection() {
   });
 }
 function mountArtwork(art, index) {
+  art.photograph.userData.cannotReceiveAO = true;
+  art.label.userData.cannotReceiveAO = true;
   if (disposed) {
     art.dispose();
     return;
@@ -548,7 +588,7 @@ function updateAim() {
 }
 $("#interact").addEventListener("click", () => { if (!$("#interact").disabled) tap({ clientX: viewport.width / 2, clientY: viewport.height / 2 }); });
 function tap(event) {
-  if (!entered || modalOpen) return;
+  if (!entered || modalOpen || photoBusy || photoRender) return;
   guide.pause();
   const hit = pick(event.clientX, event.clientY);
   if (!hit) return;
@@ -573,6 +613,19 @@ function render(time) {
   frame = 0;
   if (disposed || document.hidden) {
     lastTime = 0;
+    return;
+  }
+  if (photoRender) {
+    const previousError = renderer.debug.onShaderError;
+    try {
+      renderer.debug.onShaderError = () => { throw new Error('Shader non supportato'); };
+      const samples = photoRender.render();
+      $("#photo-render-status").textContent = samples < 32 ? `Affinamento della luce · ${Math.floor(samples)} / 32` : 'Vista pronta · torna alla visita per muoverti';
+      if (samples < 32) invalidate();
+    } catch (error) {
+      leavePhotoRender();
+      $("#graphics-status").textContent = "Vista fotografica non supportata: visita normale ripristinata.";
+    } finally { renderer.debug.onShaderError = previousError; }
     return;
   }
   const rawDelta = Math.max(1, time - lastTime);
@@ -645,7 +698,20 @@ function render(time) {
   }
   setView();
   architecture.updateLighting(player);
-  renderer.render(scene, camera);
+  if (effects && realistic) {
+    const previousError = renderer.debug.onShaderError;
+    try {
+      renderer.debug.onShaderError = () => { throw new Error('Shader grafico non supportato'); };
+      effects.render(delta);
+    } catch (error) {
+      realistic = false;
+      $("#graphics-toggle").textContent = "Grafica: standard";
+      $("#graphics-toggle").setAttribute("aria-pressed", "false");
+      $("#graphics-status").textContent = "Effetti non disponibili su questo dispositivo. Visita standard attiva.";
+      console.warn('Postprocessing unavailable:', error);
+      renderer.setRenderTarget(null); renderer.render(scene, camera);
+    } finally { renderer.debug.onShaderError = previousError; }
+  } else renderer.render(scene, camera);
   positionPlaques(time);
   if (!moving || time - lastHud > 80) {
     updateHud();
@@ -677,6 +743,7 @@ function turnToward(target, delta) {
 }
 function resize() {
   if (!renderer || !camera) return;
+  if (photoRender || photoBusy) leavePhotoRender();
   const bounds = root.getBoundingClientRect();
   viewport = { width: bounds.width, height: bounds.height };
   camera.aspect = bounds.width / bounds.height;
@@ -707,6 +774,8 @@ addEventListener("pagehide", (event) => {
   stream?.dispose();
   architecture?.dispose();
   environment?.dispose();
+  photoRender?.dispose();
+  effects?.dispose();
   renderer?.dispose();
 });
 addEventListener("pageshow", (event) => {
@@ -758,6 +827,18 @@ try {
     onError: () =>
       announce("Una fotografia non è disponibile. La visita può continuare."),
   });
+  try {
+    const { createRealisticRenderer } = await import('../../vendor/gallery-effects.js');
+    effects = createRealisticRenderer(renderer, scene, camera, mobile);
+    $("#graphics-toggle").disabled = false;
+    $("#graphics-status").textContent = "Ombre di contatto e bordi più morbidi attivi.";
+  } catch (error) {
+    realistic = false;
+    $("#graphics-toggle").textContent = "Grafica: standard";
+    $("#graphics-toggle").setAttribute("aria-pressed", "false");
+    $("#graphics-status").textContent = "Effetti non disponibili. Visita standard attiva.";
+    console.warn('Effects initialization unavailable:', error);
+  }
   const canvas = renderer.domElement;
   let hoverTime = 0;
   canvas.addEventListener("pointermove", event => {
@@ -777,7 +858,7 @@ try {
     canvas,
     joystickElement: $("#joystick"),
     knobElement: $("#joystick-knob"),
-    isEnabled: () => entered && !modalOpen && !disposed,
+    isEnabled: () => entered && !modalOpen && !disposed && !photoBusy && !photoRender && $("#photo-render-panel").hidden,
     onTap: tap,
     onActivity: (event) => {
       if (event.kind === "move" || event.kind === "look") {

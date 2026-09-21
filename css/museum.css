@@ -1097,3 +1097,7 @@ dialog dd {
   .joystick { bottom: calc(env(safe-area-inset-bottom) + 24px); }
   .guided .tour-panel { left: 150px; width: min(310px, calc(100% - 315px)); }
 }
+
+.photo-render-panel { position: fixed; inset: 0; z-index: 20; pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 20px 20px calc(25px + env(safe-area-inset-bottom)); background: transparent; }
+.photo-render-panel p, .photo-render-panel button { background: #242827ed; color: #f6f1e6; border-radius: 12px; padding: 14px 20px; font-size: 13px; }
+.photo-render-panel button { border: 1px solid #dbbd82; min-height: 48px; }
