@@ -5,7 +5,7 @@ import { BUILDING, HALLS, WALLS, FURNITURE } from "./layout.js";
 
 /** Ten connected white halls. Repeated construction is instanced by material,
  * so the size of the building does not multiply its lighting or draw calls. */
-export function createArchitecture(scene, renderer, { mobile = false, onReady = () => {} } = {}) {
+export function createArchitecture(scene, renderer, { mobile = false, onReady = () => {}, occupiedSlots = [] } = {}) {
   const room = new T.Group();
   room.name = "white-museum-200";
   scene.add(room);
@@ -87,6 +87,21 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     box(0.008, 0.002, 139.5, x, -0.002, -60, joint);
   for (let z = -128; z < 10; z += 4)
     box(53.5, 0.002, 0.008, 0, -0.001, z, joint);
+
+  // Empty hanging positions: delicate corner marks, never imitation artworks.
+  const occupied = new Set(occupiedSlots.map(slot => slot.id));
+  for (const slot of HALLS.flatMap(hall => hall.slots)) {
+    if (occupied.has(slot.id)) continue;
+    const nx = Math.sin(slot.rotation), nz = Math.cos(slot.rotation);
+    const rx = Math.cos(slot.rotation), rz = -Math.sin(slot.rotation);
+    for (const side of [-1, 1]) for (const top of [-1, 1]) {
+      const x = slot.x + nx * 0.012 + rx * side * 0.83;
+      const z = slot.z + nz * 0.012 + rz * side * 0.83;
+      box(0.012, 0.15, 0.012, x, 2.25 + top * 1.12, z, recess);
+      box(Math.abs(rx) * 0.15 + 0.012, 0.012, Math.abs(rz) * 0.15 + 0.012,
+        x - rx * side * 0.07, 2.25 + top * 1.19, z - rz * side * 0.07, recess);
+    }
+  }
 
   // Contemporary white furniture, sharing the exact footprint used by physics.
   for (const piece of FURNITURE) {
