@@ -9,6 +9,7 @@ export function createDesignSeating(room, own) {
   const palette = {
     brown: surface(0x49332b), cognac: surface(0xb96d36),
     terracotta: surface(0xa3482d), black: surface(0x202425),
+    petrol: surface(0x245b68), olive: surface(0x69704a), ochre: surface(0xb68a37),
     ivory: surface(0xf1ede3), red: surface(0xb82e2e),
     blue: surface(0x183d93, 0.32), vermilion: surface(0xcc1737, 0.32),
     yellow: surface(0xf3d51b, 0.32), wood: surface(0x262322, 0.65),
@@ -153,7 +154,7 @@ export function createDesignSeating(room, own) {
       add(cylinder,leather,-0.84,0.66,0,0.14,0.85,0.14,Math.PI/2);
     },
     sofa() {
-      leather = palette.ivory;
+      leather = [palette.terracotta, palette.petrol, palette.olive, palette.ochre][(origin.hallIndex || 0) % 4];
       box(0, 0.21, 0, 3.06, 0.09, 0.96, palette.chrome);
       legs(2.86, 0.78, 0.2);
       pad(0, 0.35, 0, 3.05, 0.22, 1.02);

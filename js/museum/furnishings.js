@@ -66,24 +66,29 @@ export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess
     room.add(mesh);
     targets.push(mesh);
   };
-  // White woven rugs establish rooms within each large exhibition hall.
+  // Coloured woven rugs establish rooms within each large exhibition hall.
   // They are walkable floor finishes; their height stays below contact shadows.
-  const rug = own(new T.MeshStandardMaterial({ color: 0xecebe8, roughness: 1 }));
-  const weave = own(new T.MeshStandardMaterial({ color: 0xf8f7f4, roughness: 1 }));
-  rug.userData.walkable = true;
-  weave.userData.walkable = true;
-  for (const island of RUGS) {
+  const rugColors = [0xb87358, 0x47717a, 0x949774, 0xc3a165];
+  const weaveColors = [0xd8997b, 0x70959b, 0xb3b68e, 0xe0c18c];
+  const rugs = rugColors.map(color => own(new T.MeshStandardMaterial({ color, roughness: 1 })));
+  const weaves = weaveColors.map(color => own(new T.MeshStandardMaterial({ color, roughness: 1 })));
+  for (const surface of [...rugs, ...weaves]) surface.userData.walkable = true;
+  for (const [index, island] of RUGS.entries()) {
+    const rug = rugs[Math.floor(index / 2) % rugs.length];
+    const weave = weaves[Math.floor(index / 2) % weaves.length];
     box(island.width, 0.003, island.depth, island.x, 0, island.z, rug);
     for (let dz = -island.depth / 2 + 0.12; dz < island.depth / 2; dz += 0.18)
       box(island.width - 0.16, 0.0008, 0.018, island.x, 0.002, island.z + dz, weave);
     for (const edge of [-1, 1])
       box(0.035, 0.001, island.depth - 0.12, island.x + edge * (island.width / 2 - 0.08), 0.002, island.z, weave);
   }
+  const accents = [0x245b68, 0x994b36, 0x626b45, 0xb68a37].map(color =>
+    own(new T.MeshStandardMaterial({ color, roughness: 0.38 })));
   const dark = own(new T.MeshStandardMaterial({ color: 0x262626, roughness: 0.65 }));
   const ceramic = own(new T.MeshStandardMaterial({ color: 0xf7f6f2, roughness: 0.28 }));
   const dome = own(new T.SphereGeometry(0.46, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2));
   const lampDome = (x, y, z) => {
-    const shade = new T.Mesh(dome, ceramic);
+    const shade = new T.Mesh(dome, accents[3]);
     shade.position.set(x, y, z); room.add(shade); targets.push(shade);
     cylinder(0.42, 0.018, x, y, z, glow);
   };
@@ -95,6 +100,7 @@ export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess
   }
   for (const piece of FURNITURE) {
     const { x, z, width: w, depth: d } = piece;
+    const accent = accents[(piece.hallIndex ?? 0) % accents.length];
     if (piece.kind === 'temu') {
       // Internoitaliano Temù reference: three turned elements, 35 x 35 x 68cm.
       for (let i = 0; i < 3; i++) {
@@ -111,7 +117,7 @@ export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess
     }
     if (piece.kind === 'console') {
       box(w - 0.18, 0.12, d - 0.12, x, 0.06, z, recess);
-      box(w, 0.65, d, x, 0.46, z, lacquer);
+      box(w, 0.65, d, x, 0.46, z, accent);
       box(w + 0.025, 0.045, d + 0.025, x, 0.81, z, stone);
       for (const dx of [-w / 6, w / 6]) {
         box(0.009, 0.60, 0.007, x + dx, 0.47, z - d / 2 - 0.005, recess);
@@ -167,7 +173,7 @@ export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess
       base.position.set(x, 0.065, z);
       room.add(base);
       targets.push(base);
-      const seat = new T.Mesh(own(new T.CylinderGeometry(w * 0.47, w * 0.5, 0.40, 48)), stone);
+      const seat = new T.Mesh(own(new T.CylinderGeometry(w * 0.47, w * 0.5, 0.40, 48)), accent);
       seat.position.set(x, 0.32, z);
       room.add(seat);
       targets.push(seat);
