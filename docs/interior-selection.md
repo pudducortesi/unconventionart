@@ -204,3 +204,16 @@ Procedural floor/material generation also avoids temporary arrays per texel,
 keeping the same pixel values while reducing allocation during scene setup.
 References: https://esbuild.github.io/api/#splitting and
 https://vercel.com/docs/caching/cache-control-headers .
+
+
+## Mobile screenshot: sketch-like shading correction
+
+User screenshot shows grainy black bands on beam/wall intersections, consistent
+with excessive low-sample half-resolution HBAO. Default is now soft N8AO on all
+devices: 0.22m radius, 0.65 intensity, full-resolution depth/contact evaluation
+and Low (mobile) / Medium (desktop) quality. HBAO remains selectable, at full
+resolution with more samples and denoising, smaller radius, and a final 22%
+blend limit so even fully occluded pixels cannot become black outlines.
+Architecture, models, colours, photographs and path tracing are unchanged.
+This is a code correction based on the screenshot; on-device visual confirmation
+is still pending, not claimed by passing unit tests.

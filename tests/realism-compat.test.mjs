@@ -30,7 +30,7 @@ test('HBAO bridge keeps depth attached through resizing and feeds its denoised o
   const scene = new T.Scene(), camera = new T.PerspectiveCamera(60,1,.08,200);
   const pass = new GalleryHBAOPass(scene,camera,true);
   pass.setSize(640,480);
-  assert.equal(pass.effect.aoPass.renderTarget.width,320);
+  assert.equal(pass.effect.aoPass.renderTarget.width,640);
   assert.equal(pass.effect.aoPass.fullscreenMaterial.uniforms.depthTexture.value,pass.beauty.depthTexture);
   const draws=[], targets=[];
   pass.render({setRenderTarget: target=>targets.push(target),render:(s,c)=>draws.push([s,c])},'output');

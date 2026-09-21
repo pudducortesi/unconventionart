@@ -9,9 +9,9 @@ export function createRealisticRenderer(renderer, scene, camera, mobile) {
   const target = new T.WebGLRenderTarget(1, 1, { type: T.HalfFloatType });
   const composer = new EffectComposer(renderer, target);
   const ao = new N8AOPass(scene, camera, 1, 1);
-  ao.setQualityMode(mobile ? 'Performance' : 'Medium');
-  Object.assign(ao.configuration, { aoRadius: .6, distanceFalloff: .75, intensity: 1.7,
-    halfRes: mobile, gammaCorrection: false, accumulate: false, transparencyAware: true });
+  ao.setQualityMode(mobile ? 'Low' : 'Medium');
+  Object.assign(ao.configuration, { aoRadius: .22, distanceFalloff: .5, intensity: .65,
+    halfRes: false, gammaCorrection: false, accumulate: false, transparencyAware: true });
   let hbao = null;
   const aa = new SMAAPass();
   const output = new OutputPass();
