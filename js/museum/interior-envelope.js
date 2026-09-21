@@ -54,6 +54,9 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
     ['stone', 'fins'], ['stone', 'coffers'], ['terrazzo', 'rafts'], ['terrazzo', 'fins'],
   ];
   const h = BUILDING.height;
+  const lining = own(new T.MeshStandardMaterial({color:0xbcb8ae, roughness:.85}));
+  const opal = own(new T.MeshStandardMaterial({color:0xf3eee2, roughness:.72, emissive:0xfff0d7, emissiveIntensity:.22}));
+  const trim = own(new T.MeshStandardMaterial({color:0xe3e1db, roughness:.38, metalness:.45}));
   for (const hall of HALLS) {
     const { x, z } = hall.center;
     const [finish, ceiling] = plans[hall.index];
@@ -67,8 +70,9 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
     if (ceiling === 'coffers') {
       // Six deep rooflight wells, with structural white rims and diffusers.
       for (const dx of [-4.65, 4.65]) for (const dz of [-7.2, 0, 7.2]) {
-        box(7.7, .05, 5.9, x + dx, h - .12, z + dz, recess);
-        box(7.25, .025, 5.45, x + dx, h - .16, z + dz, glow);
+        box(7.7, .05, 5.9, x + dx, h - .12, z + dz, lining);
+        box(7.25, .025, 5.45, x + dx, h - .16, z + dz, opal);
+        for (const mullion of [-2.4, 0, 2.4]) box(.035,.05,5.5,x+dx+mullion,h-.205,z+dz,trim);
         for (const side of [-1, 1]) {
           box(.2, .42, 6.1, x + dx + side * 3.85, h - .3, z + dz, plaster);
           box(7.9, .42, .2, x + dx, h - .3, z + dz + side * 2.95, plaster);
@@ -76,16 +80,20 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
       }
     } else if (ceiling === 'fins') {
       // A central acoustic field leaves the perimeter quiet for photographs.
-      box(13.6, .04, 20.4, x, h - .12, z, recess);
+      box(13.6, .04, 20.4, x, h - .12, z, lining);
+      for (const dz of [-8.6,0,8.6]) box(13.4,.085,.06,x,h-.20,z+dz,trim);
       for (let dx = -6.4; dx <= 6.4; dx += .8)
-        box(.12, .38, 20, x + dx, h - .35, z, plaster);
+        for (const dz of [-6.72,0,6.72]) box(.10, .34, 6.65, x + dx, h - .35, z + dz, plaster);
       for (const dx of [-7.2, 7.2]) box(.08, .025, 19.8, x + dx, h - .3, z, glow);
     } else {
       // Suspended acoustic rafts, shallow hangers and a recessed glowing reveal.
       for (const dz of [-6, 5.8]) {
         box(13.8, .03, 7.8, x, h - .15, z + dz, recess);
-        box(13.3, .025, 7.3, x, h - .2, z + dz, glow);
-        box(12.9, .18, 6.9, x, h - .43, z + dz, plaster);
+        // Modular acoustic panels with real open joints and a recessed perimeter.
+        for (const edge of [-1,1]) box(12.7,.02,.035,x,h-.24,z+dz+edge*3.55,opal);
+        box(12.9,.04,6.9,x,h-.30,z+dz,lining);
+        for (const dx of [-5.375,-3.225,-1.075,1.075,3.225,5.375]) for (const row of [-1.725,1.725])
+          box(2.13,.15,3.43,x+dx,h-.43,z+dz+row,plaster);
         for (const dx of [-5.5, 5.5]) for (const end of [-2.6, 2.6])
           box(.025, .3, .025, x + dx, h - .25, z + dz + end, recess);
       }
