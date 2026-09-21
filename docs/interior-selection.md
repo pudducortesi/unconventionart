@@ -33,3 +33,7 @@ planning elements. Luminous surfaces do not imply simulated individual light sou
 
 Validation: all 200 exhibition envelopes and routes stay clear; first-work sightline checked.
 The cloud browser cannot render WebGL. Visual quality and mobile frame rate are unverified.
+
+## Colour update
+
+Architecture remains white. New sofas, rugs, ottomans and sideboards use coordinated terracotta, petrol blue, olive and ochre; pendant shades use mustard. Reference furniture retains its established colours. These are project finishes, not claims about manufacturer availability.
