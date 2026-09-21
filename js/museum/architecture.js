@@ -1,3 +1,4 @@
+import { createSurfaceDetail } from "./surface-detail.js";
 import * as T from "../../vendor/three.module.js";
 import { createDesignSeating } from "./design-seating.js";
 import { furnishGallery } from "./furnishings.js";
@@ -13,8 +14,9 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   const lights = [];
   const own = (value) => (resources.add(value), value);
   const material = (options) => own(new T.MeshStandardMaterial(options));
-  const plaster = material({ color: 0xffffff, roughness: 0.92 });
-  const terrazzo = material({ color: 0xf8f8f8, roughness: 0.52 });
+  const grain = createSurfaceDetail(own);
+  const plaster = material({ color: 0xffffff, roughness: 0.92, bumpMap: grain, bumpScale: 0.008 });
+  const terrazzo = material({ color: 0xf8f8f8, roughness: 0.38, roughnessMap: grain });
   const stone = material({ color: 0xf8f8f8, roughness: 0.65 });
   const lacquer = material({ color: 0xffffff, roughness: 0.28 });
   const recess = material({ color: 0xd9d9d9, roughness: 0.97 });
@@ -31,6 +33,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   const floor = new T.Mesh(floorGeometry, terrazzo);
   floor.position.set(0, -0.105, -60);
   floor.name = "walkable-floor";
+  floor.receiveShadow = true;
   floor.userData.walkable = true;
   room.add(floor);
   for (const wall of WALLS) {
@@ -143,6 +146,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   const transform = new T.Object3D();
   for (const [surface, instances] of batches) {
     const mesh = new T.InstancedMesh(boxGeometry, surface, instances.length);
+    mesh.receiveShadow = true;
     if (surface.userData.walkable) mesh.userData.walkable = true;
     mesh.name = surface === plaster ? "white-architecture" : "museum-details";
     instances.forEach((v, index) => {
@@ -157,13 +161,13 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     if (surface !== glow && surface !== joint) occluders.push(mesh);
   }
 
-  // Shared soft contact shadow texture; no realtime shadow maps on any device.
+  // Shared soft contact texture complements the local furniture shadow map.
   const shadowCanvas = document.createElement("canvas");
   shadowCanvas.width = shadowCanvas.height = 96;
   const shadowContext = shadowCanvas.getContext("2d");
   const gradient = shadowContext.createRadialGradient(48, 48, 3, 48, 48, 48);
-  gradient.addColorStop(0, "rgba(0,0,0,.29)");
-  gradient.addColorStop(0.5, "rgba(0,0,0,.12)");
+  gradient.addColorStop(0, "rgba(0,0,0,.12)");
+  gradient.addColorStop(0.5, "rgba(0,0,0,.06)");
   gradient.addColorStop(1, "rgba(0,0,0,0)");
   shadowContext.fillStyle = gradient;
   shadowContext.fillRect(0, 0, 96, 96);
@@ -227,19 +231,41 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     sign.rotation.y = hall.side === -1 ? Math.PI / 2 : -Math.PI / 2;
     room.add(sign);
   }
-  renderer.shadowMap.enabled = false;
-  const sky = new T.HemisphereLight(0xffffff, 0xd8d8d8, 1.85);
-  const daylight = new T.DirectionalLight(0xffffff, 2.1);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = T.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate = false;
+  const sky = new T.HemisphereLight(0xffffff, 0xd8d8d8, 1.1);
+  const daylight = new T.DirectionalLight(0xffffff, 1.7);
   daylight.position.set(-12, 26, 12);
   daylight.target.position.set(0, 0, -28);
+  daylight.castShadow = true;
+  daylight.shadow.mapSize.set(mobile ? 1024 : 2048, mobile ? 1024 : 2048);
+  Object.assign(daylight.shadow.camera, { left: -17, right: 17, top: 18, bottom: -18, near: 0.2, far: 45 });
+  daylight.shadow.camera.updateProjectionMatrix();
+  daylight.shadow.normalBias = 0.025;
+  daylight.shadow.bias = -0.0001;
+  let litZone = '';
+  const updateLighting = (position) => {
+    const hall = HALLS.find(h => position.x > h.bounds.minX && position.x < h.bounds.maxX && position.z > h.bounds.minZ && position.z < h.bounds.maxZ);
+    const x = hall ? hall.center.x : 0;
+    const z = hall ? hall.center.z : Math.round(position.z / 20) * 20;
+    const zone = `${x}/${z}`;
+    if (zone === litZone) return;
+    litZone = zone;
+    daylight.position.set(x - 4, 6, z + 3);
+    daylight.target.position.set(x, 0, z);
+    renderer.shadowMap.needsUpdate = true;
+  };
   scene.add(sky, daylight, daylight.target);
   lights.push(sky, daylight);
   return {
     floor,
     occluders,
+    updateLighting,
     dispose() {
       for (const resource of resources) resource.dispose();
       for (const light of lights) {
+        light.shadow?.dispose();
         scene.remove(light);
         if (light.target) scene.remove(light.target);
       }

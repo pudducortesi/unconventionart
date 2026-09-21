@@ -1,3 +1,4 @@
+import { createEnvironment } from "./environment.js";
 import * as T from "../../vendor/three.module.js";
 import { loadCatalogue } from "../catalogue.js";
 import { createArchitecture, createArtwork } from "./architecture.js";
@@ -33,6 +34,7 @@ let renderer,
   scene,
   camera,
   architecture,
+  environment,
   controls,
   stream,
   catalogue,
@@ -591,6 +593,7 @@ function render(time) {
     renderer.setPixelRatio(desiredPixelRatio);
   }
   setView();
+  architecture.updateLighting(player);
   renderer.render(scene, camera);
   positionPlaques(time);
   if (!moving || time - lastHud > 80) {
@@ -648,6 +651,7 @@ addEventListener("pagehide", (event) => {
   controls?.dispose();
   stream?.dispose();
   architecture?.dispose();
+  environment?.dispose();
   renderer?.dispose();
 });
 addEventListener("pageshow", (event) => {
@@ -684,6 +688,11 @@ try {
   );
   root.append(renderer.domElement);
   architecture = createArchitecture(scene, renderer, { mobile, onReady: invalidate, occupiedSlots: slots });
+  try {
+    environment = createEnvironment(scene, renderer);
+  } catch (error) {
+    console.warn('Environment reflections unavailable; continuing gallery visit.', error);
+  }
   stream = createArtStream({
     slots,
     limit: mobile ? 24 : 48,

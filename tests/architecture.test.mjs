@@ -16,7 +16,17 @@ for (const mobile of [false, true]) {
     t.after(() => { globalThis.document = previous; });
     t.mock.method(T.TextureLoader.prototype, 'load', () => new T.Texture());
     const scene = new T.Scene();
-    const architecture = createArchitecture(scene, { shadowMap: {} }, { mobile });
+    const renderer = { shadowMap: {} };
+    const architecture = createArchitecture(scene, renderer, { mobile });
+    assert.equal(renderer.shadowMap.enabled, true);
+    assert.equal(renderer.shadowMap.autoUpdate, false);
+    architecture.updateLighting(INITIAL);
+    assert.equal(renderer.shadowMap.needsUpdate, true);
+    renderer.shadowMap.needsUpdate = false;
+    architecture.updateLighting(INITIAL);
+    assert.equal(renderer.shadowMap.needsUpdate, false, "Static room lighting should reuse its shadow map");
+    architecture.updateLighting({ x: 16, z: -39 });
+    assert.equal(renderer.shadowMap.needsUpdate, true, "Changing rooms must refresh furniture shadows");
     assert(architecture.floor.userData.walkable);
     assert(architecture.occluders.length > 10);
     const room = scene.getObjectByName('white-museum-200');

@@ -41,3 +41,21 @@ Architecture remains white. New sofas, rugs, ottomans and sideboards use coordin
 ## Room identities
 
 The current ten spatial profiles are defined in js/museum/room-profiles.js: Soglia, Atelier, Contrasto, Movimento, Corpo, Notturno, Materia, Archivio, Intimo, Orizzonte. Each controls its palette, rug geometry and pendant arrangement. Secondary seating is selected per room; facing chairs replace repeated ottomans in four rooms. Names and spatial descriptions appear in the floor plan. These are proposed spatial identities, not claims about photographic collections already installed. Architecture and shared gallery lighting remain white; Notturno refers to the upholstery palette, not a darkened room.
+
+
+## Rendering realism update
+
+Implemented the official Three.js RoomEnvironment add-on, vendored from the pinned
+Three.js dependency with its license. Its PMREM studio environment provides softbox
+reflections for PBR furniture; it does not mirror actual gallery objects.
+Seeded procedural bump and roughness detail adds variation to upholstery, plaster
+and the floor without changing photographic textures. A local directional shadow
+map adds furniture shadows and updates on room changes, with 1024px on mobile and
+2048px on desktop. Existing soft contact patches remain at reduced opacity.
+
+Evaluated https://github.com/N8python/n8ao and
+https://github.com/0beqz/realism-effects. Neither is installed: AO/SSGI and temporal
+passes need separate GPU and mobile performance validation before integration.
+This update is not ray tracing or game-engine-level global illumination.
+Automated construction, shadow invalidation and build checks pass; actual WebGL
+appearance and iPhone frame rate remain unverified in the cloud browser.

@@ -1,3 +1,4 @@
+import { createSurfaceDetail } from "./surface-detail.js";
 import * as T from "../../vendor/three.module.js";
 import { ROOM_PROFILES } from "./room-profiles.js";
 import { FURNITURE } from "./layout.js";
@@ -5,8 +6,10 @@ import { FURNITURE } from "./layout.js";
 // Lightweight interpretations of the supplied furniture photographs, with their reference colours.
 // Parts are instanced across the museum; no external models or image textures.
 export function createDesignSeating(room, own) {
+  const grain = createSurfaceDetail(own);
   const surface = (color, roughness = 0.48, metalness = 0) =>
-    own(new T.MeshStandardMaterial({ color, roughness, metalness }));
+    own(new T.MeshStandardMaterial({ color, roughness, metalness,
+      ...(metalness === 0 ? { bumpMap: grain, bumpScale: 0.004 } : {}) }));
   const palette = {
     brown: surface(0x49332b), cognac: surface(0xb96d36),
     terracotta: surface(0xa3482d), black: surface(0x202425),
@@ -188,6 +191,8 @@ export function createDesignSeating(room, own) {
   for(const {geometry,material,parts} of batches.values()) {
     const mesh=new T.InstancedMesh(geometry,material,parts.length);
     mesh.name='reference-furniture';
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
     parts.forEach((matrix,i)=>mesh.setMatrixAt(i,matrix));
     mesh.computeBoundingSphere();
     room.add(mesh);meshes.push(mesh);
