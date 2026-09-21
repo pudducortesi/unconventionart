@@ -1,4 +1,5 @@
 import * as T from "../../vendor/three.module.js";
+import { createDesignSeating } from "./design-seating.js";
 import { furnishGallery } from "./furnishings.js";
 import { BUILDING, HALLS, WALLS, FURNITURE } from "./layout.js";
 
@@ -83,13 +84,7 @@ export function createArchitecture(scene, renderer, { mobile = false } = {}) {
   // Contemporary white furniture, sharing the exact footprint used by physics.
   for (const piece of FURNITURE) {
     const { x, z, width: w, depth: d } = piece;
-    if (piece.kind === "bench") {
-      box(w, 0.2, d, x, 0.48, z, stone);
-      for (const side of [-1, 1])
-        box(0.22, 0.38, d * 0.7, x + side * w * 0.32, 0.19, z, stone);
-    } else if (piece.kind === "lounge") {
-      box(w * 0.85, 0.1, d * 0.8, x, 0.1, z, recess);
-      box(w, 0.3, d, x, 0.3, z, fabric);
+    if (piece.kind === "reception") {
       box(w * 0.96, 0.16, d * 0.9, x, 0.53, z, fabric);
       box(w * 0.96, 0.5, 0.24, x, 0.71, z + d * 0.4, fabric);
       for (const side of [-1, 1])
@@ -105,7 +100,7 @@ export function createArchitecture(scene, renderer, { mobile = false } = {}) {
   const features = furnishGallery({ room, own, box, plaster, stone, lacquer, recess, glow });
 
   // Include the real floor so the same raycast list supports tap-to-walk.
-  const occluders = [floor, ...features];
+  const occluders = [floor, ...features, ...createDesignSeating(room, own)];
   const transform = new T.Object3D();
   for (const [surface, instances] of batches) {
     const mesh = new T.InstancedMesh(boxGeometry, surface, instances.length);
