@@ -4,6 +4,7 @@ export function createResolutionPolicy({ wake, schedule = setTimeout, cancel = c
   let timer = null;
   let detail = false;
   return {
+    get settled() { return detail; },
     sample(moving, motionRatio, detailRatio) {
       if (moving) {
         if (timer !== null) cancel(timer);
