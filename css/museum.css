@@ -1101,3 +1101,9 @@ dialog dd {
 .photo-render-panel { position: fixed; inset: 0; z-index: 20; pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 20px 20px calc(25px + env(safe-area-inset-bottom)); background: transparent; }
 .photo-render-panel p, .photo-render-panel button { background: #242827ed; color: #f6f1e6; border-radius: 12px; padding: 14px 20px; font-size: 13px; }
 .photo-render-panel button { border: 1px solid #dbbd82; min-height: 48px; }
+
+/* The full-resolution photograph is independent of the 3D texture budget. */
+.artwork-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px 14px; }
+.artwork-actions a, .artwork-actions button { display:inline-flex; align-items:center; min-height:44px; font-size:12px; }
+#artwork-load-status { position:absolute; left:20px; right:20px; top:16px; text-align:center; font-size:12px; pointer-events:none; }
+@media(max-width:700px) { .artwork-actions { flex-direction:column; gap:0; align-items:flex-end; } .artwork-caption { gap:10px; } }

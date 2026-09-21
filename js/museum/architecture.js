@@ -1,3 +1,4 @@
+import { furnishCorridor } from "./corridor.js";
 import { partitionInstances } from "./spatial-batches.js";
 import { pendantPositions } from "./lighting-fixtures.js";
 import { createInteriorEnvelope } from "./interior-envelope.js";
@@ -88,6 +89,8 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     box(0.025, 0.035, 25.5, hall.side * 26.81, 0.042, z, recess);
   }
   const finishedFloors = createInteriorEnvelope({ room, own, box, plaster, recess, glow, renderer });
+
+  furnishCorridor({ own, box, glow });
 
   // Full-size planning mockups: 60% of wall positions, no invented photographs.
   const occupied = new Set(occupiedSlots.map(slot => slot.id));

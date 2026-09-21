@@ -48,6 +48,13 @@ for (const mobile of [false, true]) {
       assert(hit.object.name.startsWith(hall.id + '-'), 'Room finish must cover the structural slab');
       assert.equal(hit.object.material.color.getHex(), ROOM_FINISHES[hall.index].floor, 'Each room retains its own coloured floor material');
     }
+    for (const x of [0, -4.2, 4.2]) {
+      for (const z of [-13, -39, -65, -91, -117]) {
+        const down = new T.Raycaster(new T.Vector3(x, 1.7, z), new T.Vector3(0,-1,0), 0, 2);
+        assert(down.intersectObjects(architecture.occluders, false)[0]?.object.userData.walkable,
+          'Corridor ribbon and coloured thresholds must preserve tap-to-walk');
+      }
+    }
     const eye = new T.Vector3(INITIAL.x, INITIAL.y, INITIAL.z);
     const target = new T.Vector3(INITIAL_TARGET.x, INITIAL_TARGET.y, INITIAL_TARGET.z);
     const distance = eye.distanceTo(target);

@@ -515,10 +515,18 @@ function inspect() {
   $("#artwork-title").textContent = work.title;
   $("#artwork-series").textContent =
     collectionFor(work)?.title || "UnconventionArt";
+  $("#artwork-load-status").textContent = "Caricamento della fotografia originale…";
+  $("#artwork-original").href = work.image;
   $("#artwork-image").src = work.image;
   $("#artwork-image").alt = work.alt || work.title;
   openDialog("artwork");
 }
+$("#artwork-image").addEventListener("load", () => {
+  $("#artwork-load-status").textContent = "";
+});
+$("#artwork-image").addEventListener("error", () => {
+  $("#artwork-load-status").textContent = "Immagine non disponibile. Riprova o apri il file originale.";
+});
 async function focusWork(index) {
   if (!slots.length) return;
   stop();
@@ -612,7 +620,7 @@ function updateAim() {
   const available = !!(data?.work || data?.dialog);
   $("#reticle").classList.toggle("ready", available);
   $("#interact").disabled = !available;
-  $("#interact-label").textContent = data?.isPlaque ? "Cartellino" : data?.work ? "Scopri l’opera" : data?.dialog ? "Esplora" : "Inquadra un’opera";
+  $("#interact-label").textContent = data?.isPlaque ? "Cartellino" : data?.work ? "Apri in HD" : data?.dialog ? "Esplora" : "Inquadra un’opera";
 }
 $("#interact").addEventListener("click", () => { if (!$("#interact").disabled) tap({ clientX: viewport.width / 2, clientY: viewport.height / 2 }); });
 function tap(event) {
@@ -628,7 +636,7 @@ function tap(event) {
   if (work) {
     const index = slots.findIndex((slot) => slot.work.id === work.id);
     if (hit.object.userData.isPlaque) describeWork(index);
-    else focusWork(index);
+    else { selected = index; inspect(); }
   } else if (
     hit.object.userData.walkable ||
     hit.object === architecture.floor
