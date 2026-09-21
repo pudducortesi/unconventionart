@@ -106,3 +106,22 @@ the guide; asynchronous artwork focus is invalidated when interrupted.
 No voice narration or invented photographic catalogue. State transitions and
 keyboard focus/repeat handling are covered by tests. End-to-end GPU rendering
 and physical iPhone layout/performance remain unverified.
+
+
+## Constructed ceilings and light fixtures
+
+Replaced hemisphere pendants and block-shaped track heads with instanced fittings:
+spun-metal shade profiles, rolled rims, inner reflectors, recessed opal disks,
+7mm suspension cords, cord grippers and supported service canopies. Track heads
+now have adapters, tilt, dark optical recesses and small lenses; tracks connect
+to the roof with suspension rods. Original room accent colours are retained.
+These are original procedural fixtures, not manufacturer CAD models.
+
+Rooflight and promenade diffusers now use rough PBR materials with restrained
+emission instead of unlit white panels. Mullions, shaded liners, segmented fins,
+support rails and acoustic panel joints describe assembly and depth.
+Three shared, unshadowed warm spotlights illuminate the occupied room's pendant
+area; their positions follow its actual fixture arrangement and they switch off
+in the promenade. This is local illumination, not global illumination or ray tracing.
+Construction, pool size, corridor deactivation and cleanup are tested. Physical
+iPhone frame rate and WebGL visual output remain unverified in this environment.

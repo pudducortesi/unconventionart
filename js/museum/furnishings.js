@@ -1,3 +1,4 @@
+import { createLightingFixtures } from "./lighting-fixtures.js";
 import * as T from "../../vendor/three.module.js";
 import { ROOM_PROFILES } from "./room-profiles.js";
 import { FURNITURE, HALLS, BUILDING, RUGS } from "./layout.js";
@@ -100,28 +101,7 @@ export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess
     own(new T.MeshStandardMaterial({ color, roughness: 0.38 })));
   const dark = own(new T.MeshStandardMaterial({ color: 0x262626, roughness: 0.65 }));
   const ceramic = own(new T.MeshStandardMaterial({ color: 0xf7f6f2, roughness: 0.28 }));
-  const dome = own(new T.SphereGeometry(0.46, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2));
-  const lampDome = (x, y, z, accent) => {
-    const shade = new T.Mesh(dome, accent);
-    shade.position.set(x, y, z); room.add(shade); targets.push(shade);
-    cylinder(0.42, 0.018, x, y, z, glow);
-  };
-  for (const hall of HALLS) {
-    const { x, z } = hall.center;
-    const accent = accents[hall.index];
-    if (hall.profile.light === 'linear') {
-      box(3.4, 0.055, 0.12, x, 3.2, z + 4.8, accent);
-      box(3.25, 0.015, 0.09, x, 3.16, z + 4.8, glow);
-      for (const dx of [-1.3, 1.3]) cylinder(0.009, BUILDING.height - 3.2, x + dx, (BUILDING.height + 3.2) / 2, z + 4.8, chrome);
-    } else {
-      const positions = hall.profile.light === 'cluster' ? [[-0.8, 3.5, 4.6], [0.3, 3.1, 5.2], [1, 3.8, 4.4]] :
-        hall.profile.light === 'pair' ? [[-1.1, 3.4, 4.8], [1.1, 3.4, 4.8]] : [[0, 3.0, 4.8]];
-      for (const [dx, height, dz] of positions) {
-        cylinder(0.012, BUILDING.height - height, x + dx, (BUILDING.height + height) / 2, z + dz, chrome);
-        lampDome(x + dx, height, z + dz, accent);
-      }
-    }
-  }
+  targets.push(...createLightingFixtures({ room, own, box }));
   for (const piece of FURNITURE) {
     const { x, z, width: w, depth: d } = piece;
     const accent = accents[(piece.hallIndex ?? 0) % accents.length];
@@ -232,17 +212,5 @@ export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess
     }
   }
 
-  // Visible ceiling tracks give scale without adding per-artwork dynamic lights.
-  for (const hall of HALLS) {
-    const { x, z } = hall.center;
-    for (const dz of [-9.7, 9.7]) {
-      box(17.5, 0.065, 0.09, x, 5.55, z + dz, lacquer);
-      for (const dx of [-7, -3.5, 0, 3.5, 7]) {
-        box(0.07, 0.2, 0.07, x + dx, 5.43, z + dz, lacquer);
-        box(0.19, 0.23, 0.28, x + dx, 5.24, z + dz, lacquer);
-        box(0.14, 0.015, 0.21, x + dx, 5.12, z + dz, glow);
-      }
-    }
-  }
   return targets;
 }

@@ -1,3 +1,4 @@
+import { pendantPositions } from "./lighting-fixtures.js";
 import { createInteriorEnvelope } from "./interior-envelope.js";
 import { createSurfaceDetail } from "./surface-detail.js";
 import * as T from "../../vendor/three.module.js";
@@ -23,6 +24,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   const lacquer = material({ color: 0xffffff, roughness: 0.28 });
   const recess = material({ color: 0xd9d9d9, roughness: 0.97 });
   const glow = own(new T.MeshBasicMaterial({ color: 0xffffff }));
+  const ceilingDiffuser = material({ color: 0xf3eee2, roughness: 0.72, emissive: 0xfff0d7, emissiveIntensity: 0.22 });
   const joint = own(new T.MeshBasicMaterial({ color: 0xeaeaea }));
   const batches = new Map();
   const boxGeometry = own(new T.BoxGeometry(1, 1, 1));
@@ -58,7 +60,11 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   }
   for (let z = 5; z > -129; z -= 10) {
     box(5.7, 0.04, 5.3, 0, ceiling - 0.13, z, recess);
-    box(5.32, 0.03, 4.94, 0, ceiling - 0.16, z, glow);
+    box(5.32, 0.03, 4.94, 0, ceiling - 0.16, z, ceilingDiffuser);
+    for (const side of [-1, 1]) {
+      box(.1, .18, 5.4, side * 2.82, ceiling - .22, z);
+      box(5.7, .18, .1, 0, ceiling - .22, z + side * 2.65);
+    }
     box(0.04, 0.06, 5.05, 0, ceiling - 0.19, z);
   }
 
@@ -235,6 +241,14 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   daylight.shadow.camera.updateProjectionMatrix();
   daylight.shadow.normalBias = 0.025;
   daylight.shadow.bias = -0.0001;
+  // Reuse only three unshadowed local sources, matching the occupied room's
+  // pendant diffusers. No light is allocated per fixture across the building.
+  const pendantLights = Array.from({length: 3}, () => {
+    const light = new T.SpotLight(0xffecd5, 0, 10, Math.PI / 2.7, .85, 2);
+    light.name = 'local-pendant-light';
+    scene.add(light, light.target); lights.push(light);
+    return light;
+  });
   let litZone = '';
   const updateLighting = (position) => {
     const hall = HALLS.find(h => position.x > h.bounds.minX && position.x < h.bounds.maxX && position.z > h.bounds.minZ && position.z < h.bounds.maxZ);
@@ -245,6 +259,15 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     litZone = zone;
     daylight.position.set(x - 4, 6, z + 3);
     daylight.target.position.set(x, 0, z);
+    const positions = hall ? pendantPositions(hall) : [];
+    pendantLights.forEach((light, i) => {
+      const point = positions[i];
+      light.intensity = point ? 48 : 0;
+      if (!point) return;
+      const [dx, height, dz] = point;
+      light.position.set(x + dx, height - .035, z + dz);
+      light.target.position.set(x + dx, .3, z + dz);
+    });
     renderer.shadowMap.needsUpdate = true;
   };
   scene.add(sky, daylight, daylight.target);

@@ -27,6 +27,12 @@ for (const mobile of [false, true]) {
     assert.equal(renderer.shadowMap.needsUpdate, false, "Static room lighting should reuse its shadow map");
     architecture.updateLighting({ x: 16, z: -39 });
     assert.equal(renderer.shadowMap.needsUpdate, true, "Changing rooms must refresh furniture shadows");
+    const localLights = scene.children.filter(object => object.name === 'local-pendant-light');
+    assert.equal(localLights.length, 3, 'Reuse a bounded light pool across all ten rooms');
+    architecture.updateLighting(INITIAL);
+    assert.equal(localLights.filter(light => light.intensity > 0).length, 3);
+    architecture.updateLighting({x: 0, z: -39});
+    assert(localLights.every(light => light.intensity === 0), 'Pendant light must not follow the visitor into the corridor');
     assert(architecture.floor.userData.walkable);
     assert(architecture.occluders.length > 10);
     const room = scene.getObjectByName('white-museum-200');
