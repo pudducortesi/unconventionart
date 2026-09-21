@@ -4,6 +4,8 @@ import { EXHIBITION_ZONES, FURNITURE, HALLS } from '../js/museum/layout.js';
 
 test('all 200 exhibition envelopes remain clear of furniture and screens', () => {
   assert.equal(EXHIBITION_ZONES.length, 200);
+  assert.equal(HALLS.flatMap(hall => hall.slots).filter(slot => slot.plannedPhoto).length, 120);
+  for (const hall of HALLS) assert.equal(hall.slots.filter(slot => slot.plannedPhoto).length, 12);
   assert.equal(new Set(EXHIBITION_ZONES.map(zone => zone.slotId)).size, 200);
   for (const zone of EXHIBITION_ZONES) for (const piece of FURNITURE) {
     const overlaps = zone.minX < piece.maxX && zone.maxX > piece.minX &&
