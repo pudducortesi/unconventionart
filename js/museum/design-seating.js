@@ -1,4 +1,5 @@
 import * as T from "../../vendor/three.module.js";
+import { ROOM_PROFILES } from "./room-profiles.js";
 import { FURNITURE } from "./layout.js";
 
 // Lightweight interpretations of the supplied furniture photographs, with their reference colours.
@@ -16,6 +17,7 @@ export function createDesignSeating(room, own) {
     darkWood: surface(0x16191a, 0.55), chrome: surface(0xe3e5e6, 0.20, 0.8),
     darkSeam: surface(0x171a1a, 0.75), warmSeam: surface(0x713524, 0.75),
   };
+  const roomUpholstery = ROOM_PROFILES.map(profile => surface(profile.color));
   let leather = palette.black, frame = palette.chrome,
     lacquer = palette.darkWood, seam = palette.darkSeam;
   const cube = own(new T.BoxGeometry(1, 1, 1));
@@ -154,7 +156,7 @@ export function createDesignSeating(room, own) {
       add(cylinder,leather,-0.84,0.66,0,0.14,0.85,0.14,Math.PI/2);
     },
     sofa() {
-      leather = [palette.terracotta, palette.petrol, palette.olive, palette.ochre][(origin.hallIndex || 0) % 4];
+      leather = roomUpholstery[origin.hallIndex || 0];
       box(0, 0.21, 0, 3.06, 0.09, 0.96, palette.chrome);
       legs(2.86, 0.78, 0.2);
       pad(0, 0.35, 0, 3.05, 0.22, 1.02);

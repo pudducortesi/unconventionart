@@ -207,7 +207,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     context.fillText(String(hall.index + 1).padStart(2, "0"), 25, top + 61);
     context.font = "15px sans-serif";
     context.fillStyle = "#808080";
-    context.fillText("SALA / GALLERY", 131, top + 43);
+    context.fillText(hall.profile.name.toUpperCase(), 131, top + 43);
     context.fillText("UNCONVENTIONART", 131, top + 68);
   }
   const signTexture = own(new T.CanvasTexture(atlas));

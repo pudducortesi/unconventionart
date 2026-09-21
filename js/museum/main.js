@@ -263,7 +263,9 @@ function buildMaps() {
     detail.textContent = count
       ? `${count} ${count === 1 ? "opera esposta" : "opere esposte"}`
       : "In allestimento · 20 posizioni";
-    button.append(name, detail);
+    const mood = document.createElement("span");
+    mood.textContent = hall.profile.mood;
+    button.append(name, detail, mood);
     button.addEventListener("click", () => {
       $("#floorplan").close();
       visitHall(hall.index);
