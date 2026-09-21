@@ -9,8 +9,8 @@ export const BUILDING = {
   height: 6.6,
 };
 export const BOUNDS = { minX: -26.45, maxX: 26.45, minZ: -129.45, maxZ: 9.45 };
-export const INITIAL = { x: -9, y: 1.7, z: -2.5 };
-export const INITIAL_TARGET = { x: -19, y: 2.1, z: -21 };
+export const INITIAL = { x: -8.5, y: 1.7, z: -13 };
+export const INITIAL_TARGET = { x: -26.7, y: 2.1, z: -10.9 };
 export const HALLS = [];
 export const WALLS = [];
 export const FURNITURE = [];
@@ -72,6 +72,11 @@ for (let row = 0; row < 5; row++) {
     }
     for (const dz of [-9.6, -5.3, 5.3, 9.6])
       slot(side * 5.3, z + dz, side === -1 ? -Math.PI / 2 : Math.PI / 2);
+    // Start with the outer wall visible from the doorway, then follow the perimeter.
+    const order = [8, 9, 10, 11, 12, 13, 14, 15, 19, 18, 17, 16, 4, 3, 2, 1, 0, 5, 6, 7];
+    hall.slots = order.map((previous, position) => ({
+      ...hall.slots[previous], id: `S${index + 1}-${String(position + 1).padStart(2, '0')}`,
+    }));
     HALLS.push(hall);
   }
 }
@@ -80,7 +85,7 @@ const models = ['discs', 'bibendum', 'geometric', 'ribbed', 'cantilever', 'tufte
 for (const hall of HALLS) {
   const { x, z } = hall.center;
   const index = hall.index;
-  const cinema = index === 0 || index === 5;
+  const cinema = index === 3 || index === 5;
   const seat = (sx, sz, model, rotation = 0) => FURNITURE.push(
     rectangle(sx, sz, model === 'discs' ? 2.5 : 1.6, 1.6,
       { kind: 'lounge', model, rotation, hallIndex: index }));
@@ -108,6 +113,14 @@ for (const index of [1, 3, 7, 9]) {
   const { x, z } = HALLS[index].center;
   FURNITURE.push(rectangle(x - 3, z - 4.5, 2.8, 1.4, { kind: 'editorial', hallIndex: index }));
 }
+// Reserved exhibition envelopes: 3.8m along the wall, 4m clear in front.
+// These are planning constraints, not barriers for visitors.
+export const EXHIBITION_ZONES = HALLS.flatMap(hall => hall.slots.map(slot => {
+  const nx = Math.sin(slot.rotation), nz = Math.cos(slot.rotation);
+  return rectangle(slot.x + nx * 2, slot.z + nz * 2,
+    Math.abs(nx) > 0.5 ? 4 : 3.8, Math.abs(nx) > 0.5 ? 3.8 : 4,
+    { slotId: slot.id, hallIndex: hall.index });
+}));
 export const OBSTACLES = [...WALLS, ...FURNITURE];
 export function locateHall(position) {
   const hall = HALLS.find(

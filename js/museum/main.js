@@ -227,7 +227,8 @@ function visitHall(index) {
   if (!entered) return;
   clearSelection();
   const hall = HALLS[index];
-  walkTo(hall.entry, { ...hall.center, y: 2.1 });
+  const first = slots.find(slot => slot.hallIndex === index) || hall.slots[0];
+  walkTo(hall.entry, { x: first.x, y: 2.25, z: first.z });
   announce(`Percorso verso ${hall.title}.`);
 }
 $("#entrance").addEventListener("click", () => {
@@ -235,7 +236,7 @@ $("#entrance").addEventListener("click", () => {
   walkTo(INITIAL, INITIAL_TARGET);
 });
 $("#next-room").addEventListener("click", () =>
-  visitHall((hallIndex + 1) % HALLS.length),
+  openDialog("floorplan"),
 );
 
 function buildMaps() {
@@ -261,7 +262,7 @@ function buildMaps() {
     const detail = document.createElement("span");
     detail.textContent = count
       ? `${count} ${count === 1 ? "opera esposta" : "opere esposte"}`
-      : "Spazio da esplorare";
+      : "In allestimento · 20 posizioni";
     button.append(name, detail);
     button.addEventListener("click", () => {
       $("#floorplan").close();
@@ -680,7 +681,7 @@ try {
     200,
   );
   root.append(renderer.domElement);
-  architecture = createArchitecture(scene, renderer, { mobile, onReady: invalidate });
+  architecture = createArchitecture(scene, renderer, { mobile, onReady: invalidate, occupiedSlots: slots });
   stream = createArtStream({
     slots,
     limit: mobile ? 24 : 48,
@@ -741,6 +742,7 @@ try {
   $("#next-room").hidden = false;
   $("#previous-work").disabled = slots.length < 2;
   $("#next-work").disabled = !slots.length;
+  $("#next-work").innerHTML = slots.length > 1 ? 'Opera successiva <span>→</span>' : 'Scopri l’opera <span>↗</span>';
   document.body.classList.add("exploring");
   $("#loading-status").textContent = "";
   if (!mobile && !modalOpen) controls.focus();
