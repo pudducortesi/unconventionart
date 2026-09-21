@@ -87,3 +87,6 @@ for (const path of ['data/catalogue.json','images/site/brand-original.svg', ...d
 const engineOwners = Object.values(meta.outputs).filter(output => output.inputs?.['vendor/three.core.js']);
 assert.equal(engineOwners.length,1,'One shared Three engine across rendering modes');
 console.log('Production imports, on-demand path tracing, shared engine and original assets verified.');
+
+const studioSource = await readFile("js/museum/collector-studio.js", "utf8");
+for (const [,id] of studioSource.matchAll(/\$\('#([\w-]+)'\)/g)) assert(museumIds.has(id), `Missing Studio element: ${id}`);

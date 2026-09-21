@@ -1,3 +1,4 @@
+import { buildARModel } from './build-ar-model.mjs';
 import { prepareVendor } from './vendor.mjs';
 import { build } from 'esbuild';
 import { cp, mkdir, rm, readFile, writeFile, readdir } from 'node:fs/promises';
@@ -5,8 +6,9 @@ import { gzipSync } from 'node:zlib';
 await rm('dist', { recursive:true, force:true });
 await mkdir('dist', { recursive:true });
 await prepareVendor();
+await buildARModel();
 // Preserve the catalogue, original photographs and logo byte-for-byte.
-for (const path of ['data/catalogue.json','images/kavyar','images/site/favicon-32.png','images/site/brand-original.svg']) {
+for (const path of ['data/catalogue.json','data/experience.json','models','images/kavyar','images/site/favicon-32.png','images/site/brand-original.svg']) {
   await mkdir(`dist/${path.substring(0,path.lastIndexOf('/'))}`, {recursive:true});
   await cp(path,`dist/${path}`,{recursive:true});
 }
@@ -38,6 +40,8 @@ const preloads = [...initial].filter(path=>path!==main).map(path=>`<link rel="mo
 html = html.replace('</head>',`    ${preloads}\n  </head>`);
 await writeFile('dist/index.html',html);
 await mkdir('dist/licenses',{recursive:true});
+await cp('ar-runtime/node_modules/@google/model-viewer/LICENSE','dist/licenses/model-viewer-LICENSE.txt');
+await cp('ar-runtime/node_modules/three/LICENSE','dist/licenses/AR-THREE-LICENSE.txt');
 for (const name of await readdir('vendor')) if (name.endsWith('LICENSE.txt')) await cp(`vendor/${name}`,`dist/licenses/${name}`);
 let bytes=0,gzip=0;
 for(const path of initial) {const buffer=await readFile(path);bytes+=buffer.length;gzip+=gzipSync(buffer).length;}

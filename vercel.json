@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "npm ci --ignore-scripts",
+  "installCommand": "npm ci --ignore-scripts && npm ci --prefix ar-runtime --ignore-scripts",
   "buildCommand": "node tools/build.mjs",
   "outputDirectory": "dist",
   "cleanUrls": false,

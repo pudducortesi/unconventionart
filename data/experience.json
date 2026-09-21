@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "offers": {},
+  "events": [],
+  "services": {
+    "curatorEndpoint": null,
+    "liveRoomUrl": null
+  },
+  "arModels": {
+    "kavyar-01": { "src": "models/kavyar-01.glb", "heightCm": 90, "widthCm": 59.99 }
+  }
+}
