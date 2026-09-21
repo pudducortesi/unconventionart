@@ -1,8 +1,8 @@
 # UnconventionArt
 
-Un’unica pagina HTML, CSS e JavaScript: una galleria contemporanea 3D percorribile in prima persona. Pareti, soffitto, pavimento, cornici, sedute e reception sono bianchi. La profondità deriva da geometria, luce e ombre. Three.js è installato con versione bloccata e servito dallo stesso dominio.
+Una sola pagina HTML/CSS/JavaScript: galleria contemporanea 3D in prima persona. Dieci sale collegate, venti postazioni per sala, capacità complessiva di 200 opere. L’edificio misura 54 × 140 metri, con una promenade centrale di dieci metri e porte larghe cinque metri. Pareti, pavimenti, lucernari, reception e arredi sono bianchi.
 
-## Avvio e build
+## Avvio
 
 Richiede Node.js 20 o successivo.
 
@@ -14,34 +14,40 @@ npm run build
 npm run check
 ```
 
-`dist/` contiene esclusivamente la galleria, il catalogo pubblico e i suoi asset. Le precedenti pagine editoriali restano nel repository come sorgenti storici: non sono pubblicate dalla build. Vercel riscrive i vecchi indirizzi HTML verso la galleria.
+`dist/` contiene l’unica pagina della galleria e gli asset pubblici espliciti. Le vecchie pagine editoriali restano nel repository ma non nella build. Vercel riscrive i vecchi indirizzi verso la galleria.
 
 ## Visita
 
-La pagina si apre direttamente all’ingresso della sala, senza copertina o pulsante “entra”. Su desktop: trascina per guardare, WASD/frecce per camminare, oppure clicca sul pavimento. Su touch: joystick a sinistra per muoverti e trascinamento con l’altra mano per guardarti intorno. È disponibile anche il tap sul pavimento. Non servono pointer lock, fullscreen o permessi del dispositivo.
+L’ingresso si apre nella prima sala, in vista delle fotografie disponibili. Tutte le dieci sale appartengono allo stesso spazio e sono collegate da porte percorribili; il passaggio tra sale non sostituisce la scena.
 
-Toccando una fotografia ci si avvicina. Il cartellino fisico accanto alla cornice apre descrizione e metadati disponibili; un pulsante HTML ancorato alla sua posizione rende il bersaglio utilizzabile con touch e tastiera. Il cartellino viene nascosto se occluso dall’architettura. Foto intera, informazioni, aiuto e indice sono dialoghi interni alla stessa pagina.
+Desktop: WASD/frecce e trascinamento per guardare. Touch: joystick analogico a sinistra e visuale con l’altro dito; i gesti funzionano contemporaneamente. Il tap sul pavimento avvia un percorso intorno agli ostacoli. Dal pulsante Sale si può raggiungere una sala specifica. Tocca una fotografia per avvicinarti e il cartellino per leggere la descrizione. Fotografie intere, aiuto, indice e pianta restano nella stessa pagina.
 
-Collisioni e percorsi aggirano tutti e tre gli arredi. Il cambio orientamento del telefono conserva la posizione. Le distanze di osservazione si adattano allo schermo e restano entro la stanza. Il movimento ridotto usa spostamenti immediati; il rendering si ferma quando la scena è immobile o la scheda è nascosta. Risoluzione massima 1,25× su touch e 1,5× su desktop; ombre statiche riutilizzate.
+## Fluidità e caricamento
+
+Il movimento usa integrazione indipendente dalla frequenza dello schermo, accelerazione e rilascio graduali, zona morta del joystick e gestione separata delle due dita. Rilasci multitouch, perdita del focus e apertura dei dialoghi non avviano movimenti accidentali.
+
+L’architettura usa geometrie ripetute in istanze: circa 19 mesh e 5.500 triangoli per l’intero edificio, senza luci per singola opera o mappe d’ombra dinamiche. Le ombre di contatto sono condivise. Non vengono caricate 200 texture contemporaneamente: massimo 24 residenti su touch e 48 su desktop, due caricamenti in parallelo. Opere lontane vengono rilasciate e ricaricate avvicinandosi.
+
+Le texture sulle pareti hanno lato massimo 1.024 pixel su touch e 2.048 su desktop; il file fotografico originale resta inalterato ed è usato nel visore. Risoluzione iniziale del canvas limitata a 1,1× su touch, adattata verso il basso solo quando i fotogrammi lenti persistono. Il rendering si ferma a scena immobile e a scheda nascosta.
 
 ## Codice
 
-- `index.html`: unica pagina, comandi e dialoghi.
-- `css/museum.css`: interfaccia, touch, aree sicure e movimento ridotto.
-- `js/museum/architecture.js`: geometrie della sala, arredi, luci e opere.
-- `js/museum/navigation.js`: collisioni, percorsi e punti di osservazione sicuri.
-- `js/museum/main.js`: scena, catalogo, joystick, mouse e tastiera.
-- `data/catalogue.json`: fotografie, descrizioni e metadati.
-- `tools/build.mjs`: build con elenco esplicito degli asset pubblici.
+- `js/museum/layout.js`: pianta unica condivisa, pareti, arredi e 200 postazioni.
+- `architecture.js`: ambiente, istanze, illuminazione e fotografie.
+- `navigation.js`: collisioni, griglia di navigazione A*, percorsi continui.
+- `controls.js`: joystick, multitouch, tastiera e filtro del movimento.
+- `streaming.js`: coda delle texture, priorità, limiti, errori e rilascio delle risorse.
+- `main.js`: integrazione della scena, dialoghi, pianta e catalogo.
+- `data/catalogue.json`: opere pubblicate, descrizioni e metadati.
 
-## Fotografie
+## Fotografie disponibili
 
-Il catalogo pubblico contiene una fotografia Kavyar. Le altre cinque dell’album attendono ancora l’esportazione. Le fotografie non vengono duplicate per riempire le pareti; non sono incluse immagini ARGINE. I JPEG rimangono inalterati, con rapporto originale e senza applicazione del tone mapping alla fotografia.
+È pubblicata una fotografia Kavyar. L’album Lightroom contiene sei fotografie; le altre cinque non sono state importate perché l’esportazione non è disponibile nel flusso di lavoro corrente. Non vengono duplicate fotografie per riempire le sale, né pubblicate immagini di altri album per sostituirle.
 
-Aggiungere le immagini autorizzate in `images/kavyar/` e i relativi record in `data/catalogue.json`. Le sale vengono generate per collezione, fino a otto opere per sala. I campi opzionali `description`, `medium`, `year`, `edition` alimentano il cartellino. La galleria legge lo stesso catalogo pubblico anche durante lo sviluppo locale.
+Per aggiungere gli scatti Kavyar esportati, inserirli in `images/kavyar/` e in `data/catalogue.json`; le postazioni vengono assegnate automaticamente, fino a 200. `thumbnail` può indicare una versione ottimizzata, `image` resta la fotografia intera. `description`, `medium`, `year`, `edition` sono facoltativi. Il catalogo pubblico viene letto anche durante lo sviluppo locale.
 
 ## Verifiche
 
-Eseguiti: build, sintassi JavaScript, integrità del catalogo, corrispondenza tra controller e ID HTML, unica pagina nella build e isolamento degli asset privati. Dodici test della navigazione controllano collisioni, percorsi continui, tre arredi, bordi, orientamento e punti di osservazione su formati diversi.
+Build e controlli statici; test di multitouch e input a 30/60/120 Hz; raggiungibilità di tutte le 200 postazioni e dieci porte; collisioni con pareti e arredi; limite e concorrenza dello streaming su 200 opere simulate, smaltimento di caricamenti obsoleti e gestione degli errori. La costruzione delle geometrie è stata verificata con Three.js e 210 percorsi del controller sono stati simulati senza blocchi.
 
-Questi controlli non equivalgono a un collaudo visivo o touch. La verifica del rendering e delle interazioni su browser/dispositivi reali resta da completare: l’anteprima Vercel richiede autenticazione non disponibile nella sessione di verifica.
+Questi controlli non misurano gli FPS effettivi e non equivalgono al collaudo visivo su iPhone. La verifica interattiva dell’anteprima resta condizionata dall’autenticazione Vercel non disponibile nella sessione di verifica.
