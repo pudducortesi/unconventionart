@@ -196,7 +196,7 @@
         </dd>
         <dt>03 / Incontra le opere</dt>
         <dd>
-          Tocca una fotografia per avvicinarti. Il cartellino accanto alla
+          Tocca una fotografia per aprirla in HD. Il cartellino accanto alla
           cornice apre la descrizione. Puoi anche scegliere un’opera dall’indice
           in alto.
         </dd>
@@ -296,12 +296,16 @@
       >
         ×</button
       ><img id="artwork-image" alt="" />
+      <p id="artwork-load-status" role="status" aria-live="polite"></p>
       <div class="artwork-caption">
         <div>
           <span class="eyebrow" id="artwork-series"></span>
           <h2 id="artwork-title"></h2>
         </div>
-        <button id="artwork-details">Leggi il cartellino ↗</button>
+        <div class="artwork-actions">
+          <a id="artwork-original" target="_blank" rel="noopener">Apri originale ↗</a>
+          <button id="artwork-details">Leggi il cartellino ↗</button>
+        </div>
       </div>
     </dialog>
     <noscript

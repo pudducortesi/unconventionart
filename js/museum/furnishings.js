@@ -212,5 +212,8 @@ export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess
     }
   }
 
+  panel({ width: 5.6, height: 1.65, x: 0, y: 2.65, z: -129.81,
+    kicker: "UNCONVENTIONART / DIECI SPAZI, UN PERCORSO", title: "Continua a guardare.",
+    subtitle: "RITROVA LE OPERE NELL’INDICE  ↗", dark: true, dialog: "collection" });
   return targets;
 }
