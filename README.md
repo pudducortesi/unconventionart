@@ -1,13 +1,14 @@
 # UnconventionArt
 
-Una sola pagina HTML/CSS/JavaScript: galleria contemporanea 3D in prima persona. Dieci sale collegate, venti postazioni per sala, capacità complessiva di 200 opere. L’edificio misura 54 × 140 metri, con una promenade centrale di dieci metri e porte larghe cinque metri. Pareti, pavimenti, lucernari, reception e arredi sono bianchi.
+Una sola pagina HTML/CSS/JavaScript: galleria contemporanea 3D in prima persona. Dieci sale collegate, venti postazioni per sala, capacità complessiva di 200 opere. L’edificio misura 54 × 140 metri, con una promenade centrale di dieci metri e porte larghe cinque metri. Le sale hanno palette e arredi distinti, con un percorso centrale continuo.
 
 ## Avvio
 
 Richiede Node.js 20 o successivo.
 
 ```sh
-npm ci
+npm ci --ignore-scripts
+npm run setup:ar
 npm run dev
 # http://localhost:4173
 npm run build
@@ -20,7 +21,7 @@ npm run check
 
 L’ingresso si apre nella prima sala, in vista delle fotografie disponibili. Tutte le dieci sale appartengono allo stesso spazio e sono collegate da porte percorribili; il passaggio tra sale non sostituisce la scena.
 
-Desktop: WASD/frecce e trascinamento per guardare. Touch: joystick analogico a sinistra e visuale con l’altro dito; i gesti funzionano contemporaneamente. Il tap sul pavimento avvia un percorso intorno agli ostacoli. Dal pulsante Sale si può raggiungere una sala specifica. Tocca una fotografia per avvicinarti e il cartellino per leggere la descrizione. Fotografie intere, aiuto, indice e pianta restano nella stessa pagina.
+Desktop: WASD/frecce e trascinamento per guardare. Touch: joystick analogico a sinistra e visuale con l’altro dito; i gesti funzionano contemporaneamente. Il tap sul pavimento avvia un percorso intorno agli ostacoli. Dal pulsante Sale si può raggiungere una sala specifica. Tocca una fotografia per aprirla in HD e il cartellino per leggere la descrizione. Fotografie intere, aiuto, indice e pianta restano nella stessa pagina.
 
 ## Fluidità e caricamento
 
@@ -51,3 +52,7 @@ Per aggiungere gli scatti Kavyar esportati, inserirli in `images/kavyar/` e in `
 Build e controlli statici; test di multitouch e input a 30/60/120 Hz; raggiungibilità di tutte le 200 postazioni e dieci porte; collisioni con pareti e arredi; limite e concorrenza dello streaming su 200 opere simulate, smaltimento di caricamenti obsoleti e gestione degli errori. La costruzione delle geometrie è stata verificata con Three.js e 210 percorsi del controller sono stati simulati senza blocchi.
 
 Questi controlli non misurano gli FPS effettivi e non equivalgono al collaudo visivo su iPhone. La verifica interattiva dell’anteprima resta condizionata dall’autenticazione Vercel non disponibile nella sessione di verifica.
+
+## Studio del collezionista
+
+Apri lo Studio dal footer: schede, guida editoriale con lettura locale facoltativa, prova sulla parete, anteprima 3D/AR su richiesta, capitoli e sala di visione. [Stato, configurazione e limiti del rilascio](docs/UPGRADE_RELEASE.md).

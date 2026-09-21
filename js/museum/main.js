@@ -60,6 +60,34 @@ const performancePolicy = createPerformancePolicy();
 let movementPixelRatio = Math.min(devicePixelRatio, mobile ? 1.1 : performancePolicy.profile.ratio);
 const resolutionPolicy = createResolutionPolicy({ wake: invalidate });
 let savedSelection, selectionOnly = false;
+let studioPromise, performanceMode = 'auto';
+try { performanceMode = localStorage.getItem('ua-performance') || 'auto'; } catch {}
+if (!['auto','fluid','detail'].includes(performanceMode)) performanceMode = 'auto';
+$('#performance-mode').value = performanceMode;
+$('#performance-mode').addEventListener('change', () => {
+  performanceMode = $('#performance-mode').value;
+  try { localStorage.setItem('ua-performance', performanceMode); } catch {}
+  invalidate();
+});
+async function openStudio(id, panel='discover') {
+  if (!catalogue?.works.length) { announce('Il catalogo sta caricando. Riprova fra un momento.'); return; }
+  openDialog('collector-studio');
+  $('#studio-note').textContent='Preparazione dello Studio…';
+  try {
+    studioPromise ||= import('./collector-studio.js').then(({mountStudio}) => mountStudio({
+      catalogue, selection: savedSelection,
+      inspect(id) { selected=slots.findIndex(s=>s.work.id===id);inspect(); },
+      tour() { if(entered) $('#tour-pilot').click(); else { openDialog('guided-tours'); announce('La visita 3D non è disponibile su questo dispositivo. Le schede restano consultabili nello Studio.'); } },
+      halls:HALLS,
+      visit(index) { if(entered) visitHall(index); else { openDialog('floorplan'); } },
+      status:buildCollection,
+    }));
+    const studio = await studioPromise;
+    studio.open(id,panel);
+  } catch { studioPromise=null; $('#studio-note').textContent='Lo Studio non è disponibile. Chiudi e riprova.'; }
+}
+$('#studio-open').addEventListener('click', () => openStudio());
+$('#artwork-studio').addEventListener('click', () => { const id=slots[selected]?.work.id;$('#artwork').close();openStudio(id,'wall'); });
 let detailArtwork = null;
 let focusRequest = 0;
 let realistic = true;
@@ -774,14 +802,14 @@ function render(time) {
     movementPixelRatio = Math.min(devicePixelRatio, performancePolicy.profile.ratio);
   }
   const desiredPixelRatio = resolutionPolicy.sample(
-    moving, movementPixelRatio, Math.min(devicePixelRatio, performancePolicy.profile.economical ? 1.25 : 2),
+    moving, performanceMode === "fluid" ? Math.min(devicePixelRatio, .85) : movementPixelRatio, Math.min(devicePixelRatio, performanceMode === "fluid" ? 1 : performancePolicy.profile.economical ? 1.25 : 2),
   );
   if (Math.abs(renderer.getPixelRatio() - desiredPixelRatio) > 0.01) {
     renderer.setPixelRatio(desiredPixelRatio);
   }
   setView();
   architecture.updateLighting(player);
-  const fastNavigation = !resolutionPolicy.settled && performancePolicy.profile.economical;
+  const fastNavigation = performanceMode === "fluid" || !resolutionPolicy.settled;
   if (effects && realistic && !fastNavigation) {
     const previousError = renderer.debug.onShaderError;
     try {

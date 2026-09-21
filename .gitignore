@@ -6,3 +6,5 @@ vendor/
 
 build-meta.json
 build-report.json
+
+models/*.glb

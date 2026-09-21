@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "node tools/vendor.mjs && node tools/serve.mjs",
     "build": "node tools/build.mjs",
-    "check": "node tools/build.mjs && node tools/check.mjs && node --test tests/*.test.mjs"
+    "check": "node tools/build.mjs && node tools/check.mjs && node --test tests/*.test.mjs",
+    "setup:ar": "npm ci --prefix ar-runtime --ignore-scripts"
   },
   "dependencies": {
     "n8ao": "2.0.1",
