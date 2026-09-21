@@ -32,6 +32,12 @@
         <span class="header-caption">GALLERIA CONTEMPORANEA</span>
         <nav aria-label="Comandi della visita">
           <button
+            data-open="floorplan"
+            aria-label="Apri la pianta delle dieci sale"
+          >
+            Sale
+          </button>
+          <button
             id="collection-open"
             data-open="collection"
             aria-label="Apri l’indice delle opere"
@@ -69,15 +75,11 @@
         </div>
         <aside class="map" aria-label="Mappa della sala">
           <svg
-            viewBox="0 0 140 180"
+            viewBox="0 0 140 324"
             role="img"
             aria-label="La tua posizione nella galleria"
           >
-            <path class="map-outline" d="M12 12H128V168H12Z" />
-            <path
-              class="map-furniture"
-              d="M74 86h19v10H74zM20 120h22v11H20zM98 137h21v11H98z"
-            />
+            <path class="map-outline" d="M12 12H128V312H12Z" />
             <g id="map-art"></g>
             <g id="map-player">
               <path d="M0 -9L-5 4L0 1L5 4Z" />
@@ -102,7 +104,7 @@
             ←
           </button>
           <button id="next-work">Avvicinati all’opera <span>↗</span></button>
-          <button id="next-room" hidden>Sala successiva →</button>
+          <button id="next-room">Sala successiva →</button>
         </div>
         <div id="work-panel" class="work-panel" hidden>
           <div>
@@ -142,10 +144,7 @@
         </div>
       </div>
       <footer class="museum-footer">
-        <button data-open="about">Dentro lo spazio</button
-        ><button id="motion-toggle" aria-pressed="true">
-          Movimento fluido
-        </button>
+        <button data-open="about">Dentro lo spazio</button>
       </footer>
       <p class="sr-only" id="announcement" aria-live="polite"></p>
     </main>
@@ -175,9 +174,26 @@
           in alto.
         </dd>
       </dl>
+      <button id="motion-toggle" aria-pressed="true">Movimento fluido</button>
       <button class="dialog-primary" data-close="help">
         Riprendi la visita ↗
       </button>
+    </dialog>
+    <dialog id="floorplan" aria-labelledby="floorplan-title">
+      <button
+        class="dialog-close"
+        data-close="floorplan"
+        aria-label="Chiudi la pianta"
+      >
+        ×
+      </button>
+      <span class="eyebrow">10 SALE / 200 POSTAZIONI</span>
+      <h2 id="floorplan-title">Un luogo da attraversare.</h2>
+      <p>
+        Dieci sale collegate da una promenade centrale. Scegli una sala per
+        raggiungerla, oppure continua a camminare liberamente.
+      </p>
+      <div id="hall-list" aria-label="Sale espositive"></div>
     </dialog>
     <dialog id="collection" aria-labelledby="collection-title">
       <button
@@ -189,7 +205,7 @@
       ><span class="eyebrow">INDICE DELLA GALLERIA</span>
       <h2 id="collection-title">Le opere.</h2>
       <p class="collection-intro">
-        Scegli una fotografia. Ti accompagniamo nella sala.
+        Scegli una fotografia. Ti accompagniamo nella sua sala.
       </p>
       <div id="collection-list"></div>
     </dialog>
@@ -208,8 +224,8 @@
         il proprio tempo.
       </p>
       <p>
-        La visita comincia qui. Muoviti liberamente nella sala, osserva le opere
-        e apri i cartellini per leggerne le storie.
+        La visita comincia qui. Attraversa le dieci sale, osserva le opere e
+        apri i cartellini per leggerne le storie.
       </p>
       <button class="dialog-primary" data-close="about">
         Torna nello spazio ↗

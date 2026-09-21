@@ -792,3 +792,170 @@ dialog dd {
     transition: none !important;
   }
 }
+/* Large museum: quiet overview, generous touch controls, all rooms stay in scene. */
+#hall-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px 30px;
+  position: relative;
+  margin: 24px 0 5px;
+}
+#hall-list:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: #dedede;
+  pointer-events: none;
+}
+.hall-button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 7px;
+  padding: 14px 16px;
+  min-height: 70px;
+  border: 1px solid var(--line);
+  background: #fbfbfb;
+  text-align: left;
+}
+.hall-button strong {
+  font-size: 12px;
+  font-weight: 500;
+}
+.hall-button span {
+  font-size: 10px;
+  color: #858585;
+}
+.hall-button[aria-current="true"] {
+  border-color: #777;
+  background: #f0f0f0;
+}
+#motion-toggle {
+  border-bottom: 1px solid var(--line);
+  font-size: 11px;
+  margin-top: 14px;
+}
+.wall-plaque {
+  top: 0;
+  left: 0;
+  will-change: transform;
+  contain: layout style;
+}
+.map {
+  width: 58px;
+}
+.map svg {
+  max-height: 155px;
+}
+#next-room {
+  position: absolute;
+  bottom: 55px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  min-height: 36px;
+  background: #ffffffa8;
+}
+.work-panel {
+  bottom: 187px;
+}
+@media (pointer: coarse) {
+  .joystick {
+    width: 132px;
+    height: 132px;
+    left: max(15px, env(safe-area-inset-left));
+    bottom: max(83px, calc(68px + env(safe-area-inset-bottom)));
+    contain: layout style;
+  }
+  #joystick-knob {
+    left: 45px;
+    top: 45px;
+    will-change: transform;
+  }
+  .joystick-caption {
+    top: 139px;
+  }
+  .work-panel {
+    bottom: max(251px, calc(237px + env(safe-area-inset-bottom)));
+  }
+  .look-hint {
+    bottom: max(131px, calc(113px + env(safe-area-inset-bottom)));
+  }
+}
+@media (max-width: 700px) {
+  .museum-header nav {
+    gap: 3px;
+  }
+  .museum-header nav > button:not(.round-button) {
+    padding: 0 7px;
+  }
+  .wordmark {
+    font-size: 19px;
+  }
+  .map {
+    width: 44px;
+    right: 18px;
+    opacity: 0.5;
+  }
+  .map svg {
+    max-height: 105px;
+  }
+  #floorplan {
+    max-height: 92dvh;
+  }
+  .hall-button {
+    min-height: 61px;
+    padding: 11px;
+  }
+  .hall-button span {
+    font-size: 9px;
+  }
+  #floorplan h2 {
+    font-size: 30px;
+  }
+  #floorplan > p {
+    font-size: 12px;
+  }
+}
+@media (max-height: 520px) and (pointer: coarse) {
+  .joystick {
+    width: 112px;
+    height: 112px;
+    bottom: 18px;
+  }
+  #joystick-knob {
+    left: 35px;
+    top: 35px;
+  }
+  .work-panel {
+    bottom: 111px;
+  }
+  .navigation-dock {
+    bottom: 12px;
+  }
+  .look-hint {
+    bottom: 45px;
+  }
+  #next-room {
+    bottom: 49px;
+  }
+  #floorplan {
+    max-width: 620px;
+    margin: auto;
+  }
+  #hall-list {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+  #hall-list:before {
+    display: none;
+  }
+  .hall-button {
+    padding: 8px;
+    font-size: 10px;
+  }
+}

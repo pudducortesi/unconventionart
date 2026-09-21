@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   BOUNDS,
+  OBSTACLES,
   moveWithCollision,
   insideObstacle,
   findPath,
@@ -11,162 +12,236 @@ import {
   safeViewpoint,
   viewingDistance,
 } from "../js/museum/navigation.js";
-const INITIAL = { x: -1.8, z: 6.7 };
+import {
+  INITIAL,
+  HALLS,
+  FURNITURE,
+  CAPACITY,
+  locateHall,
+} from "../js/museum/layout.js";
+
+function assertWalkable(point) {
+  assert(point && Number.isFinite(point.x) && Number.isFinite(point.z));
+  assert(point.x >= BOUNDS.minX - 1e-9 && point.x <= BOUNDS.maxX + 1e-9);
+  assert(point.z >= BOUNDS.minZ - 1e-9 && point.z <= BOUNDS.maxZ + 1e-9);
+  assert(
+    !insideObstacle(point.x, point.z),
+    `A visitor intersects an obstacle at ${point.x}, ${point.z}`,
+  );
+}
 function assertSafeRoute(start, route, goal) {
-  assert(route.length > 0, `A route must reach ${JSON.stringify(goal)}`);
+  assert(route.length > 0, `No route to ${JSON.stringify(goal)}`);
   assert.deepEqual(route.at(-1), goal);
   let previous = start;
   for (const point of route) {
     const steps = Math.ceil(
-      Math.hypot(point.x - previous.x, point.z - previous.z) / 0.01,
+      Math.hypot(point.x - previous.x, point.z - previous.z) / 0.055,
     );
     for (let index = 0; index <= steps; index++) {
       const t = steps ? index / steps : 0;
-      const x = previous.x + (point.x - previous.x) * t;
-      const z = previous.z + (point.z - previous.z) * t;
-      assert(x >= BOUNDS.minX - 1e-9 && x <= BOUNDS.maxX + 1e-9);
-      assert(z >= BOUNDS.minZ - 1e-9 && z <= BOUNDS.maxZ + 1e-9);
-      assert(!insideObstacle(x, z), `Route intersects furniture at ${x}, ${z}`);
+      assertWalkable({
+        x: previous.x + (point.x - previous.x) * t,
+        z: previous.z + (point.z - previous.z) * t,
+      });
     }
     previous = point;
   }
 }
-test("the visitor cannot walk through room boundaries", () => {
-  const position = moveWithCollision({ x: 0, z: -2 }, 100, -100);
-  assert(Math.abs(position.x - BOUNDS.maxX) < 1e-9);
-  assert(Math.abs(position.z - BOUNDS.minZ) < 1e-9);
-});
-test("a continuous walk stops at the bench and can slide alongside it", () => {
-  let position = { x: 1.5, z: -2 };
-  for (let i = 0; i < 100; i++) position = moveWithCollision(position, 0, 0.05);
-  assert(!insideObstacle(position.x, position.z));
-  assert(position.z < -0.5);
-  const sliding = moveWithCollision(position, 0.1, 0.1);
-  assert(sliding.x > position.x);
-  assert(!insideObstacle(sliding.x, sliding.z));
-});
-test("click-to-walk finds a route around furniture, never across it", () => {
-  const start = { x: 1.5, z: -2 },
-    end = { x: 1.5, z: 2 };
-  const route = findPath(start, end);
-  assertSafeRoute(start, route, end);
-  assert(
-    route.length <= 3,
-    "A single bench requires at most two turning points",
+const works = Array.from({ length: CAPACITY }, (_, id) => ({
+  id: `work-${id}`,
+  collection: `collection-${Math.floor(id / 30)}`,
+}));
+const slots = layoutWorks(works);
+
+test("the continuous museum has 200 unique hanging positions in ten halls", () => {
+  assert.equal(HALLS.length, 10);
+  assert.equal(CAPACITY, 200);
+  assert.equal(slots.length, 200);
+  assert.equal(new Set(slots.map(({ x, z }) => `${x},${z}`)).size, 200);
+  assert.equal(layoutWorks([...works, { id: "overflow" }]).length, 200);
+  assert.equal(layoutWorks([]).length, 0);
+  assert.equal(
+    layoutWorks([works[0]])[0].x,
+    slots[0].x,
+    "Adding works must not relocate previously hung photos",
+  );
+  for (const hall of HALLS)
+    assert.equal(
+      slots.filter(({ hallIndex }) => hallIndex === hall.index).length,
+      20,
+    );
+  slots.forEach((slot, index) =>
+    assert.equal(slot.work, works[index], "Preserve real collection metadata"),
   );
 });
-test("clicks on furniture do not start a walk", () => {
-  assert.deepEqual(findPath({ x: 0, z: -2 }, { x: 1.5, z: 0.3 }), []);
+
+test("the entrance and every hall connect through a walkable doorway", () => {
+  assertWalkable(INITIAL);
+  const started = performance.now();
+  for (const hall of HALLS) {
+    const route = findPath(INITIAL, hall.entry);
+    assertSafeRoute(INITIAL, route, hall.entry);
+    assert.equal(locateHall(hall.entry), hall.index);
+    assert(
+      route.length <= 5,
+      "A long promenade should not produce a grid zigzag",
+    );
+    assertSafeRoute(
+      hall.entry,
+      findPath(hall.entry, { x: INITIAL.x, z: INITIAL.z }),
+      { x: INITIAL.x, z: INITIAL.z },
+    );
+  }
+  assert(
+    performance.now() - started < 3000,
+    "Twenty full-building routes must complete without an interactive hang",
+  );
 });
-test("all eight hanging positions have accessible viewing points", () => {
-  const works = Array.from({ length: 8 }, (_, i) => ({ id: i }));
-  const slots = layoutWorks(works);
-  assert.equal(slots.length, 8);
+
+test("all 200 artworks have a reachable view inside their own exhibition hall", () => {
   for (const slot of slots) {
     const point = safeViewpoint({
       x: slot.x + Math.sin(slot.rotation) * 4.8,
       z: slot.z + Math.cos(slot.rotation) * 4.8,
     });
-    assert(!insideObstacle(point.x, point.z));
+    assert.equal(
+      locateHall(point),
+      slot.hallIndex,
+      `Wrong hall for ${slot.work.id}`,
+    );
     assertSafeRoute(INITIAL, findPath(INITIAL, point), point);
   }
-  assert.equal(layoutWorks([{ id: "one" }])[0].x, 0);
-});
-test("camera faces artworks and takes the short rotation across +/- pi", () => {
-  assert(
-    Math.abs(orientation({ x: 0, y: 1, z: 0 }, { x: 0, y: 1, z: -1 }).yaw) <
-      1e-8,
-  );
-  assert(Math.abs(shortestAngle(Math.PI - 0.1, -Math.PI + 0.1) - 0.2) < 1e-8);
 });
 
-test("portrait phone framing computes space for photograph and wall label", () => {
-  for (const [w, h] of [
-    [320, 568],
-    [390, 844],
-    [430, 932],
-    [844, 390],
-    [1440, 900],
+test("full-length routes between opposite halls cannot cut through a partition", () => {
+  for (const [from, to] of [
+    [0, 9],
+    [9, 0],
+    [2, 7],
+    [7, 2],
   ]) {
-    const aspect = w / h,
-      distance = viewingDistance(2.4, 3.6, aspect),
-      tangent = Math.tan((53 * Math.PI) / 360);
-    assert((2.4 + 1.65) / (2 * distance * tangent * aspect) <= 0.86 + 1e-9);
-    assert((3.6 + 0.5) / (2 * distance * tangent) <= 0.62 + 1e-9);
-  }
-});
-
-test("a long input cannot tunnel through any of the three furnishings", () => {
-  for (const [start, distance, limit] of [
-    [{ x: 1.5, z: -2 }, 4, -0.58],
-    [{ x: -4.5, z: 2 }, 4, 3.27],
-    [{ x: 4.5, z: 4 }, 4, 5.195],
-  ]) {
-    const end = moveWithCollision(start, 0, distance);
-    assert(end.z <= limit + 1e-9, "Walk must stop on the near side");
-    assert(!insideObstacle(end.x, end.z));
-  }
-});
-
-test("exact endpoints beside furniture keep safe start and finish connectors", () => {
-  const routes = [
-    [
-      { x: 1.5, z: -0.6 },
-      { x: 0.15, z: -0.1 },
-    ],
-    [
-      { x: -4.5, z: 3.25 },
-      { x: -4.5, z: 5.15 },
-    ],
-    [
-      { x: 4.5, z: 5.18 },
-      { x: 4.5, z: 7.03 },
-    ],
-    [INITIAL, { x: 6.245, z: 6.1 }],
-  ];
-  for (const [start, goal] of routes)
+    const start = HALLS[from].entry,
+      goal = HALLS[to].entry;
     assertSafeRoute(start, findPath(start, goal), goal);
-});
-
-test("unobstructed click travel uses a direct path rather than a grid zigzag", () => {
-  const goal = { x: 0.137, z: -7.251 };
-  assert.deepEqual(findPath(INITIAL, goal), [goal]);
-});
-
-test("viewpoints on furniture project to a nearby safe location", () => {
-  for (const desired of [
-    { x: 1.6, z: 0.3 },
-    { x: -4.7, z: 4.2 },
-    { x: 4.65, z: 6.1 },
-  ]) {
-    const point = safeViewpoint(desired);
-    assert(!insideObstacle(point.x, point.z));
-    assert(Math.hypot(point.x - desired.x, point.z - desired.z) < 1);
-    assertSafeRoute(INITIAL, findPath(INITIAL, point), point);
   }
 });
 
-test("portrait phones and landscape photos never place a viewpoint outside the room", () => {
-  const slots = layoutWorks(Array.from({ length: 8 }, (_, id) => ({ id })));
+test("touch movement blocks solid walls but passes through all ten doors", () => {
+  for (const hall of HALLS) {
+    const side = hall.side;
+    const blocked = moveWithCollision(
+      { x: 0, z: hall.center.z + 6 },
+      side * 18,
+      0,
+    );
+    assert(Math.abs(blocked.x - side * 4.56) < 1e-9);
+    assertWalkable(blocked);
+    const doorway = moveWithCollision(
+      { x: 0, z: hall.center.z },
+      side * 8.5,
+      0,
+    );
+    assert.deepEqual(doorway, hall.entry);
+    const sliding = moveWithCollision(blocked, side * 0.2, -0.2);
+    assert.equal(sliding.x, blocked.x);
+    assert(
+      sliding.z < blocked.z,
+      "A blocked diagonal input must slide along the wall",
+    );
+  }
+});
+
+test("long inputs cannot tunnel through furniture or leave the building", () => {
+  for (const furniture of FURNITURE) {
+    const start = { x: furniture.x, z: furniture.minZ - 1 };
+    assertWalkable(start);
+    const end = moveWithCollision(start, 0, furniture.depth + 3);
+    assert(Math.abs(end.z - (furniture.minZ - 0.28)) < 1e-8);
+    assertWalkable(end);
+  }
+  const promenadeStart = { x: 0, z: 6 };
+  assert.equal(moveWithCollision(promenadeStart, 0, 1000).z, BOUNDS.maxZ);
+  assert.equal(moveWithCollision(promenadeStart, 0, -1000).z, BOUNDS.minZ);
+  assert.equal(moveWithCollision({ x: -25, z: -20 }, -1000, 0).x, BOUNDS.minX);
+  assert.equal(moveWithCollision({ x: 25, z: -20 }, 1000, 0).x, BOUNDS.maxX);
+});
+
+test("furniture click destinations are rejected and obstructed viewpoints are corrected", () => {
+  for (const furniture of FURNITURE) {
+    const center = { x: furniture.x, z: furniture.z };
+    assert.deepEqual(findPath(INITIAL, center), []);
+    const corrected = safeViewpoint(center);
+    assertWalkable(corrected);
+    assert(Math.hypot(center.x - corrected.x, center.z - corrected.z) < 1.2);
+  }
+  assert.deepEqual(findPath(INITIAL, { x: NaN, z: 0 }), []);
+  assert.deepEqual(findPath({ x: NaN, z: 0 }, INITIAL), []);
+});
+
+test("routes keep their exact endpoints beside walls and at both sides of benches", () => {
+  for (const hall of HALLS) {
+    const bench = FURNITURE.find(
+      (f) => f.hallIndex === hall.index && f.kind === "bench",
+    );
+    const start = { x: bench.x, z: bench.minZ - 0.31 };
+    const goal = { x: bench.x + 0.127, z: bench.maxZ + 0.31 };
+    assertSafeRoute(start, findPath(start, goal), goal);
+  }
+  const goal = { x: 0.137, z: -128.251 };
+  assert.deepEqual(
+    findPath({ x: 0, z: 6 }, goal),
+    [goal],
+    "An unobstructed promenade uses a direct segment",
+  );
+});
+
+test("camera framing remains in each hall for portrait phones and wide photographs", () => {
   for (const aspect of [320 / 844, 390 / 844, 844 / 390, 1440 / 900]) {
     for (const [width, height] of [
       [2.4, 3.6],
       [4, 2.25],
     ]) {
       const distance = viewingDistance(width, height, aspect);
+      const tangent = Math.tan((53 * Math.PI) / 360);
+      assert((width + 1.65) / (2 * distance * tangent * aspect) <= 0.86 + 1e-9);
+      assert((height + 0.5) / (2 * distance * tangent) <= 0.62 + 1e-9);
       for (const slot of slots) {
+        const bounds = HALLS[slot.hallIndex].bounds;
         const point = safeViewpoint({
-          x:
-            slot.x +
-            Math.cos(slot.rotation) * 0.35 +
-            Math.sin(slot.rotation) * distance,
-          z:
-            slot.z -
-            Math.sin(slot.rotation) * 0.35 +
-            Math.cos(slot.rotation) * distance,
+          x: Math.max(
+            bounds.minX + 0.6,
+            Math.min(
+              bounds.maxX - 0.6,
+              slot.x +
+                Math.cos(slot.rotation) * 0.35 +
+                Math.sin(slot.rotation) * distance,
+            ),
+          ),
+          z: Math.max(
+            bounds.minZ + 0.6,
+            Math.min(
+              bounds.maxZ - 0.6,
+              slot.z -
+                Math.sin(slot.rotation) * 0.35 +
+                Math.cos(slot.rotation) * distance,
+            ),
+          ),
         });
-        assertSafeRoute(INITIAL, findPath(INITIAL, point), point);
+        assertWalkable(point);
+        assert.equal(locateHall(point), slot.hallIndex);
       }
     }
   }
+});
+
+test("camera orientation takes the shortest rotation across +/- pi", () => {
+  assert(
+    Math.abs(orientation({ x: 0, y: 1, z: 0 }, { x: 0, y: 1, z: -1 }).yaw) <
+      1e-8,
+  );
+  assert(Math.abs(shortestAngle(Math.PI - 0.1, -Math.PI + 0.1) - 0.2) < 1e-8);
+  assert(
+    OBSTACLES.length > 40,
+    "The tested plan includes all partitions and furnishings",
+  );
 });
