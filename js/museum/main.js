@@ -1,3 +1,4 @@
+import { createPerformancePolicy } from "./performance-policy.js";
 import { createResolutionPolicy } from "./resolution-policy.js";
 import { createGuidedVisit } from "./guided-visit.js";
 import { createEnvironment } from "./environment.js";
@@ -52,11 +53,10 @@ let entered = false,
 let frame = 0,
   lastTime = 0,
   lastHud = 0,
-  lastStream = 0,
-  frameAverage = 16.7,
-  qualityFrames = 0;
+  lastStream = 0;
 let viewport = { width: innerWidth, height: innerHeight };
-let movementPixelRatio = Math.min(devicePixelRatio, mobile ? 1.1 : 1.5);
+const performancePolicy = createPerformancePolicy();
+let movementPixelRatio = Math.min(devicePixelRatio, mobile ? 1.1 : performancePolicy.profile.ratio);
 const resolutionPolicy = createResolutionPolicy({ wake: invalidate });
 let detailArtwork = null;
 let focusRequest = 0;
@@ -708,6 +708,9 @@ function render(time) {
     }
   }
   // Restore detail only after a settled pause, not between consecutive swipes.
+  if (performancePolicy.sample(rawDelta, moving)) {
+    movementPixelRatio = Math.min(devicePixelRatio, performancePolicy.profile.ratio);
+  }
   const desiredPixelRatio = resolutionPolicy.sample(
     moving, movementPixelRatio, Math.min(devicePixelRatio, 2),
   );
@@ -720,6 +723,7 @@ function render(time) {
     const previousError = renderer.debug.onShaderError;
     try {
       renderer.debug.onShaderError = () => { throw new Error('Shader grafico non supportato'); };
+      effects.setNavigation(!resolutionPolicy.settled, performancePolicy.profile.economical);
       effects.render(delta);
       if (effects.needsFrame()) invalidate();
     } catch (error) {
@@ -744,18 +748,6 @@ function render(time) {
     updateHud();
     updateAim();
     lastHud = time;
-  }
-  // Adapt only after sustained movement; never chase individual frame spikes.
-  if (mobile && moving && rawDelta < 100) {
-    frameAverage += (rawDelta - frameAverage) * 0.03;
-    if (
-      ++qualityFrames > 150 &&
-      frameAverage > 27 &&
-      movementPixelRatio > 1
-    ) {
-      movementPixelRatio = Math.max(1, movementPixelRatio - 0.1);
-      qualityFrames = 0;
-    }
   }
   if (moving) invalidate();
   else lastTime = 0;

@@ -272,6 +272,10 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   };
   scene.add(sky, daylight, daylight.target);
   lights.push(sky, daylight);
+  // The building and its furniture are static. Cache their transforms once
+  // instead of recomputing local matrices in every lighting/postprocessing pass.
+  room.updateMatrixWorld(true);
+  room.traverse(object => { object.matrixAutoUpdate = false; });
   return {
     floor,
     occluders,
