@@ -4,9 +4,14 @@
   "events": [],
   "services": {
     "curatorEndpoint": null,
-    "liveRoomUrl": null
+    "liveRoomUrl": null,
+    "apiBaseUrl": null
   },
   "arModels": {
-    "kavyar-01": { "src": "models/kavyar-01.glb", "heightCm": 90, "widthCm": 59.99 }
+    "kavyar-01": {
+      "src": "models/kavyar-01.glb",
+      "heightCm": 90,
+      "widthCm": 59.99
+    }
   }
 }

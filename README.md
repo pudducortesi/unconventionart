@@ -56,3 +56,7 @@ Questi controlli non misurano gli FPS effettivi e non equivalgono al collaudo vi
 ## Studio del collezionista
 
 Apri lo Studio dal footer: schede, guida editoriale con lettura locale facoltativa, prova sulla parete, anteprima 3D/AR su richiesta, capitoli e sala di visione. [Stato, configurazione e limiti del rilascio](docs/UPGRADE_RELEASE.md).
+
+### Backend dedicato opzionale
+
+Il servizio Node in `server/` aggiunge richieste dei collezionisti e un curatore AI configurabile, senza dipendenze npm aggiuntive. Rimane scollegato dalla galleria finché `services.apiBaseUrl` è `null`. Installazione Hetzner, conservazione dei contatti e configurazione dei servizi: [docs/HETZNER_BACKEND.md](docs/HETZNER_BACKEND.md). Nessun pagamento o mint automatico.

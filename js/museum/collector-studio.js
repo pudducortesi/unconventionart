@@ -1,8 +1,10 @@
+import { connectCollectorService } from './collector-service.js';
 import { WALLS, offerFor, editorialAnswer, selectionDocument, secureLink } from './experience-model.js';
 let viewerImport;
 export function mountStudio({ catalogue, selection, inspect, tour, halls, visit, status }) {
   const $ = s => document.querySelector(s), dialog = $('#collector-studio');
-  let active = catalogue.works[0], config = {}, mode = 'discover', narration;
+  let active = catalogue.works[0], config = {}, mode = 'discover', narration, service;
+  let questionToken=0;
   let userWall = null, renderToken = 0, slideTimer = null, audioContext = null;
   function stopSequence() { clearInterval(slideTimer);slideTimer=null;$('#vision-play').textContent='Avvia sequenza'; }
   function stopAudio() { if(audioContext){audioContext.close().catch(()=>{});audioContext=null;}$('#vision-audio').setAttribute('aria-pressed','false');$('#vision-audio').textContent='Suono ambientale'; }
@@ -34,7 +36,7 @@ export function mountStudio({ catalogue, selection, inspect, tour, halls, visit,
     if (mode!=='wall') { renderToken++; $('#ar-container').replaceChildren(); }
   }
   function showWork(work) {
-    if (!work) return; active=work; stopVoice(); renderToken++;
+    if (!work) return; active=work; stopVoice(); renderToken++; questionToken++;
     $('#studio-work').value=work.id;
     for (const image of dialog.querySelectorAll('[data-studio-image]')) { image.src=work.image; image.alt=work.alt || work.title; }
     $('#studio-title').textContent=work.title;
@@ -83,7 +85,14 @@ export function mountStudio({ catalogue, selection, inspect, tour, halls, visit,
     $('#studio-note').textContent='Selezione esportata: titoli, crediti e descrizioni. Non è un certificato di proprietà.';
   });
   $('#studio-route').addEventListener('click',()=>{dialog.close();tour();});
-  function answer(q) { stopVoice();$('#studio-answer').textContent=editorialAnswer(q,active,catalogue.collections.find(c=>c.id===active.collection)); }
+  async function answer(q) {
+    stopVoice();const token=++questionToken;
+    const fallback=editorialAnswer(q,active,catalogue.collections.find(c=>c.id===active.collection));
+    $('#studio-answer').textContent=fallback;
+    if(!service)return;
+    try { const result=await service.answer(q);if(token===questionToken && result)$('#studio-answer').textContent=`${result.source==='ai'?'Curatore AI':'Guida editoriale'} · ${result.answer}`; }
+    catch { if(token===questionToken)$('#studio-note').textContent='Curatore non disponibile: resta visibile la guida editoriale.'; }
+  }
   for(const b of dialog.querySelectorAll('[data-question]')) b.addEventListener('click',()=>answer(b.dataset.question));
   $('#studio-question-form').addEventListener('submit',e=>{e.preventDefault();answer($('#studio-question').value);});
   $('#studio-voice').addEventListener('click',()=>{
@@ -129,7 +138,7 @@ export function mountStudio({ catalogue, selection, inspect, tour, halls, visit,
     }
     if(!$('#studio-events').children.length)$('#studio-events').textContent='Le prossime visite con l’autore saranno annunciate qui.';
   };
-  fetch('data/experience.json').then(r=>{if(!r.ok)throw Error();return r.json();}).then(x=>{config=x;showWork(active);roomLink();}).catch(()=>{roomLink();});
+  fetch('data/experience.json').then(r=>{if(!r.ok)throw Error();return r.json();}).then(x=>{config=x;showWork(active);roomLink();if(config.services?.apiBaseUrl)connectCollectorService(config.services.apiBaseUrl,()=>active,message=>{$('#studio-note').textContent=message;}).then(value=>{service=value;}).catch(()=>{});}).catch(()=>{roomLink();});
   dialog.addEventListener('close',()=>{stopVoice();stopSequence();stopAudio();renderToken++;$('#ar-container').replaceChildren();});
   document.addEventListener('visibilitychange',()=>{if(document.hidden){stopVoice();stopSequence();stopAudio();}});
   showWork(active);setMode('discover');
