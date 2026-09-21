@@ -959,3 +959,80 @@ dialog dd {
     font-size: 10px;
   }
 }
+
+/* Thumb zones: movement left, destination actions right. No stacked controls
+   over the joystick, including narrow phones and Safari's dynamic viewport. */
+@media (pointer: coarse) {
+  .map,
+  .look-hint {
+    display: none;
+  }
+  .joystick {
+    width: clamp(96px, 28vw, 112px);
+    height: clamp(96px, 28vw, 112px);
+    left: max(18px, calc(env(safe-area-inset-left) + 12px));
+    bottom: calc(env(safe-area-inset-bottom) + 38px);
+  }
+  #joystick-knob {
+    left: 50%;
+    top: 50%;
+    margin-left: -21px;
+    margin-top: -21px;
+  }
+  .joystick-caption {
+    top: calc(100% + 9px);
+  }
+  .navigation-dock {
+    left: auto;
+    right: max(16px, calc(env(safe-area-inset-right) + 12px));
+    bottom: calc(env(safe-area-inset-bottom) + 16px);
+    transform: none;
+    width: clamp(142px, 42vw, 180px);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+    justify-items: end;
+    white-space: normal;
+  }
+  #next-work,
+  #next-room {
+    position: static;
+    transform: none;
+    grid-column: 1 / -1;
+    width: 100%;
+    padding: 10px 12px;
+    min-height: 46px;
+    font-size: 11px;
+    line-height: 1.3;
+    border-radius: 23px;
+    background: #fffffff0;
+  }
+  #next-work {
+    order: 1;
+  }
+  #next-work span {
+    padding-left: 6px;
+  }
+  #next-room {
+    order: 2;
+  }
+  #entrance {
+    order: 3;
+    grid-column: 2;
+    grid-row: 3;
+  }
+  #previous-work {
+    order: 3;
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .navigation-dock .round-button {
+    min-height: 44px;
+    width: 44px;
+  }
+  .work-panel {
+    bottom: calc(env(safe-area-inset-bottom) + 194px);
+    width: max-content;
+    max-width: calc(100% - 32px);
+  }
+}
