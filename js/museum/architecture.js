@@ -1,3 +1,4 @@
+import { createInteriorEnvelope } from "./interior-envelope.js";
 import { createSurfaceDetail } from "./surface-detail.js";
 import * as T from "../../vendor/three.module.js";
 import { createDesignSeating } from "./design-seating.js";
@@ -31,7 +32,8 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   const ceiling = BUILDING.height;
   const floorGeometry = own(new T.BoxGeometry(54, 0.2, 140));
   const floor = new T.Mesh(floorGeometry, terrazzo);
-  floor.position.set(0, -0.105, -60);
+  // Structural slab below finish planes avoids depth flicker at grazing angles.
+  floor.position.set(0, -0.16, -60);
   floor.name = "walkable-floor";
   floor.receiveShadow = true;
   floor.userData.walkable = true;
@@ -67,15 +69,6 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
       box(0.38, 4.7, 0.055, hall.side * 5, 2.35, z + edge * 2.5, lacquer);
       box(0.385, 4.7, 0.012, hall.side * 5, 2.35, z + edge * 2.53, recess);
     }
-    // Rooflights and fine ceiling reveals define each exhibition chamber.
-    for (const offset of [-4.7, 4.7]) {
-      box(6.7, 0.06, 17.8, x + offset, ceiling - 0.14, z, recess);
-      box(6.3, 0.035, 17.38, x + offset, ceiling - 0.19, z, glow);
-      for (const side of [-1, 1])
-        box(0.16, 0.2, 17.9, x + offset + side * 3.37, ceiling - 0.23, z);
-      for (const dz of [-5.8, 0, 5.8])
-        box(6.35, 0.08, 0.055, x + offset, ceiling - 0.22, z + dz);
-    }
     // Architectural wall washes use emissive strips, not 200 dynamic lights.
     for (const dz of [-11.7, 11.7]) {
       box(18.2, 0.07, 0.065, x, ceiling - 0.65, z + dz, lacquer);
@@ -86,10 +79,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
       box(21.5, 0.035, 0.025, x, 0.042, z + dz, recess);
     box(0.025, 0.035, 25.5, hall.side * 26.81, 0.042, z, recess);
   }
-  for (let x = -24; x <= 24; x += 4)
-    box(0.008, 0.002, 139.5, x, -0.002, -60, joint);
-  for (let z = -128; z < 10; z += 4)
-    box(53.5, 0.002, 0.008, 0, -0.001, z, joint);
+  const finishedFloors = createInteriorEnvelope({ room, own, box, plaster, recess, glow, renderer });
 
   // Full-size planning mockups: 60% of wall positions, no invented photographs.
   const occupied = new Set(occupiedSlots.map(slot => slot.id));
@@ -142,7 +132,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   const features = furnishGallery({ room, own, box, plaster, stone, lacquer, recess, glow, onReady });
 
   // Include the real floor so the same raycast list supports tap-to-walk.
-  const occluders = [floor, ...features, ...createDesignSeating(room, own)];
+  const occluders = [floor, ...finishedFloors, ...features, ...createDesignSeating(room, own)];
   const transform = new T.Object3D();
   for (const [surface, instances] of batches) {
     const mesh = new T.InstancedMesh(boxGeometry, surface, instances.length);

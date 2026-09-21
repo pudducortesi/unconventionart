@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from '../vendor/three.module.js';
-import { INITIAL, INITIAL_TARGET } from '../js/museum/layout.js';
+import { INITIAL, INITIAL_TARGET, HALLS } from '../js/museum/layout.js';
 import { createArchitecture } from '../js/museum/architecture.js';
 
 for (const mobile of [false, true]) {
@@ -32,6 +32,14 @@ for (const mobile of [false, true]) {
     const room = scene.getObjectByName('white-museum-200');
     assert(room);
     scene.updateMatrixWorld(true);
+    for (const hall of HALLS) {
+      const floorRay = new T.Raycaster(
+        new T.Vector3(hall.center.x + 9, 1, hall.center.z + 10),
+        new T.Vector3(0, -1, 0), 0, 2);
+      const hit = floorRay.intersectObjects(architecture.occluders, true)[0];
+      assert(hit?.object.userData.walkable, 'Finished floors must preserve tap-to-walk');
+      assert(hit.object.name.startsWith(hall.id + '-'), 'Room finish must cover the structural slab');
+    }
     const eye = new T.Vector3(INITIAL.x, INITIAL.y, INITIAL.z);
     const target = new T.Vector3(INITIAL_TARGET.x, INITIAL_TARGET.y, INITIAL_TARGET.z);
     const distance = eye.distanceTo(target);
