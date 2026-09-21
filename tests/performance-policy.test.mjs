@@ -26,3 +26,18 @@ test('very slow frames still trigger adaptation and quality does not oscillate',
   for (let i=0;i<500;i++) p.sample(16,true);
   assert.equal(p.profile.economical,true);
 });
+
+test('recording-like 300–600ms frames are not discarded as loading pauses', () => {
+  const p = createPerformancePolicy();
+  for (let i=0;i<16;i++) { p.sample(i%2 ? 600 : 300,true); p.sample(16,false); }
+  assert.equal(p.profile.economical,true);
+  assert.equal(p.profile.ratio,.85);
+  assert.equal(p.fps,2);
+});
+test('short gestures accumulate enough evidence without including idle time', () => {
+  const p = createPerformancePolicy();
+  for (let i=0;i<40;i++) { p.sample(33,true); p.sample(500,false); }
+  assert.equal(p.profile.ratio,1);
+  assert.equal(p.profile.economical,true);
+  assert.equal(p.fps,30);
+});

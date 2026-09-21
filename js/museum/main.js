@@ -729,14 +729,15 @@ function render(time) {
     movementPixelRatio = Math.min(devicePixelRatio, performancePolicy.profile.ratio);
   }
   const desiredPixelRatio = resolutionPolicy.sample(
-    moving, movementPixelRatio, Math.min(devicePixelRatio, 2),
+    moving, movementPixelRatio, Math.min(devicePixelRatio, performancePolicy.profile.economical ? 1.25 : 2),
   );
   if (Math.abs(renderer.getPixelRatio() - desiredPixelRatio) > 0.01) {
     renderer.setPixelRatio(desiredPixelRatio);
   }
   setView();
   architecture.updateLighting(player);
-  if (effects && realistic) {
+  const fastNavigation = !resolutionPolicy.settled && performancePolicy.profile.economical;
+  if (effects && realistic && !fastNavigation) {
     const previousError = renderer.debug.onShaderError;
     try {
       renderer.debug.onShaderError = () => { throw new Error('Shader grafico non supportato'); };
@@ -759,12 +760,15 @@ function render(time) {
       console.warn('Postprocessing unavailable:', error);
       renderer.setRenderTarget(null); renderer.render(scene, camera);
     } finally { renderer.debug.onShaderError = previousError; }
-  } else renderer.render(scene, camera);
+  } else { renderer.setRenderTarget(null); renderer.render(scene, camera); }
   positionPlaques(time);
   if (!moving || time - lastHud > 80) {
     updateHud();
     updateAim();
     lastHud = time;
+    const fps = performancePolicy.fps;
+    if (fps !== null) $("#performance-status").textContent = `Ultima misura in movimento: ${fps} fps · ${performancePolicy.profile.label}.`;
+
   }
   if (moving) invalidate();
   else lastTime = 0;
