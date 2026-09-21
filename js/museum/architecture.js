@@ -20,8 +20,8 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   const material = (options) => own(new T.MeshStandardMaterial(options));
   const grain = createSurfaceDetail(own);
   const plaster = material({ color: 0xffffff, roughness: 0.92, bumpMap: grain, bumpScale: 0.008 });
-  const wallPlaster = material({ color: 0xf3eee3, roughness: 0.92, bumpMap: grain, bumpScale: 0.008 });
-  const terrazzo = material({ color: 0xece6d9, roughness: 0.38, roughnessMap: grain });
+  const wallPlaster = material({ color: 0xffffff, roughness: 0.92, bumpMap: grain, bumpScale: 0.008 });
+  const terrazzo = material({ color: 0x482319, roughness: 0.48, roughnessMap: grain });
   const stone = material({ color: 0xf8f8f8, roughness: 0.65 });
   const lacquer = material({ color: 0xffffff, roughness: 0.28 });
   const recess = material({ color: 0xd9d9d9, roughness: 0.97 });
