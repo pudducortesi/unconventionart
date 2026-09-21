@@ -588,17 +588,26 @@ $("#previous-work").addEventListener("click", () =>
   focusWork(selected < 0 ? slots.length - 1 : selected - 1),
 );
 
-function pick(clientX, clientY) {
+function pick(clientX, clientY, interactiveOnly = false) {
   pointerCoords.set((clientX / viewport.width) * 2 - 1, 1 - (clientY / viewport.height) * 2);
   ray.far = 190;
   ray.setFromCamera(pointerCoords, camera);
-  return ray.intersectObjects([
-    ...architecture.occluders,
-    ...stream.values().flatMap(([, art]) => [art.photograph, art.label]),
-  ], false)[0];
+  const artworks = stream.values().flatMap(([, art]) => [art.photograph, art.label]);
+  if (interactiveOnly) {
+    // Most frames point at a blank wall/floor. Find an actionable candidate
+    // before raycasting detailed furniture just to decide cursor appearance.
+    const candidate = ray.intersectObjects([
+      ...artworks, ...architecture.occluders.filter(object => object.userData.dialog),
+    ], false)[0];
+    if (!candidate) return;
+    ray.far = Math.max(0, candidate.distance - .001);
+    const blocked = ray.intersectObjects(architecture.occluders, false).length > 0;
+    return blocked ? undefined : candidate;
+  }
+  return ray.intersectObjects([...architecture.occluders, ...artworks], false)[0];
 }
 function updateAim() {
-  const hit = pick(viewport.width / 2, viewport.height / 2);
+  const hit = pick(viewport.width / 2, viewport.height / 2, true);
   const data = hit?.object.userData;
   const available = !!(data?.work || data?.dialog);
   $("#reticle").classList.toggle("ready", available);
@@ -874,7 +883,7 @@ try {
   canvas.addEventListener("pointermove", event => {
     if (mobile || !entered || modalOpen || event.buttons || performance.now() - hoverTime < 80) return;
     hoverTime = performance.now();
-    const data = pick(event.clientX, event.clientY)?.object.userData;
+    const data = pick(event.clientX, event.clientY, true)?.object.userData;
     canvas.classList.toggle("over-art", !!(data?.work || data?.dialog));
   });
   $("#tour-art-count").textContent = `${slots.length} ${slots.length === 1 ? "fotografia esposta" : "fotografie esposte"} · cartellini e visione ravvicinata`;
