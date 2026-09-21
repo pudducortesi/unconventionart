@@ -9,8 +9,8 @@ export const BUILDING = {
   height: 6.6,
 };
 export const BOUNDS = { minX: -26.45, maxX: 26.45, minZ: -129.45, maxZ: 9.45 };
-export const INITIAL = { x: -8.5, y: 1.7, z: -13 };
-export const INITIAL_TARGET = { x: -26.7, y: 2.1, z: -10.9 };
+export const INITIAL = { x: -19, y: 1.7, z: -10.9 };
+export const INITIAL_TARGET = { x: -26.7, y: 2.25, z: -10.9 };
 export const HALLS = [];
 export const WALLS = [];
 export const FURNITURE = [];
@@ -83,8 +83,10 @@ for (let row = 0; row < 5; row++) {
 // Composed seating islands: screen rooms face the film; other rooms pair chairs.
 const models = ['discs', 'bibendum', 'geometric', 'ribbed', 'cantilever', 'tufted', 'sling', 'geometric', 'bibendum', 'tufted'];
 for (const hall of HALLS) {
-  const { x, z } = hall.center;
+  const { x } = hall.center;
   const index = hall.index;
+  // Arrival has a clear sightline; its lounge sits beside the visitor's route.
+  const z = hall.center.z - (index === 0 ? 6 : 0);
   const cinema = index === 3 || index === 5;
   const seat = (sx, sz, model, rotation = 0) => FURNITURE.push(
     rectangle(sx, sz, model === 'discs' ? 2.5 : 1.6, 1.6,
@@ -95,7 +97,7 @@ for (const hall of HALLS) {
     seat(x + 1.8, z + 2.7, index === 0 ? 'sling' : 'cantilever');
   } else {
     seat(x - 2.1, z + 1.8, models[index]);
-    seat(x + 2.1, z - 1.8, models[index], Math.PI);
+    seat(x + 2.1, z - 1.8, index === 0 ? 'sling' : models[index], Math.PI);
     FURNITURE.push(rectangle(x, z, 1.4, 1.4, { kind: 'coffee', hallIndex: index }));
   }
   FURNITURE.push(rectangle(x + 3.7, z + 2.8, 0.65, 0.65, { kind: 'lamp', hallIndex: index }));
