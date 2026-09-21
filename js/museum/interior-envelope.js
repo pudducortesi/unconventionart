@@ -16,7 +16,9 @@ function floorFinish(own, kind, anisotropy) {
     const edge = Math.min(x, y, size - 1 - x, size - 1 - y);
     if (kind !== 'resin' && edge < 1) value = 212;
     else if (kind !== 'resin' && edge < 2) value -= 5;
-    pixels.set([value, value, value, 255], (y * size + x) * 4);
+    const index = (y * size + x) * 4;
+    pixels[index] = pixels[index+1] = pixels[index+2] = value;
+    pixels[index+3] = 255;
   }
   const map = own(new T.DataTexture(pixels, size, size, T.RGBAFormat));
   map.colorSpace = T.SRGBColorSpace;

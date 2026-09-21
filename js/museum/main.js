@@ -23,6 +23,8 @@ import {
   safeViewpoint,
 } from "./navigation.js";
 
+// Fetch effects concurrently with the catalogue; initialization still precedes entry.
+const effectsModule = import('../../vendor/gallery-effects.js').then(module => ({module}), error => ({error}));
 const $ = (selector) => document.querySelector(selector);
 const root = $("#scene"),
   mobile = matchMedia("(pointer:coarse)").matches;
@@ -851,7 +853,9 @@ try {
       announce("Una fotografia non è disponibile. La visita può continuare."),
   });
   try {
-    const { createRealisticRenderer } = await import('../../vendor/gallery-effects.js');
+    const loadedEffects = await effectsModule;
+    if (loadedEffects.error) throw loadedEffects.error;
+    const { createRealisticRenderer } = loadedEffects.module;
     effects = createRealisticRenderer(renderer, scene, camera, mobile);
     try { effects.setAdvanced(advanced); } catch (error) {
       advanced = false; effects.setAdvanced(false);

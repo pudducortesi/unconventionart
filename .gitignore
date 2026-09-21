@@ -3,3 +3,6 @@ dist/
 images/private/
 data/local-catalogue.json
 vendor/
+
+build-meta.json
+build-report.json

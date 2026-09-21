@@ -65,3 +65,25 @@ assert.deepEqual(
   "One production page",
 );
 console.log("Gallery controller elements and single-page build checked.");
+
+// Validate the actual deploy artifact, not only the editable source tree.
+const meta = JSON.parse(await readFile('build-meta.json','utf8'));
+const report = JSON.parse(await readFile('build-report.json','utf8'));
+const deployedHtml = await readFile('dist/index.html','utf8');
+for (const [, path] of deployedHtml.matchAll(/(?:src|href)="([^"]+)"/g)) {
+  if (!/^(https?:|mailto:|#|data:)/.test(path)) await access(`dist/${path}`);
+}
+for (const [path, output] of Object.entries(meta.outputs)) {
+  await access(path);
+  for (const ref of output.imports) {
+    assert.equal(!!ref.external,false,`No unresolved production import: ${ref.path}`);
+    await access(ref.path);
+  }
+}
+assert(!report.initial.includes(report.photo),'Path tracer stays out of initial loading');
+assert(!deployedHtml.includes(report.photo.replace('dist/','')),'Do not preload the path tracer');
+for (const path of ['data/catalogue.json','images/site/brand-original.svg', ...data.works.map(work=>work.image)])
+  assert((await readFile(path)).equals(await readFile(`dist/${path}`)),`Preserve original asset bytes: ${path}`);
+const engineOwners = Object.values(meta.outputs).filter(output => output.inputs?.['vendor/three.core.js']);
+assert.equal(engineOwners.length,1,'One shared Three engine across rendering modes');
+console.log('Production imports, on-demand path tracing, shared engine and original assets verified.');

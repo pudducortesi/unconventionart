@@ -179,3 +179,28 @@ construction/depth binding/denoiser composition and disposal with a renderer
 stub. Actual GPU shader compilation and appearance remain unverified. This
 integration activates HBAO, not SSGI/TRAA; importing those exports is not proof
 that their separate material/temporal pipelines work with current Three.js.
+
+
+## Loading optimization, preserving rendering features
+
+Expanded the existing esbuild build (https://github.com/evanw/esbuild): minified
+ESM chunks share one Three engine, with CSS and JS content-hashed for immutable
+caching. Default effects are fetched concurrently with the catalogue and
+preloaded; they still initialize before the first gallery frame. Path tracing
+remains a separate dynamic import. Catalogue and original photographs/logo are
+byte-for-byte preserved and verified against the deploy artifact. No route,
+rendering mode, guided visit or integration is removed. Catalogue and HTML
+revalidate; immutable caching applies only to hashed assets. No service worker.
+
+Local initial-JS budget: 2,715,544 to 1,089,766 bytes (59.9% reduction),
+691,422 to 396,428 estimated gzip bytes (42.7% reduction), 19 to 3 JS requests.
+See loading-budget.json. These are artifact measurements, not measured iPhone
+load times. Build validates all deployed imports, lazy path tracing, one shared
+engine and original asset bytes; all 38 functional tests pass. Existing upstream
+unused-effect warnings (typeof-array and duplicate keys) remain unchanged; no
+third-party shader behavior was altered for this optimization.
+
+Procedural floor/material generation also avoids temporary arrays per texel,
+keeping the same pixel values while reducing allocation during scene setup.
+References: https://esbuild.github.io/api/#splitting and
+https://vercel.com/docs/caching/cache-control-headers .

@@ -8,7 +8,9 @@ export function createSurfaceDetail(own) {
   for (let i = 0; i < size * size; i++) {
     seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
     const value = 150 + (seed >>> 24) * 0.35;
-    pixels.set([value, value, value, 255], i * 4);
+    const index = i * 4;
+    pixels[index] = pixels[index+1] = pixels[index+2] = value;
+    pixels[index+3] = 255;
   }
   const texture = own(new T.DataTexture(pixels, size, size, T.RGBAFormat));
   texture.wrapS = texture.wrapT = T.RepeatWrapping;
