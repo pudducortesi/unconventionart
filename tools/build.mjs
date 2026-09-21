@@ -1,3 +1,4 @@
+import { optimizePhotos } from './optimize-photos.mjs';
 import { buildARModel } from './build-ar-model.mjs';
 import { prepareVendor } from './vendor.mjs';
 import { build } from 'esbuild';
@@ -12,6 +13,9 @@ for (const path of ['data/catalogue.json','data/experience.json','models','image
   await mkdir(`dist/${path.substring(0,path.lastIndexOf('/'))}`, {recursive:true});
   await cp(path,`dist/${path}`,{recursive:true});
 }
+const optimized = await optimizePhotos(JSON.parse(await readFile('data/catalogue.json','utf8')));
+await writeFile('dist/data/catalogue.json',JSON.stringify(optimized.catalogue,null,2));
+await writeFile('photo-optimization-report.json',JSON.stringify(optimized.report,null,2));
 const result = await build({
   entryPoints:['js/museum/main.js','css/museum.css'],
   outdir:'dist/assets', outbase:'.', entryNames:'[name]-[hash]', chunkNames:'chunk-[hash]',

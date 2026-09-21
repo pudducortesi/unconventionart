@@ -38,7 +38,7 @@ export function mountStudio({ catalogue, selection, inspect, tour, halls, visit,
   function showWork(work) {
     if (!work) return; active=work; stopVoice(); renderToken++; questionToken++;
     $('#studio-work').value=work.id;
-    for (const image of dialog.querySelectorAll('[data-studio-image]')) { image.src=work.image; image.alt=work.alt || work.title; }
+    for (const image of dialog.querySelectorAll('[data-studio-image]')) { image.src=image.closest('[data-studio-panel=vision]') ? work.image : work.preview || work.image; image.alt=work.alt || work.title; }
     $('#studio-title').textContent=work.title;
     $('#vision-count').textContent=`${catalogue.works.indexOf(work)+1} / ${catalogue.works.length} · ${work.title}`;
     $('#studio-description').textContent=work.description || work.alt || '';

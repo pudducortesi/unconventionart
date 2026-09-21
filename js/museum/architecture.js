@@ -302,8 +302,10 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
 
 export async function createArtwork(slot, renderer, { mobile = false } = {}) {
   const source =
-    mobile && slot.work.thumbnail ? slot.work.thumbnail : slot.work.image;
-  const texture = await new T.TextureLoader().loadAsync(source);
+    (mobile ? slot.work.mobilePreview || slot.work.thumbnail : slot.work.preview) || slot.work.image;
+  let texture;
+  try { texture = await new T.TextureLoader().loadAsync(source); }
+  catch(error) { if(source===slot.work.image)throw error;texture=await new T.TextureLoader().loadAsync(slot.work.image); }
   texture.colorSpace = T.SRGBColorSpace;
   const aspect = texture.image.width / texture.image.height;
   // Keep the original photograph intact while bounding its GPU allocation.
