@@ -279,3 +279,15 @@ test("small touch drags respond, ease out and never become floor taps", () => {
   assert.equal(f.taps.length, 0);
   f.control.dispose();
 });
+
+
+test("interaction key fires once and respects canvas focus", () => {
+  const f = fixture();
+  f.fire(f.win, "keydown", {code: "KeyE"});
+  assert.equal(f.keyboard.length, 0);
+  f.canvas.focus();
+  f.fire(f.win, "keydown", {code: "KeyE"});
+  f.fire(f.win, "keydown", {code: "KeyE", repeat: true});
+  assert.deepEqual(f.keyboard, ["interact"]);
+  f.control.dispose();
+});

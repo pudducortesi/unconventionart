@@ -1,3 +1,4 @@
+import { createGuidedVisit } from "./guided-visit.js";
 import { createEnvironment } from "./environment.js";
 import * as T from "../../vendor/three.module.js";
 import { loadCatalogue } from "../catalogue.js";
@@ -53,6 +54,7 @@ let frame = 0,
 let viewport = { width: innerWidth, height: innerHeight };
 let movementPixelRatio = Math.min(devicePixelRatio, mobile ? 1.1 : 1.5);
 let detailArtwork = null;
+let focusRequest = 0;
 const player = { x: INITIAL.x, z: INITIAL.z };
 const initialLook = orientation(INITIAL, INITIAL_TARGET);
 let yaw = initialLook.yaw,
@@ -70,6 +72,43 @@ const announce = (text) => {
   $("#announcement").textContent = text;
 };
 
+const guide = createGuidedVisit({
+  go(step) {
+    stop(); clearSelection();
+    if (step.workIndex !== undefined) focusWork(step.workIndex);
+    else visitHall(step.hallIndex);
+    controls?.focus();
+  },
+  onPause() { focusRequest++; path = []; finalLook = null; invalidate(); },
+  onChange(state) {
+    $("#tour-panel").hidden = !state.active;
+    document.body.classList.toggle("guided", state.active);
+    if (!state.active) { announce("Visita terminata. Esplorazione libera."); return; }
+    $("#tour-count").textContent = `VISITA GUIDATA · ${state.index + 1} / ${state.total}`;
+    $("#tour-title").textContent = state.step.title;
+    $("#tour-description").textContent = state.step.description;
+    $("#tour-previous").disabled = state.index === 0;
+    $("#tour-pause").textContent = state.paused ? "Riprendi" : "Pausa";
+    $("#tour-pause").setAttribute("aria-pressed", String(state.paused));
+    $("#tour-next").textContent = state.index === state.total - 1 ? "Concludi ✓" : "Prossima tappa →";
+    $("#tour-status").textContent = state.paused ? "In pausa · esplora liberamente" : "Ti accompagniamo alla tappa. Prosegui quando vuoi.";
+    announce(`${state.step.title}. ${state.paused ? "Guida in pausa." : state.step.description}`);
+  },
+});
+$("#tour-spaces").addEventListener("click", () => {
+  $("#guided-tours").close();
+  if (entered) guide.start(HALLS.map(h => ({ hallIndex: h.index, title: h.profile.name, description: h.profile.mood })));
+});
+$("#tour-art").addEventListener("click", () => {
+  $("#guided-tours").close();
+  if (entered) guide.start(slots.map((s, i) => ({ workIndex: i, title: s.work.title, description: s.work.description || s.work.alt || "Avvicinati e apri il cartellino per conoscere l’opera." })));
+});
+$("#tour-next").addEventListener("click", () => guide.next());
+$("#tour-previous").addEventListener("click", () => guide.previous());
+$("#tour-pause").addEventListener("click", () => { if (guide.state().paused) guide.resume(); else { stop(); guide.pause(); } });
+$("#tour-end").addEventListener("click", () => { stop(); guide.end(); controls?.focus(); });
+for (const id of ["entrance", "next-work", "previous-work"]) $("#" + id).addEventListener("click", () => guide.pause(), { capture: true });
+
 function invalidate() {
   if (renderer && camera && !frame && !disposed && !document.hidden) {
     if (!lastTime) lastTime = performance.now();
@@ -77,6 +116,7 @@ function invalidate() {
   }
 }
 function stop() {
+  focusRequest++;
   controls?.stop();
   path = [];
   finalLook = null;
@@ -88,6 +128,7 @@ function clearSelection() {
   document.body.classList.remove("viewing");
 }
 function openDialog(id) {
+  guide.pause();
   stop();
   modalOpen = true;
   document.getElementById(id).showModal();
@@ -423,12 +464,13 @@ async function focusWork(index) {
   if (!slots.length) return;
   stop();
   selected = (index + slots.length) % slots.length;
+  const request = focusRequest;
   const intent = selected,
     slot = slots[intent];
   stream.update(player, { selected, force: true });
   announce(`Avvicinamento a ${slot.work.title}.`);
   const art = await stream.ensure(intent);
-  if (selected !== intent || disposed) return;
+  if (selected !== intent || request !== focusRequest || disposed) return;
   if (!art) {
     announce("L’immagine non è disponibile. Puoi riprovare dall’indice.");
     return;
@@ -487,19 +529,28 @@ $("#previous-work").addEventListener("click", () =>
   focusWork(selected < 0 ? slots.length - 1 : selected - 1),
 );
 
-function tap(event) {
-  if (!entered || modalOpen) return;
-  pointerCoords.set(
-    (event.clientX / viewport.width) * 2 - 1,
-    1 - (event.clientY / viewport.height) * 2,
-  );
+function pick(clientX, clientY) {
+  pointerCoords.set((clientX / viewport.width) * 2 - 1, 1 - (clientY / viewport.height) * 2);
   ray.far = 190;
   ray.setFromCamera(pointerCoords, camera);
-  const targets = [
+  return ray.intersectObjects([
     ...architecture.occluders,
     ...stream.values().flatMap(([, art]) => [art.photograph, art.label]),
-  ];
-  const hit = ray.intersectObjects(targets, false)[0];
+  ], false)[0];
+}
+function updateAim() {
+  const hit = pick(viewport.width / 2, viewport.height / 2);
+  const data = hit?.object.userData;
+  const available = !!(data?.work || data?.dialog);
+  $("#reticle").classList.toggle("ready", available);
+  $("#interact").disabled = !available;
+  $("#interact-label").textContent = data?.isPlaque ? "Cartellino" : data?.work ? "Scopri l’opera" : data?.dialog ? "Esplora" : "Inquadra un’opera";
+}
+$("#interact").addEventListener("click", () => { if (!$("#interact").disabled) tap({ clientX: viewport.width / 2, clientY: viewport.height / 2 }); });
+function tap(event) {
+  if (!entered || modalOpen) return;
+  guide.pause();
+  const hit = pick(event.clientX, event.clientY);
   if (!hit) return;
   if (hit.object.userData.dialog) {
     openDialog(hit.object.userData.dialog);
@@ -598,6 +649,7 @@ function render(time) {
   positionPlaques(time);
   if (!moving || time - lastHud > 80) {
     updateHud();
+    updateAim();
     lastHud = time;
   }
   // Adapt only after sustained movement; never chase individual frame spikes.
@@ -636,6 +688,7 @@ function resize() {
 addEventListener("resize", resize);
 window.visualViewport?.addEventListener("resize", resize);
 document.addEventListener("visibilitychange", () => {
+  guide.pause();
   stop();
   if (document.hidden) {
     cancelAnimationFrame(frame);
@@ -643,7 +696,9 @@ document.addEventListener("visibilitychange", () => {
     lastTime = 0;
   } else invalidate();
 });
+addEventListener("blur", () => guide.pause());
 addEventListener("pagehide", (event) => {
+  guide.pause();
   stop();
   if (event.persisted) return;
   disposed = true;
@@ -704,6 +759,15 @@ try {
       announce("Una fotografia non è disponibile. La visita può continuare."),
   });
   const canvas = renderer.domElement;
+  let hoverTime = 0;
+  canvas.addEventListener("pointermove", event => {
+    if (mobile || !entered || modalOpen || event.buttons || performance.now() - hoverTime < 80) return;
+    hoverTime = performance.now();
+    const data = pick(event.clientX, event.clientY)?.object.userData;
+    canvas.classList.toggle("over-art", !!(data?.work || data?.dialog));
+  });
+  $("#tour-art-count").textContent = `${slots.length} ${slots.length === 1 ? "fotografia esposta" : "fotografie esposte"} · cartellini e visione ravvicinata`;
+  $("#tour-art").disabled = !slots.length;
   canvas.tabIndex = 0;
   canvas.setAttribute(
     "aria-label",
@@ -717,6 +781,7 @@ try {
     onTap: tap,
     onActivity: (event) => {
       if (event.kind === "move" || event.kind === "look") {
+        guide.pause();
         path = [];
         finalLook = null;
         clearSelection();
@@ -724,12 +789,15 @@ try {
       invalidate();
     },
     onKeyboardAction: (action) => {
+      if (action === "interact") $("#interact").click();
       if (action === "escape") {
+        guide.pause();
         stop();
         clearSelection();
       }
     },
     onWheel: (event) => {
+      guide.pause();
       clearSelection();
       const sign = Math.sign(event.deltaY);
       walkTo(
@@ -753,7 +821,7 @@ try {
   $("#next-room").hidden = false;
   $("#previous-work").disabled = slots.length < 2;
   $("#next-work").disabled = !slots.length;
-  $("#next-work").innerHTML = slots.length > 1 ? 'Opera successiva <span>→</span>' : 'Scopri l’opera <span>↗</span>';
+  $("#next-work").innerHTML = slots.length > 1 ? 'Opere <span>→</span>' : 'Opera <span>↗</span>';
   document.body.classList.add("exploring");
   $("#loading-status").textContent = "";
   if (!mobile && !modalOpen) controls.focus();
