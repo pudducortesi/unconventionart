@@ -13,3 +13,5 @@ models/*.glb
 .env.*
 !*.example
 server/storage/
+
+photo-optimization-report.json

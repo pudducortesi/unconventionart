@@ -314,7 +314,7 @@ function mapPoint(position) {
     y: 12 + ((BOUNDS.maxZ - position.z) / (BOUNDS.maxZ - BOUNDS.minZ)) * 300,
   };
 }
-function updateHud() {
+function updateHud(moving = false) {
   let nearest = null,
     nearestDistance = 12;
   for (const [index, art] of stream.values()) {
@@ -328,10 +328,12 @@ function updateHud() {
       nearestDistance = distance;
     }
   }
-  if (nearest !== detailArtwork) {
+  const closeEnough = nearest && Math.hypot(player.x-nearest.slot.x,player.z-nearest.slot.z) <= (nearest===detailArtwork ? 7 : 5.5);
+  const detail = closeEnough && (!moving || nearest===detailArtwork) ? nearest : null;
+  if (detail !== detailArtwork) {
     detailArtwork?.setDetail(false);
-    detailArtwork = nearest;
-    nearest
+    detailArtwork = detail;
+    detail
       ?.setDetail(true)
       .then(invalidate)
       .catch(() => {
@@ -836,7 +838,7 @@ function render(time) {
   } else { renderer.setRenderTarget(null); renderer.render(scene, camera); }
   positionPlaques(time);
   if (!moving || time - lastHud > 80) {
-    updateHud();
+    updateHud(moving);
     updateAim();
     lastHud = time;
     const fps = performancePolicy.fps;

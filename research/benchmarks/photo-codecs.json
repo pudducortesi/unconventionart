@@ -1,0 +1,130 @@
+[
+  {
+    "edge": 768,
+    "format": "webp",
+    "quality": 90,
+    "bytes": 39336,
+    "psnr": 43.226306080134876,
+    "encodeMs": 362.38235499999996
+  },
+  {
+    "edge": 768,
+    "format": "webp",
+    "quality": 95,
+    "bytes": 59314,
+    "psnr": 45.7859997347372,
+    "encodeMs": 371.1589399999999
+  },
+  {
+    "edge": 768,
+    "format": "webp",
+    "quality": "lossless",
+    "bytes": 149626,
+    "psnr": 100,
+    "encodeMs": 1082.019874
+  },
+  {
+    "edge": 768,
+    "format": "avif",
+    "quality": 85,
+    "bytes": 48017,
+    "psnr": 46.07934619389577,
+    "encodeMs": 9016.412256
+  },
+  {
+    "edge": 1024,
+    "format": "webp",
+    "quality": 90,
+    "bytes": 73018,
+    "psnr": 43.216006071971464,
+    "encodeMs": 534.4017870000007
+  },
+  {
+    "edge": 1024,
+    "format": "webp",
+    "quality": 95,
+    "bytes": 108172,
+    "psnr": 46.13136503979248,
+    "encodeMs": 561.8239429999994
+  },
+  {
+    "edge": 1024,
+    "format": "webp",
+    "quality": "lossless",
+    "bytes": 256306,
+    "psnr": 100,
+    "encodeMs": 1434.570959999999
+  },
+  {
+    "edge": 1024,
+    "format": "avif",
+    "quality": 85,
+    "bytes": 86070,
+    "psnr": 46.19747971068735,
+    "encodeMs": 14833.777807999999
+  },
+  {
+    "edge": 1536,
+    "format": "webp",
+    "quality": 90,
+    "bytes": 157724,
+    "psnr": 43.876592721382295,
+    "encodeMs": 829.0084129999996
+  },
+  {
+    "edge": 1536,
+    "format": "webp",
+    "quality": 95,
+    "bytes": 237120,
+    "psnr": 46.779562783052846,
+    "encodeMs": 952.0539710000012
+  },
+  {
+    "edge": 1536,
+    "format": "webp",
+    "quality": "lossless",
+    "bytes": 531256,
+    "psnr": 100,
+    "encodeMs": 2287.7023789999985
+  },
+  {
+    "edge": 1536,
+    "format": "avif",
+    "quality": 85,
+    "bytes": 175926,
+    "psnr": 46.61949791144065,
+    "encodeMs": 31435.75903
+  },
+  {
+    "edge": 2048,
+    "format": "webp",
+    "quality": 90,
+    "bytes": 252952,
+    "psnr": 44.983629866013935,
+    "encodeMs": 1211.3947530000078
+  },
+  {
+    "edge": 2048,
+    "format": "webp",
+    "quality": 95,
+    "bytes": 351128,
+    "psnr": 47.59775673130795,
+    "encodeMs": 1482.9683479999949
+  },
+  {
+    "edge": 2048,
+    "format": "webp",
+    "quality": "lossless",
+    "bytes": 839486,
+    "psnr": 100,
+    "encodeMs": 3082.43080799999
+  },
+  {
+    "edge": 2048,
+    "format": "avif",
+    "quality": 85,
+    "bytes": 243155,
+    "psnr": 51.231571761790555,
+    "encodeMs": 32555.809253999993
+  }
+]

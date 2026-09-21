@@ -82,8 +82,17 @@ for (const [path, output] of Object.entries(meta.outputs)) {
 }
 assert(!report.initial.includes(report.photo),'Path tracer stays out of initial loading');
 assert(!deployedHtml.includes(report.photo.replace('dist/','')),'Do not preload the path tracer');
-for (const path of ['data/catalogue.json','images/site/brand-original.svg', ...data.works.map(work=>work.image)])
+for (const path of ['images/site/brand-original.svg', ...data.works.map(work=>work.image)])
   assert((await readFile(path)).equals(await readFile(`dist/${path}`)),`Preserve original asset bytes: ${path}`);
+const optimizedCatalogue = JSON.parse(await readFile('dist/data/catalogue.json','utf8'));
+assert.equal(optimizedCatalogue.works.length,data.works.length,'Preserve the public work count');
+for(const [key,value] of Object.entries(data))if(key!=='works')assert.deepEqual(optimizedCatalogue[key],value,`Preserve catalogue ${key}`);
+for(const [index,work] of data.works.entries()) {
+  const published=optimizedCatalogue.works[index];
+  for(const [key,value] of Object.entries(work))if(!['variants','thumbnail','mobilePreview','preview'].includes(key))assert.deepEqual(published[key],value,`Preserve work ${key}`);
+  for(const path of work.variants || [])assert(published.variants.includes(path),'Preserve existing variants');
+  for(const field of ['thumbnail','mobilePreview','preview'])await access(`dist/${published[field]}`);
+}
 const engineOwners = Object.values(meta.outputs).filter(output => output.inputs?.['vendor/three.core.js']);
 assert.equal(engineOwners.length,1,'One shared Three engine across rendering modes');
 console.log('Production imports, on-demand path tracing, shared engine and original assets verified.');

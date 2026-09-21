@@ -86,3 +86,27 @@ test("a late detail download is disposed when the artwork has left the scene", a
   await request;
   assert(released);
 });
+
+test("navigation uses the appropriate derivative and HD keeps the original", async (t) => {
+  const oldDocument=globalThis.document;
+  globalThis.document={createElement:()=>({getContext:()=>({...context})})};
+  t.after(()=>{globalThis.document=oldDocument;});
+  const requests=[];
+  t.mock.method(T.TextureLoader.prototype,'loadAsync',async source=>{requests.push(source);return new T.Texture({width:683,height:1024});});
+  const optimized={...slot,work:{...slot.work,thumbnail:'thumb.webp',mobilePreview:'mobile.webp',preview:'desktop.webp'}};
+  const mobile=await createArtwork(optimized,renderer,{mobile:true});
+  const desktop=await createArtwork(optimized,renderer);
+  await desktop.setDetail(true);
+  assert.deepEqual(requests,['mobile.webp','desktop.webp','original.jpg']);
+  mobile.dispose();desktop.dispose();
+});
+
+test("a missing derivative falls back to the original without losing the artwork", async (t) => {
+  const oldDocument=globalThis.document;
+  globalThis.document={createElement:()=>({getContext:()=>({...context})})};
+  t.after(()=>{globalThis.document=oldDocument;});
+  const requests=[];
+  t.mock.method(T.TextureLoader.prototype,'loadAsync',async source=>{requests.push(source);if(source==='missing.webp')throw Error('404');return new T.Texture({width:683,height:1024});});
+  const art=await createArtwork({...slot,work:{...slot.work,preview:'missing.webp'}},renderer);
+  assert.deepEqual(requests,['missing.webp','original.jpg']);art.dispose();
+});

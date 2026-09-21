@@ -1,0 +1,37 @@
+[
+  {
+    "id": "kavyar-01",
+    "original": "images/kavyar/01.jpg",
+    "originalBytes": 331182,
+    "sourceSha256": "d9f0b4673645f8d2b0722e35e9d2b73f7e2306c6e44f14830c1b1b8835b9a4c7",
+    "variants": [
+      {
+        "field": "thumbnail",
+        "path": "images/optimized/fa1755fa0e73f835ed7b-768.webp",
+        "width": 512,
+        "height": 768,
+        "bytes": 39336,
+        "quality": 90,
+        "psnr": 43.226
+      },
+      {
+        "field": "mobilePreview",
+        "path": "images/optimized/33eb40f99770ea78d4bd-1024.webp",
+        "width": 683,
+        "height": 1024,
+        "bytes": 73018,
+        "quality": 90,
+        "psnr": 43.216
+      },
+      {
+        "field": "preview",
+        "path": "images/optimized/b09e78bc6e0075ce10f8-1536.webp",
+        "width": 1024,
+        "height": 1536,
+        "bytes": 157724,
+        "quality": 90,
+        "psnr": 43.877
+      }
+    ]
+  }
+]

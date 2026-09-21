@@ -172,7 +172,7 @@
       <nav class="studio-tabs" aria-label="Sezioni dello Studio"><button data-studio-tab="discover" aria-pressed="true">L’opera</button><button data-studio-tab="guide" aria-pressed="false">La guida</button><button data-studio-tab="wall" aria-pressed="false">Nel tuo spazio</button><button data-studio-tab="vision" aria-pressed="false">Sala di visione</button><button data-studio-tab="chapters" aria-pressed="false">I capitoli</button></nav>
       <label class="studio-picker">Fotografia <select id="studio-work"></select></label>
       <section data-studio-panel="discover" class="studio-discover">
-        <div class="studio-image-wrap"><img data-studio-image alt="" /><span id="studio-series" class="eyebrow"></span></div>
+        <div class="studio-image-wrap"><img data-studio-image loading="lazy" decoding="async" alt="" /><span id="studio-series" class="eyebrow"></span></div>
         <div class="studio-copy"><span class="eyebrow">FOTOGRAFIA / COLLEZIONE</span><h3 id="studio-title"></h3><p id="studio-description"></p><p id="studio-credit" class="studio-credit"></p><div class="studio-buttons"><button id="studio-hd" class="studio-primary">Osserva in HD ↗</button><button id="studio-save" aria-pressed="false">♡ Aggiungi alla selezione</button></div><div id="studio-offer" class="studio-offer"></div><button id="studio-export">Esporta la tua selezione ↓</button></div>
       </section>
       <section data-studio-panel="guide" hidden>
@@ -182,12 +182,12 @@
         <p id="studio-answer" class="studio-answer" role="status"></p><button id="studio-voice">Ascolta</button><button id="studio-route">Inizia il percorso Metamorfosi →</button>
       </section>
       <section data-studio-panel="wall" hidden>
-        <div id="wall-stage" class="wall-stage"><div class="wall-floor"></div><img id="wall-print" data-studio-image alt="" /><div class="wall-bench"></div></div>
+        <div id="wall-stage" class="wall-stage"><div class="wall-floor"></div><img id="wall-print" data-studio-image loading="lazy" decoding="async" alt="" /><div class="wall-bench"></div></div>
         <p id="print-dimensions"></p><p id="wall-scale-note" class="studio-fineprint"></p>
         <div class="wall-controls"><label>Parete<select id="wall-color"></select></label><label>Altezza della stampa<select id="print-height"><option value="60">60 cm</option><option value="90" selected>90 cm</option><option value="120">120 cm</option></select></label><label>Cornice<select id="print-frame"><option value="#222222">Nera</option><option value="#e9e4dc">Avorio</option><option value="#96734f">Legno</option><option value="transparent">Senza cornice</option></select></label></div>
         <div class="studio-buttons"><label class="studio-upload">Usa una foto della tua stanza<input id="wall-upload" type="file" accept="image/jpeg,image/png,image/webp" /></label><button id="wall-reset">Ripristina parete</button><button id="studio-ar" disabled>Anteprima 3D / AR ↗</button></div><p class="studio-fineprint">La foto della tua stanza resta sul dispositivo e non viene caricata sul server.</p><div id="ar-container"></div>
       </section>
-      <section data-studio-panel="vision" hidden class="vision-room"><span class="eyebrow">SALA DI VISIONE</span><div class="vision-frame"><img data-studio-image alt="" /></div><div class="vision-controls"><button id="vision-previous" aria-label="Fotografia precedente">←</button><button id="vision-play">Avvia sequenza</button><button id="vision-next" aria-label="Fotografia successiva">→</button><button id="vision-audio" aria-pressed="false">Suono ambientale</button></div><p id="vision-count"></p><p class="studio-fineprint">Una pausa dedicata alle fotografie. Sequenza e paesaggio sonoro si attivano solo su tua richiesta.</p></section>
+      <section data-studio-panel="vision" hidden class="vision-room"><span class="eyebrow">SALA DI VISIONE</span><div class="vision-frame"><img data-studio-image loading="lazy" decoding="async" alt="" /></div><div class="vision-controls"><button id="vision-previous" aria-label="Fotografia precedente">←</button><button id="vision-play">Avvia sequenza</button><button id="vision-next" aria-label="Fotografia successiva">→</button><button id="vision-audio" aria-pressed="false">Suono ambientale</button></div><p id="vision-count"></p><p class="studio-fineprint">Una pausa dedicata alle fotografie. Sequenza e paesaggio sonoro si attivano solo su tua richiesta.</p></section>
       <section data-studio-panel="chapters" hidden><span class="eyebrow">DIECI ATMOSFERE</span><h3>Ogni sala, un punto di vista.</h3><div id="studio-chapters"></div><h3>Incontri con l’autore</h3><div id="studio-events"></div></section>
       <p id="studio-note" role="status" aria-live="polite"></p>
     </dialog>
