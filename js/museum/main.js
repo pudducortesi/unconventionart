@@ -596,9 +596,9 @@ function render(time) {
     if (
       ++qualityFrames > 150 &&
       frameAverage > 27 &&
-      movementPixelRatio > 0.8
+      movementPixelRatio > 1
     ) {
-      movementPixelRatio = Math.max(0.8, movementPixelRatio - 0.1);
+      movementPixelRatio = Math.max(1, movementPixelRatio - 0.1);
       qualityFrames = 0;
     }
   }
@@ -657,7 +657,8 @@ try {
   buildCollection();
   buildMaps();
   renderer = new T.WebGLRenderer({
-    antialias: !mobile,
+    // Smooth the high-contrast photograph silhouettes on touch displays too.
+    antialias: true,
     alpha: false,
     powerPreference: "high-performance",
   });
