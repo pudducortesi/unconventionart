@@ -1,7 +1,8 @@
+import { ROOM_FINISHES, addRoomWallFinishes } from './room-finishes.js';
 import * as T from '../../vendor/three.module.js';
 import { BUILDING, HALLS } from './layout.js';
 
-// White architectural finishes; each texel is data generated here, not an artwork.
+// Architectural finishes; each texel is data generated here, not an artwork.
 function floorFinish(own, kind, anisotropy) {
   const size = 512, pixels = new Uint8Array(size * size * 4);
   let seed = 781;
@@ -37,11 +38,13 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
   const anisotropy = Math.min(8, renderer.capabilities?.getMaxAnisotropy?.() ?? 1);
   const finishes = Object.fromEntries(['terrazzo', 'stone', 'resin'].map(kind => [kind, floorFinish(own, kind, anisotropy)]));
   const floors = [];
-  const surface = (width, depth, x, z, kind, name) => {
+  const surface = (width, depth, x, z, kind, name, colour) => {
     const geometry = own(new T.PlaneGeometry(width, depth));
     const uv = geometry.attributes.uv;
     for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * width / 3, uv.getY(i) * depth / 3);
-    const mesh = new T.Mesh(geometry, finishes[kind]);
+    const finishMaterial = colour === undefined ? finishes[kind] : own(finishes[kind].clone());
+    if (colour !== undefined) finishMaterial.color.setHex(colour);
+    const mesh = new T.Mesh(geometry, finishMaterial);
     mesh.rotation.x = -Math.PI / 2;
     mesh.position.set(x, -.003, z);
     mesh.name = name;
@@ -61,8 +64,16 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
   const trim = own(new T.MeshStandardMaterial({color:0xe3e1db, roughness:.38, metalness:.45}));
   for (const hall of HALLS) {
     const { x, z } = hall.center;
-    const [finish, ceiling] = plans[hall.index];
-    surface(22, 26, x, z, finish, `${hall.id}-${finish}-floor`);
+    const palette = ROOM_FINISHES[hall.index];
+    const finish = palette.finish, ceiling = plans[hall.index][1];
+    surface(22, 26, x, z, finish, `${hall.id}-${finish}-floor`, palette.floor);
+    const wallPaint = own(plaster.clone()); wallPaint.color.setHex(palette.wall);
+    const accentPaint = own(plaster.clone()); accentPaint.color.setHex(palette.accent);
+    const ceilingPaint = own(plaster.clone()); ceilingPaint.color.setHex(palette.ceiling);
+    const skirting = own(new T.MeshStandardMaterial({color: palette.trim, roughness: .6}));
+    addRoomWallFinishes(hall, box, wallPaint, accentPaint, skirting);
+    // Continuous coloured soffit behind the room's coffers, fins or rafts.
+    box(21.62, .025, 25.62, x, h - .035, z, ceilingPaint);
     // Shadow gaps and concealed light establish thickness around the ceiling.
     for (const dx of [-9.7, 9.7]) {
       box(.14, .04, 23.4, x + dx, h - .25, z, recess);
@@ -76,8 +87,8 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
         box(7.25, .025, 5.45, x + dx, h - .16, z + dz, opal);
         for (const mullion of [-2.4, 0, 2.4]) box(.035,.05,5.5,x+dx+mullion,h-.205,z+dz,trim);
         for (const side of [-1, 1]) {
-          box(.2, .42, 6.1, x + dx + side * 3.85, h - .3, z + dz, plaster);
-          box(7.9, .42, .2, x + dx, h - .3, z + dz + side * 2.95, plaster);
+          box(.2, .42, 6.1, x + dx + side * 3.85, h - .3, z + dz, ceilingPaint);
+          box(7.9, .42, .2, x + dx, h - .3, z + dz + side * 2.95, ceilingPaint);
         }
       }
     } else if (ceiling === 'fins') {
@@ -85,7 +96,7 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
       box(13.6, .04, 20.4, x, h - .12, z, lining);
       for (const dz of [-8.6,0,8.6]) box(13.4,.085,.06,x,h-.20,z+dz,trim);
       for (let dx = -6.4; dx <= 6.4; dx += .8)
-        for (const dz of [-6.72,0,6.72]) box(.10, .34, 6.65, x + dx, h - .35, z + dz, plaster);
+        for (const dz of [-6.72,0,6.72]) box(.10, .34, 6.65, x + dx, h - .35, z + dz, ceilingPaint);
       for (const dx of [-7.2, 7.2]) box(.08, .025, 19.8, x + dx, h - .3, z, glow);
     } else {
       // Suspended acoustic rafts, shallow hangers and a recessed glowing reveal.
@@ -95,7 +106,7 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
         for (const edge of [-1,1]) box(12.7,.02,.035,x,h-.24,z+dz+edge*3.55,opal);
         box(12.9,.04,6.9,x,h-.30,z+dz,lining);
         for (const dx of [-5.375,-3.225,-1.075,1.075,3.225,5.375]) for (const row of [-1.725,1.725])
-          box(2.13,.15,3.43,x+dx,h-.43,z+dz+row,plaster);
+          box(2.13,.15,3.43,x+dx,h-.43,z+dz+row,ceilingPaint);
         for (const dx of [-5.5, 5.5]) for (const end of [-2.6, 2.6])
           box(.025, .3, .025, x + dx, h - .25, z + dz + end, recess);
       }

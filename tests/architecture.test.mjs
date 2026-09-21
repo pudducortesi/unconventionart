@@ -1,3 +1,4 @@
+import { ROOM_FINISHES } from '../js/museum/room-finishes.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from '../vendor/three.module.js';
@@ -45,6 +46,7 @@ for (const mobile of [false, true]) {
       const hit = floorRay.intersectObjects(architecture.occluders, true)[0];
       assert(hit?.object.userData.walkable, 'Finished floors must preserve tap-to-walk');
       assert(hit.object.name.startsWith(hall.id + '-'), 'Room finish must cover the structural slab');
+      assert.equal(hit.object.material.color.getHex(), ROOM_FINISHES[hall.index].floor, 'Each room retains its own coloured floor material');
     }
     const eye = new T.Vector3(INITIAL.x, INITIAL.y, INITIAL.z);
     const target = new T.Vector3(INITIAL_TARGET.x, INITIAL_TARGET.y, INITIAL_TARGET.z);

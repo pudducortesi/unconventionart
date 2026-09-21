@@ -1,3 +1,4 @@
+import { ROOM_FINISHES } from './room-finishes.js';
 // Spatial identities, independent of the photographs eventually curated here.
 export const ROOM_PROFILES = [
   { name: 'Soglia', mood: 'Un ingresso pop. Il primo incontro con lo sguardo.', color: 0xa94738, rug: 0xb96853, weave: 0xe2ad91, shape: 'oval', light: 'cluster', seat: 'discs' },
@@ -10,4 +11,4 @@ export const ROOM_PROFILES = [
   { name: 'Archivio', mood: 'Ordine, consultazione e dialogo intorno alla fotografia.', color: 0x374c69, rug: 0x7e8d9a, weave: 0xbbc8d3, shape: 'rectangle', light: 'linear', seat: 'sofa' },
   { name: 'Intimo', mood: 'Sedute singole e forme morbide. Guardare con calma.', color: 0x986b73, rug: 0xb19196, weave: 0xdfc2c6, shape: 'oval', light: 'single', seat: 'bibendum' },
   { name: 'Orizzonte', mood: 'Un salotto aperto, blu profondo, prima del ritorno.', color: 0x25525d, rug: 0x60868b, weave: 0xa7c5c7, shape: 'oval', light: 'pair', seat: 'sofa' },
-];
+].map((profile, index) => ({ ...profile, mood: `${profile.mood} ${ROOM_FINISHES[index].detail}` }));
