@@ -153,7 +153,7 @@ test("touch movement blocks solid walls but passes through all ten doors", () =>
 
 test("long inputs cannot tunnel through furniture or leave the building", () => {
   for (const furniture of FURNITURE) {
-    const start = { x: furniture.x, z: furniture.minZ - 1 };
+    const start = { x: furniture.x, z: furniture.minZ - 0.31 };
     assertWalkable(start);
     const end = moveWithCollision(start, 0, furniture.depth + 3);
     assert(Math.abs(end.z - (furniture.minZ - 0.28)) < 1e-8);

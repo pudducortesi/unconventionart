@@ -152,6 +152,17 @@ export function createDesignSeating(room, own) {
       tuft(2.2,0.85,0.45,0,4,10);
       add(cylinder,leather,-0.84,0.66,0,0.14,0.85,0.14,Math.PI/2);
     },
+    sofa() {
+      leather = palette.ivory;
+      box(0, 0.21, 0, 3.06, 0.09, 0.96, palette.chrome);
+      legs(2.86, 0.78, 0.2);
+      pad(0, 0.35, 0, 3.05, 0.22, 1.02);
+      for (const x of [-0.95, 0, 0.95]) {
+        pad(x, 0.51, -0.06, 0.92, 0.2, 0.85);
+        pad(x, 0.85, 0.39, 0.93, 0.60, 0.20, 0.07);
+      }
+      for (const x of [-1.53, 1.53]) pad(x, 0.69, 0.02, 0.20, 0.53, 1.01);
+    },
     sling() {
       for(const x of [-0.46,0.46]) {
         tube(`sling-${x}`,[[x,0.05,0.43],[x,0.05,-0.46],[x,0.53,-0.46],[x,0.55,0.30],[x,1.01,0.35]],0.024);

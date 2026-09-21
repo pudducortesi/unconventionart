@@ -143,6 +143,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   const transform = new T.Object3D();
   for (const [surface, instances] of batches) {
     const mesh = new T.InstancedMesh(boxGeometry, surface, instances.length);
+    if (surface.userData.walkable) mesh.userData.walkable = true;
     mesh.name = surface === plaster ? "white-architecture" : "museum-details";
     instances.forEach((v, index) => {
       transform.position.set(v.x, v.y, v.z);
