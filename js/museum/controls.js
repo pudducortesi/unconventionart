@@ -11,12 +11,12 @@ const KEY_ACTIONS = new Map([
 ]);
 const EPSILON = 0.0001;
 
-export function normalizeStick(x, y, radius, deadZone = 0.09) {
+export function normalizeStick(x, y, radius, deadZone = 0.055) {
   const length = Math.hypot(x, y);
   if (!radius || length <= radius * deadZone) return { x: 0, y: 0 };
   const strength = Math.pow(
     (Math.min(length / radius, 1) - deadZone) / (1 - deadZone),
-    1.2,
+    1,
   );
   return { x: (x / length) * strength, y: (y / length) * strength };
 }
@@ -27,7 +27,8 @@ export function createMotionFilter() {
   let forward = 0,
     sideways = 0,
     lookX = 0,
-    lookY = 0;
+    lookY = 0,
+    lookResponse = 0.012;
   const integrate = (current, target, dt, tau) => {
     const decay = Math.exp(-dt / tau);
     const next = target + (current - target) * decay;
@@ -35,7 +36,8 @@ export function createMotionFilter() {
     return [Math.abs(next) < EPSILON && !target ? 0 : next, average];
   };
   return {
-    addLook(x, y) {
+    addLook(x, y, response = 0.012) {
+      lookResponse = response;
       lookX += x;
       lookY += y;
     },
@@ -44,7 +46,7 @@ export function createMotionFilter() {
       const magnitude = Math.max(1, Math.hypot(targetForward, targetSideways));
       targetForward /= magnitude;
       targetSideways /= magnitude;
-      const tau = targetForward || targetSideways ? 0.075 : 0.055;
+      const tau = targetForward || targetSideways ? 0.095 : 0.075;
       const [nextForward, averageForward] = integrate(
         forward,
         targetForward,
@@ -59,7 +61,7 @@ export function createMotionFilter() {
       );
       forward = nextForward;
       sideways = nextSideways;
-      const fraction = 1 - Math.exp(-dt / 0.012);
+      const fraction = 1 - Math.exp(-dt / lookResponse);
       const dx = Math.abs(lookX) < 0.00001 ? lookX : lookX * fraction;
       const dy = Math.abs(lookY) < 0.00001 ? lookY : lookY * fraction;
       lookX -= dx;
@@ -220,7 +222,7 @@ export function createControls({
         event.clientX - pointer.startX,
         event.clientY - pointer.startY,
       );
-      const threshold = pointer.type === "touch" ? 6 : 3;
+      const threshold = pointer.type === "touch" ? 2.5 : 3;
       let dx = event.clientX - pointer.x,
         dy = event.clientY - pointer.y;
       if (!pointer.dragged && travelled > threshold) {
@@ -235,8 +237,15 @@ export function createControls({
         320,
         Math.min(canvas.clientWidth || 390, canvas.clientHeight || 844),
       );
-      const sensitivity = pointer.type === "touch" ? 1.65 / shortSide : 0.0027;
-      filter.addLook(dx * sensitivity, dy * sensitivity);
+      const touch = pointer.type === "touch";
+      const sensitivity = touch ? 2.05 / shortSide : 0.0027;
+      // A short, bounded follow-through absorbs event cadence without adding
+      // velocity-based drift. Vertical movement is gentler than horizontal.
+      filter.addLook(
+        dx * sensitivity,
+        dy * sensitivity * (touch ? 0.72 : 1),
+        touch ? 0.035 : 0.012,
+      );
       activity("look");
     },
     { passive: false },
@@ -317,9 +326,15 @@ export function createControls({
         const rect = joystickElement.getBoundingClientRect();
         stickPointer = {
           id: event.pointerId,
-          x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2,
-          radius: Math.min(rect.width, rect.height) * 0.34,
+          x:
+            event.pointerType === "touch"
+              ? event.clientX
+              : rect.left + rect.width / 2,
+          y:
+            event.pointerType === "touch"
+              ? event.clientY
+              : rect.top + rect.height / 2,
+          radius: Math.min(rect.width, rect.height) * 0.28,
         };
         if (lookPointer) lookPointer.noTap = true;
         capture(joystickElement, event.pointerId);
@@ -378,8 +393,13 @@ export function createControls({
   });
   listen(win, "blur", stop);
   listen(win, "pagehide", stop);
+  let viewportWidth = canvas.clientWidth;
   listen(win, "resize", () => {
-    if (stickPointer || lookPointer) stop();
+    const width = canvas.clientWidth;
+    // Safari's expanding/collapsing address bar changes height, not orientation.
+    if (Math.abs(width - viewportWidth) > 40 && (stickPointer || lookPointer))
+      stop();
+    viewportWidth = width;
   });
   listen(doc, "visibilitychange", () => {
     if (doc.hidden) stop();
