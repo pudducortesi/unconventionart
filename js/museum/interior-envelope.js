@@ -26,7 +26,8 @@ function floorFinish(own, kind, anisotropy) {
   map.generateMipmaps = true;
   map.anisotropy = anisotropy;
   map.needsUpdate = true;
-  return own(new T.MeshStandardMaterial({ map, color: 0xffffff,
+  const ecru = { terrazzo: 0xfbf7ef, stone: 0xf7f2e7, resin: 0xfaf5eb };
+  return own(new T.MeshStandardMaterial({ map, color: ecru[kind],
     roughness: kind === 'resin' ? .48 : kind === 'stone' ? .58 : .36, metalness: 0 }));
 }
 

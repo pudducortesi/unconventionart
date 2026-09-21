@@ -80,3 +80,11 @@ not additional simulated light sources. Existing shared lighting is retained.
 Construction, first-artwork visibility and finished-floor walking raycasts
 pass on both device configurations. WebGL appearance remains unverified
 because the available browser has no WebGL context.
+
+
+## Écru finish revision
+
+Walls use warm écru #F3EEE3. Floor finish tints are terrazzo #FBF7EF,
+stone #F7F2E7 and resin #FAF5EB, multiplied by their existing surface textures.
+These are material inputs, not guaranteed screen colours under scene lighting.
+Ceilings, furniture colours and photographic textures retain their existing finishes.
