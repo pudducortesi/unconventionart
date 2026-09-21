@@ -17,7 +17,8 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   const material = (options) => own(new T.MeshStandardMaterial(options));
   const grain = createSurfaceDetail(own);
   const plaster = material({ color: 0xffffff, roughness: 0.92, bumpMap: grain, bumpScale: 0.008 });
-  const terrazzo = material({ color: 0xf8f8f8, roughness: 0.38, roughnessMap: grain });
+  const wallPlaster = material({ color: 0xf3eee3, roughness: 0.92, bumpMap: grain, bumpScale: 0.008 });
+  const terrazzo = material({ color: 0xece6d9, roughness: 0.38, roughnessMap: grain });
   const stone = material({ color: 0xf8f8f8, roughness: 0.65 });
   const lacquer = material({ color: 0xffffff, roughness: 0.28 });
   const recess = material({ color: 0xd9d9d9, roughness: 0.97 });
@@ -39,7 +40,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   floor.userData.walkable = true;
   room.add(floor);
   for (const wall of WALLS) {
-    box(wall.width, ceiling, wall.depth, wall.x, ceiling / 2, wall.z);
+    box(wall.width, ceiling, wall.depth, wall.x, ceiling / 2, wall.z, wallPlaster);
     // A continuous shadow line gives each wall a recessed base and ceiling reveal.
     box(wall.width + 0.006, 0.018, wall.depth + 0.006, wall.x, 0.025, wall.z, recess);
     box(wall.width + 0.008, 0.025, wall.depth + 0.008, wall.x, ceiling - 0.09, wall.z, recess);
