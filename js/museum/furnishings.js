@@ -56,8 +56,32 @@ export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess
   box(10.8, 0.025, 0.045, 15, 4.69, 2.5, glow);
   box(4.15, 0.03, 0.025, 17.5, 0.19, 4.18, glow);
 
+  const chrome = own(new T.MeshStandardMaterial({ color: 0xc5c7c9, metalness: 0.65, roughness: 0.24 }));
+  const tableTop = own(new T.MeshStandardMaterial({ color: 0xededeb, roughness: 0.3 }));
+  const round = own(new T.CylinderGeometry(1, 1, 1, 64));
+  const cylinder = (radius, height, x, y, z, material) => {
+    const mesh = new T.Mesh(round, material);
+    mesh.scale.set(radius, height, radius);
+    mesh.position.set(x, y, z);
+    room.add(mesh);
+    targets.push(mesh);
+  };
   for (const piece of FURNITURE) {
     const { x, z, width: w, depth: d } = piece;
+    if (piece.kind === 'coffee') {
+      cylinder(0.59, 0.035, x, 0.49, z, tableTop);
+      cylinder(0.028, 0.43, x, 0.245, z, chrome);
+      cylinder(0.34, 0.025, x, 0.025, z, chrome);
+      // Small closed exhibition catalogue gives the lounge a human scale.
+      box(0.28, 0.028, 0.36, x + 0.16, 0.525, z, recess);
+      box(0.29, 0.005, 0.37, x + 0.16, 0.542, z, plaster);
+    }
+    if (piece.kind === 'lamp') {
+      cylinder(0.27, 0.035, x, 0.022, z, chrome);
+      cylinder(0.017, 1.65, x, 0.85, z, chrome);
+      cylinder(0.055, 1.1, x, 1.22, z, glow);
+      cylinder(0.059, 0.025, x, 1.78, z, chrome);
+    }
     if (piece.kind === "ottoman") {
       const base = new T.Mesh(own(new T.CylinderGeometry(w * 0.43, w * 0.43, 0.13, 32)), recess);
       base.position.set(x, 0.065, z);

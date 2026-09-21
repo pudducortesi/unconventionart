@@ -16,7 +16,6 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   const plaster = material({ color: 0xffffff, roughness: 0.92 });
   const terrazzo = material({ color: 0xf8f8f8, roughness: 0.52 });
   const stone = material({ color: 0xf8f8f8, roughness: 0.65 });
-  const fabric = material({ color: 0xffffff, roughness: 1 });
   const lacquer = material({ color: 0xffffff, roughness: 0.28 });
   const recess = material({ color: 0xd9d9d9, roughness: 0.97 });
   const glow = own(new T.MeshBasicMaterial({ color: 0xffffff }));
@@ -34,8 +33,12 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   floor.name = "walkable-floor";
   floor.userData.walkable = true;
   room.add(floor);
-  for (const wall of WALLS)
+  for (const wall of WALLS) {
     box(wall.width, ceiling, wall.depth, wall.x, ceiling / 2, wall.z);
+    // A continuous shadow line gives each wall a recessed base and ceiling reveal.
+    box(wall.width + 0.006, 0.018, wall.depth + 0.006, wall.x, 0.025, wall.z, recess);
+    box(wall.width + 0.008, 0.025, wall.depth + 0.008, wall.x, ceiling - 0.09, wall.z, recess);
+  }
   box(54, 0.18, 140, 0, ceiling, -60);
 
   // Long, luminous promenade. The repeated portals establish readable scale.
@@ -57,6 +60,10 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     const { x, z } = hall.center;
     // Doorway lintels stay above eye level and never obstruct the 5m opening.
     box(0.34, 1.9, 5, hall.side * 5, ceiling - 0.95, z);
+    for (const edge of [-1, 1]) {
+      box(0.38, 4.7, 0.055, hall.side * 5, 2.35, z + edge * 2.5, lacquer);
+      box(0.385, 4.7, 0.012, hall.side * 5, 2.35, z + edge * 2.53, recess);
+    }
     // Rooflights and fine ceiling reveals define each exhibition chamber.
     for (const offset of [-4.7, 4.7]) {
       box(6.7, 0.06, 17.8, x + offset, ceiling - 0.14, z, recess);
@@ -122,8 +129,8 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   shadowCanvas.width = shadowCanvas.height = 96;
   const shadowContext = shadowCanvas.getContext("2d");
   const gradient = shadowContext.createRadialGradient(48, 48, 3, 48, 48, 48);
-  gradient.addColorStop(0, "rgba(0,0,0,.19)");
-  gradient.addColorStop(0.5, "rgba(0,0,0,.09)");
+  gradient.addColorStop(0, "rgba(0,0,0,.29)");
+  gradient.addColorStop(0.5, "rgba(0,0,0,.12)");
   gradient.addColorStop(1, "rgba(0,0,0,0)");
   shadowContext.fillStyle = gradient;
   shadowContext.fillRect(0, 0, 96, 96);
@@ -188,7 +195,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     room.add(sign);
   }
   renderer.shadowMap.enabled = false;
-  const sky = new T.HemisphereLight(0xffffff, 0xe3e3e3, 2.15);
+  const sky = new T.HemisphereLight(0xffffff, 0xd8d8d8, 1.85);
   const daylight = new T.DirectionalLight(0xffffff, 2.1);
   daylight.position.set(-12, 26, 12);
   daylight.target.position.set(0, 0, -28);

@@ -73,31 +73,40 @@ for (let row = 0; row < 5; row++) {
     for (const dz of [-9.6, -5.3, 5.3, 9.6])
       slot(side * 5.3, z + dz, side === -1 ? -Math.PI / 2 : Math.PI / 2);
     HALLS.push(hall);
-    FURNITURE.push(
-      rectangle(x, z + 2.5, 4.4, 1.5, { kind: "bench", hallIndex: index }),
-    );
-    FURNITURE.push(
-      rectangle(x + side * 4.3, z - 4.1, 2.5, 1.5, {
-        kind: "lounge",
-        hallIndex: index,
-      }),
-    );
   }
 }
-FURNITURE.push(rectangle(17.5, 5, 4.4, 1.6, { kind: "reception" }));
-FURNITURE.push(rectangle(-16, 5, 4.4, 1.5, { kind: "bench" }));
-// Furnished islands keep the central promenade and artwork viewing bands clear.
-FURNITURE.push(rectangle(-22, 5, 1.6, 1.6, { kind: "ottoman" }));
-FURNITURE.push(rectangle(-11.5, 5, 1.6, 1.6, { kind: "ottoman" }));
-FURNITURE.push(rectangle(-8, 5, 1.3, 0.7, { kind: "directory" }));
-FURNITURE.push(rectangle(9, 5, 3.4, 1.8, { kind: "editorial" }));
-for (const index of [0, 5]) {
-  const { x, z } = HALLS[index].center;
-  FURNITURE.push(rectangle(x, z - 2, 5.8, 0.5, { kind: "screen", hallIndex: index }));
+// Composed seating islands: screen rooms face the film; other rooms pair chairs.
+const models = ['discs', 'bibendum', 'geometric', 'ribbed', 'cantilever', 'tufted', 'sling', 'geometric', 'bibendum', 'tufted'];
+for (const hall of HALLS) {
+  const { x, z } = hall.center;
+  const index = hall.index;
+  const cinema = index === 0 || index === 5;
+  const seat = (sx, sz, model, rotation = 0) => FURNITURE.push(
+    rectangle(sx, sz, model === 'discs' ? 2.5 : 1.6, 1.6,
+      { kind: 'lounge', model, rotation, hallIndex: index }));
+  if (cinema) {
+    FURNITURE.push(rectangle(x, z - 2, 5.8, 0.5, { kind: 'screen', hallIndex: index }));
+    seat(x - 1.8, z + 2.7, models[index]);
+    seat(x + 1.8, z + 2.7, index === 0 ? 'sling' : 'cantilever');
+  } else {
+    seat(x - 2.1, z + 1.8, models[index]);
+    seat(x + 2.1, z - 1.8, models[index], Math.PI);
+    FURNITURE.push(rectangle(x, z, 1.4, 1.4, { kind: 'coffee', hallIndex: index }));
+  }
+  FURNITURE.push(rectangle(x + 3.7, z + 2.8, 0.65, 0.65, { kind: 'lamp', hallIndex: index }));
 }
+FURNITURE.push(rectangle(17.5, 5, 4.4, 1.6, { kind: 'reception' }));
+FURNITURE.push(rectangle(-17.5, 5.8, 2.5, 1.5, { kind: 'lounge', model: 'daybed' }));
+FURNITURE.push(rectangle(-13.5, 5.8, 1.6, 1.6, { kind: 'lounge', model: 'bibendum' }));
+FURNITURE.push(rectangle(-15.5, 3.6, 1.4, 1.4, { kind: 'coffee' }));
+FURNITURE.push(rectangle(-20, 5.8, 1.2, 1.8, { kind: 'lounge', model: 'nesting' }));
+FURNITURE.push(rectangle(-12, 6.7, 0.65, 0.65, { kind: 'lamp' }));
+FURNITURE.push(rectangle(-8, 5, 1.3, 0.7, { kind: 'directory' }));
+FURNITURE.push(rectangle(9, 5, 3.4, 1.8, { kind: 'editorial' }));
+FURNITURE.push(rectangle(16, -121, 2.5, 1.5, { kind: 'lounge', model: 'daybed', hallIndex: 9 }));
 for (const index of [1, 3, 7, 9]) {
   const { x, z } = HALLS[index].center;
-  FURNITURE.push(rectangle(x - 3, z - 4, 2.8, 1.4, { kind: "editorial", hallIndex: index }));
+  FURNITURE.push(rectangle(x - 3, z - 4.5, 2.8, 1.4, { kind: 'editorial', hallIndex: index }));
 }
 export const OBSTACLES = [...WALLS, ...FURNITURE];
 export function locateHall(position) {
