@@ -1036,3 +1036,10 @@ dialog dd {
     max-width: calc(100% - 32px);
   }
 }
+
+/* Original artwork, with only its outer black margins excluded from the viewport. */
+.wordmark { flex-shrink: 0; line-height: 0; }
+.brand-image { display: block; width: 180px; height: auto; }
+@media (max-width: 700px) {
+  .brand-image { width: clamp(112px, 33vw, 145px); }
+}

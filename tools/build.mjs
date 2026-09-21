@@ -12,6 +12,7 @@ for (const path of [
   "data/catalogue.json",
   "images/kavyar",
   "images/site/favicon-32.png",
+  "images/site/brand-original.svg",
 ]) {
   await mkdir(`dist/${path.substring(0, path.lastIndexOf("/")) || "."}`, {
     recursive: true,

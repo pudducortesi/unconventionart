@@ -3,7 +3,7 @@ import { FURNITURE, HALLS, BUILDING } from "./layout.js";
 
 // Static exhibition fittings: shared box batches and a handful of text panels.
 // No video downloads or animation loops until actual films are programmed.
-export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess, glow }) {
+export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess, glow, onReady = () => {} }) {
   const targets = [];
   const panel = ({ width, height, x, y, z, rotation = 0, title, subtitle, kicker, dark = false, dialog }) => {
     const canvas = document.createElement("canvas");
@@ -37,9 +37,21 @@ export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess
   };
 
   // Arrival wall: quiet identity, floating canopy and light-lined reception.
-  panel({ width: 8, height: 2.3, x: 16.5, y: 3.3, z: 9.81, rotation: Math.PI,
-    kicker: "FOTOGRAFIA / RITRATTO / TRASFORMAZIONE", title: "unconventionart",
-    subtitle: "Uno spazio da attraversare. Uno sguardo da abitare.", dialog: "about" });
+  const brandTexture = own(new T.TextureLoader().load(
+    "images/site/brand-original.svg", onReady,
+  ));
+  brandTexture.colorSpace = T.SRGBColorSpace;
+  brandTexture.anisotropy = 4;
+  const brand = new T.Mesh(
+    own(new T.PlaneGeometry(6, 6 * 335 / 860)),
+    own(new T.MeshBasicMaterial({ map: brandTexture, toneMapped: false })),
+  );
+  brand.position.set(16.5, 3.3, 9.81);
+  brand.rotation.y = Math.PI;
+  brand.userData.dialog = "about";
+  brand.name = "original-brand-sign";
+  room.add(brand);
+  targets.push(brand);
   box(12, 0.18, 5.5, 15, 4.8, 5, plaster);
   box(10.8, 0.025, 0.045, 15, 4.69, 2.5, glow);
   box(4.15, 0.03, 0.025, 17.5, 0.19, 4.18, glow);
