@@ -46,7 +46,10 @@ for (const mobile of [false, true]) {
       const hit = floorRay.intersectObjects(architecture.occluders, true)[0];
       assert(hit?.object.userData.walkable, 'Finished floors must preserve tap-to-walk');
       assert(hit.object.name.startsWith(hall.id + '-'), 'Room finish must cover the structural slab');
-      assert.equal(hit.object.material.color.getHex(), ROOM_FINISHES[hall.index].floor, 'Each room retains its own coloured floor material');
+      assert.equal(hit.object.material.color.getHex(), 0xffffff, 'Wood colour comes from the shared mahogany texture');
+      assert(hit.object.material.map?.image.data, 'All rooms have parquet rather than a flat fill');
+      assert.equal(ROOM_FINISHES[hall.index].wall, 0xffffff, 'Exhibition walls are white');
+      assert.equal(ROOM_FINISHES[hall.index].accent, 0xffffff, 'Entrance walls are white');
     }
     for (const x of [0, -4.2, 4.2]) {
       for (const z of [-13, -39, -65, -91, -117]) {
