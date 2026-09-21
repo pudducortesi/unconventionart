@@ -59,3 +59,24 @@ passes need separate GPU and mobile performance validation before integration.
 This update is not ray tracing or game-engine-level global illumination.
 Automated construction, shadow invalidation and build checks pass; actual WebGL
 appearance and iPhone frame rate remain unverified in the cloud browser.
+
+
+## Floors and ceilings
+
+White finishes now distinguish the rooms: fine terrazzo (Soglia, Corpo, Intimo,
+Orizzonte), honed stone (Atelier, Materia, Archivio), satin resin (Contrasto,
+Movimento, Notturno). Slab modules are 3m with thin joints. Procedural texture
+UVs use metre-based scale, mipmaps and supported anisotropic filtering.
+Floor finishes remain walkable and sit above a lowered structural slab to
+avoid coplanar depth flicker. No photographic assets are altered.
+
+Ceilings use six deep rooflight coffers in Soglia/Contrasto/Archivio; a central
+field of white acoustic fins in Atelier/Materia/Orizzonte; two suspended rafts
+in Corpo/Movimento/Notturno/Intimo. Perimeter shadow gaps, slender luminous
+reveals, panel thickness and hangers establish construction depth. Shared
+instanced geometry limits draw calls. Luminous panels are visual surfaces,
+not additional simulated light sources. Existing shared lighting is retained.
+
+Construction, first-artwork visibility and finished-floor walking raycasts
+pass on both device configurations. WebGL appearance remains unverified
+because the available browser has no WebGL context.
