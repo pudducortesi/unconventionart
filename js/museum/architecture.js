@@ -1,3 +1,4 @@
+import { partitionInstances } from "./spatial-batches.js";
 import { pendantPositions } from "./lighting-fixtures.js";
 import { createInteriorEnvelope } from "./interior-envelope.js";
 import { createSurfaceDetail } from "./surface-detail.js";
@@ -274,6 +275,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   lights.push(sky, daylight);
   // The building and its furniture are static. Cache their transforms once
   // instead of recomputing local matrices in every lighting/postprocessing pass.
+  partitionInstances(room, occluders);
   room.updateMatrixWorld(true);
   room.traverse(object => { object.matrixAutoUpdate = false; });
   return {
