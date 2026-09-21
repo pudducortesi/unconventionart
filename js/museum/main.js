@@ -8,11 +8,13 @@ import {
   layoutWorks,
   findPath,
   viewingDistance,
+  safeViewpoint,
 } from "./navigation.js";
 const $ = (selector) => document.querySelector(selector);
 const root = $("#scene"),
-  status = $("#loading-status"),
-  entry = $("#enter");
+  status = $("#loading-status");
+const coarse = matchMedia("(pointer:coarse)");
+const joystick = { x: 0, y: 0, id: null };
 const media = matchMedia("(prefers-reduced-motion: reduce)");
 let smooth = !media.matches,
   entered = false,
@@ -36,10 +38,11 @@ let frame = 0,
   lastTime = 0,
   disposed = false,
   roomGeneration = 0;
-const player = { x: -2.8, z: 5.8 };
+const player = { x: -1.8, z: 6.7 };
 const plaqueButtons = new Map();
-const initial = { x: -2.8, y: 1.7, z: 5.8 };
-let introLook = orientation(initial, { x: 0, y: 2.8, z: -8.6 });
+const initial = { x: -1.8, y: 1.7, z: 6.7 };
+const initialTarget = { x: 1, y: 1.7, z: -3.4 };
+let introLook = orientation(initial, initialTarget);
 yaw = introLook.yaw;
 pitch = introLook.pitch;
 try {
@@ -81,13 +84,30 @@ media.addEventListener("change", (event) => {
 });
 updateMotion();
 function stop() {
+  if (pointer && renderer?.domElement.hasPointerCapture(pointer.id))
+    renderer.domElement.releasePointerCapture(pointer.id);
+  pointer = null;
   keys.clear();
   path = [];
   finalLook = null;
+  resetJoystick();
+}
+function resetJoystick() {
+  joystick.x = joystick.y = 0;
+  if (joystick.id !== null && $("#joystick").hasPointerCapture(joystick.id))
+    $("#joystick").releasePointerCapture(joystick.id);
+  joystick.id = null;
+  $("#joystick-knob").style.transform = "";
 }
 function dialogOpen() {
   return !!document.querySelector("dialog[open]");
 }
+document.querySelectorAll("[data-open]").forEach((button) =>
+  button.addEventListener("click", () => {
+    stop();
+    document.getElementById(button.dataset.open).showModal();
+  }),
+);
 $("#help-open").addEventListener("click", () => {
   stop();
   $("#help").showModal();
@@ -101,20 +121,22 @@ document
   );
 document.querySelectorAll("dialog").forEach((dialog) =>
   dialog.addEventListener("close", () => {
-    invalidate();
+    if (!dialogOpen() && entered)
+      renderer?.domElement.focus({ preventScroll: true });
+    if (renderer) invalidate();
   }),
 );
 function fail(message) {
   stop();
-  entry.disabled = true;
-  entry.textContent = "La sala 3D non è disponibile";
-  status.textContent = message + " Puoi aprire il catalogo fotografico.";
+  status.textContent = message;
+  document.body.classList.add("failed");
+  $("#fallback-open").hidden = !catalogue;
   document.body.classList.remove("exploring");
   $("#hud").hidden = true;
   entered = false;
 }
 function invalidate() {
-  if (!frame && !disposed && !document.hidden)
+  if (renderer && camera && !frame && !disposed && !document.hidden)
     frame = requestAnimationFrame(render);
 }
 function setView() {
@@ -134,6 +156,7 @@ function clearSelection() {
   document.body.classList.remove("viewing");
 }
 function walkTo(destination, look = null) {
+  resetJoystick();
   keys.clear();
   path = findPath(player, destination);
   finalLook = look;
@@ -166,9 +189,11 @@ function focusPosition(art) {
   );
   const target = art.target.clone().addScaledVector(right, 0.35);
   const position = target.clone().addScaledVector(art.normal, distance);
+  Object.assign(position, safeViewpoint(position));
   position.y = 1.7;
   return { position, target };
 }
+const plaqueRay = new T.Raycaster();
 function positionPlaques() {
   if (!entered) return;
   camera.updateMatrixWorld();
@@ -181,13 +206,22 @@ function positionPlaques() {
     const facing =
       new T.Vector3().subVectors(camera.position, world).dot(art.normal) > 0;
     const projected = world.clone().project(camera);
+    const distance = camera.position.distanceTo(world);
+    plaqueRay.set(
+      camera.position,
+      world.clone().sub(camera.position).normalize(),
+    );
+    plaqueRay.far = Math.max(0, distance - 0.06);
+    const blocked =
+      plaqueRay.intersectObjects(architecture.occluders, false).length > 0;
     const visible =
       facing &&
+      !blocked &&
       projected.z > -1 &&
       projected.z < 1 &&
       Math.abs(projected.x) < 0.92 &&
       Math.abs(projected.y) < 0.72 &&
-      camera.position.distanceTo(world) < 15;
+      distance < 10;
     button.hidden = !visible;
     if (visible) {
       button.style.left = `${((projected.x + 1) * rect.width) / 2}px`;
@@ -218,8 +252,6 @@ function describeWork(index) {
     dd.textContent = value;
     $("#details-metadata").append(dt, dd);
   }
-  $("#details-contact").href =
-    `contact.html?work=${encodeURIComponent(work.title)}`;
   $("#work-details").showModal();
 }
 $("#details-inspect").addEventListener("click", () => {
@@ -249,11 +281,15 @@ function inspect() {
   $("#artwork-series").textContent = rooms[roomIndex].collection.title;
   $("#artwork-image").src = art.slot.work.image;
   $("#artwork-image").alt = art.slot.work.alt || art.slot.work.title;
-  $("#artwork-contact").href =
-    `contact.html?work=${encodeURIComponent(art.slot.work.title)}`;
+  $("#artwork-details").hidden = false;
   $("#artwork").showModal();
 }
 $("#inspect-work").addEventListener("click", inspect);
+$("#describe-work").addEventListener("click", () => describeWork(selected));
+$("#artwork-details").addEventListener("click", () => {
+  $("#artwork").close();
+  describeWork(selected);
+});
 $("#leave-work").addEventListener("click", () => {
   clearSelection();
   stop();
@@ -266,7 +302,7 @@ $("#previous-work").addEventListener("click", () =>
 );
 $("#entrance").addEventListener("click", () => {
   clearSelection();
-  walkTo(initial, { x: 0, y: 2.8, z: -8.6 });
+  walkTo(initial, initialTarget);
 });
 $("#next-room").addEventListener("click", () =>
   loadRoom((roomIndex + 1) % rooms.length).catch((error) =>
@@ -319,9 +355,6 @@ async function loadRoom(index) {
   });
   if (!artworks.length)
     throw new Error("Non è stato possibile caricare le fotografie.");
-  $("#exhibition-name").textContent = room.collection.title;
-  $("#exhibition-count").textContent =
-    `${artworks.length} ${artworks.length === 1 ? "opera esposta" : "opere esposte"} / visita libera`;
   $("#room-label").textContent =
     `SALA ${String(index + 1).padStart(2, "0")} / ${room.collection.title.toUpperCase()}`;
   $("#next-room").hidden = rooms.length < 2;
@@ -337,7 +370,7 @@ async function loadRoom(index) {
     dot.setAttribute("cx", 12 + ((art.slot.x + 7) / 14) * 116);
     dot.setAttribute("cy", 12 + ((art.slot.z + 9) / 18) * 156);
     dot.setAttribute("r", "2.5");
-    dot.setAttribute("fill", "#53594b");
+    dot.setAttribute("fill", "#454545");
     $("#map-art").append(dot);
   }
   player.x = initial.x;
@@ -345,33 +378,62 @@ async function loadRoom(index) {
   yaw = introLook.yaw;
   pitch = introLook.pitch;
   loadingRoom = false;
-  if (innerWidth <= 700 && artworks.length) {
-    const framing = focusPosition(artworks[0]);
-    Object.assign(player, { x: framing.position.x, z: framing.position.z });
-    const look = orientation(
-      { x: player.x, y: 1.7, z: player.z },
-      framing.target,
-    );
-    yaw = look.yaw;
-    pitch = look.pitch;
-    selected = 0;
-  }
   invalidate();
   announce(
     `${room.collection.title}, ${artworks.length} opere.${failed ? " Alcune immagini non sono disponibili." : ""}`,
   );
 }
-entry.addEventListener("click", () => {
-  if (!renderer || loadingRoom) return;
-  entered = true;
-  document.body.classList.add("exploring");
-  $("#hud").hidden = false;
-  renderer.domElement.focus({ preventScroll: true });
-  invalidate();
-  announce(
-    "Sei nella galleria. Trascina per guardarti intorno e clicca sul pavimento per camminare.",
+function buildCollection() {
+  $("#work-count").textContent = String(catalogue.works.length).padStart(
+    2,
+    "0",
   );
-});
+  $("#collection-list").replaceChildren();
+  for (const [roomNumber, room] of rooms.entries())
+    for (const work of room.works) {
+      const button = document.createElement("button");
+      button.className = "collection-work";
+      const image = new Image();
+      image.src = work.image;
+      image.alt = work.alt || work.title;
+      image.loading = "lazy";
+      const text = document.createElement("span");
+      text.textContent = work.title;
+      const small = document.createElement("small");
+      small.textContent = `${room.collection.title} / Sala ${String(roomNumber + 1).padStart(2, "0")}`;
+      text.append(small);
+      const arrow = document.createElement("b");
+      arrow.textContent = "↗";
+      button.append(image, text, arrow);
+      button.addEventListener("click", async () => {
+        if (!renderer || !entered) {
+          showFlatWork(work, room.collection);
+          return;
+        }
+        $("#collection").close();
+        try {
+          if (roomIndex !== roomNumber) await loadRoom(roomNumber);
+          const index = artworks.findIndex(
+            (art) => art.slot.work.id === work.id,
+          );
+          if (index >= 0) focusWork(index);
+          else announce("Questa fotografia non è disponibile.");
+        } catch (error) {
+          fail(error.message);
+        }
+      });
+      $("#collection-list").append(button);
+    }
+}
+function showFlatWork(work, collection) {
+  $("#collection").close();
+  $("#artwork-title").textContent = work.title;
+  $("#artwork-series").textContent = collection.title;
+  $("#artwork-image").src = work.image;
+  $("#artwork-image").alt = work.alt || work.title;
+  $("#artwork-details").hidden = true;
+  $("#artwork").showModal();
+}
 function render(time) {
   frame = 0;
   if (disposed || document.hidden) return;
@@ -379,13 +441,15 @@ function render(time) {
   lastTime = time;
   let moving = false;
   if (entered && !dialogOpen() && !loadingRoom) {
-    if (keys.size) {
+    if (keys.size || Math.abs(joystick.x) + Math.abs(joystick.y) > 0.01) {
       path = [];
       finalLook = null;
       clearSelection();
-      let forward = Number(keys.has("forward")) - Number(keys.has("back"));
-      let sideways = Number(keys.has("right")) - Number(keys.has("left"));
-      const length = Math.hypot(forward, sideways) || 1;
+      let forward =
+        Number(keys.has("forward")) - Number(keys.has("back")) - joystick.y;
+      let sideways =
+        Number(keys.has("right")) - Number(keys.has("left")) + joystick.x;
+      const length = Math.max(1, Math.hypot(forward, sideways));
       forward /= length;
       sideways /= length;
       const dx =
@@ -450,7 +514,7 @@ function attachControls() {
   const marker = new T.Mesh(
     new T.RingGeometry(0.17, 0.195, 40),
     new T.MeshBasicMaterial({
-      color: 0x74796c,
+      color: 0x686868,
       transparent: true,
       opacity: 0.8,
       side: T.DoubleSide,
@@ -467,18 +531,31 @@ function attachControls() {
       (-(event.clientY - rect.top) / rect.height) * 2 + 1,
     );
     raycaster.setFromCamera(coords, camera);
-    return raycaster.intersectObjects(
+    const target = raycaster.intersectObjects(
       [
-        architecture.floor,
+        ...architecture.occluders,
         ...artworks.flatMap((art) => [art.photograph, art.label]),
       ],
       false,
     )[0];
+    return target &&
+      (target.object.userData.walkable || target.object.userData.work)
+      ? target
+      : null;
   }
   canvas.addEventListener("pointerdown", (event) => {
-    if (!entered || dialogOpen() || event.button !== 0 || pointer) return;
+    if (
+      !entered ||
+      dialogOpen() ||
+      loadingRoom ||
+      event.button !== 0 ||
+      pointer
+    )
+      return;
     canvas.focus({ preventScroll: true });
-    stop();
+    // Looking and walking can happen together with two fingers.
+    path = [];
+    finalLook = null;
     pointer = {
       id: event.pointerId,
       x: event.clientX,
@@ -538,7 +615,7 @@ function attachControls() {
     pointer = null;
     if (canvas.hasPointerCapture(event.pointerId))
       canvas.releasePointerCapture(event.pointerId);
-    if (dragged) return;
+    if (dragged || dialogOpen() || !entered || loadingRoom) return;
     const target = hit(event);
     if (!target) return;
     const work = target.object.userData.work;
@@ -552,6 +629,9 @@ function attachControls() {
     }
   });
   canvas.addEventListener("pointercancel", () => {
+    pointer = null;
+  });
+  canvas.addEventListener("lostpointercapture", () => {
     pointer = null;
   });
   canvas.addEventListener("pointerleave", () => {
@@ -605,34 +685,37 @@ function attachControls() {
     stop();
     pointer = null;
   });
-  document.querySelectorAll("[data-move]").forEach((button) => {
-    button.addEventListener("pointerdown", (event) => {
-      if (dialogOpen()) return;
-      event.preventDefault();
-      button.setPointerCapture(event.pointerId);
-      keys.add(button.dataset.move);
-      invalidate();
-    });
-    const release = () => keys.delete(button.dataset.move);
-    button.addEventListener("pointerup", release);
-    button.addEventListener("pointercancel", release);
-    button.addEventListener("lostpointercapture", release);
-    button.addEventListener("click", (event) => {
-      if (event.detail === 0) {
-        const direction = button.dataset.move;
-        const forward =
-            direction === "forward" ? 1 : direction === "back" ? -1 : 0,
-          side = direction === "right" ? 1 : direction === "left" ? -1 : 0;
-        walkTo(
-          moveWithCollision(
-            player,
-            -Math.sin(yaw) * forward + Math.cos(yaw) * side,
-            -Math.cos(yaw) * forward - Math.sin(yaw) * side,
-          ),
-        );
-      }
-    });
+  const stick = $("#joystick");
+  const updateStick = (event) => {
+    const rect = stick.getBoundingClientRect();
+    const dx = event.clientX - rect.left - rect.width / 2;
+    const dy = event.clientY - rect.top - rect.height / 2;
+    const radius = 34,
+      length = Math.hypot(dx, dy),
+      ratio = Math.min(1, radius / (length || 1));
+    joystick.x = length < 5 ? 0 : (dx * ratio) / radius;
+    joystick.y = length < 5 ? 0 : (dy * ratio) / radius;
+    $("#joystick-knob").style.transform =
+      `translate(${dx * ratio}px, ${dy * ratio}px)`;
+    invalidate();
+  };
+  stick.addEventListener("pointerdown", (event) => {
+    if (dialogOpen() || !entered || joystick.id !== null) return;
+    event.preventDefault();
+    path = [];
+    finalLook = null;
+    clearSelection();
+    joystick.id = event.pointerId;
+    stick.setPointerCapture(event.pointerId);
+    updateStick(event);
   });
+  stick.addEventListener("pointermove", (event) => {
+    if (event.pointerId === joystick.id) updateStick(event);
+  });
+  for (const name of ["pointerup", "pointercancel", "lostpointercapture"])
+    stick.addEventListener(name, (event) => {
+      if (event.pointerId === joystick.id) resetJoystick();
+    });
   canvas.addEventListener("webglcontextlost", (event) => {
     event.preventDefault();
     fail(
@@ -646,17 +729,6 @@ function resize() {
   camera.aspect = rect.width / rect.height;
   camera.updateProjectionMatrix();
   renderer.setSize(rect.width, rect.height);
-  if (selected >= 0 && artworks[selected] && !pointer && !keys.size) {
-    stop();
-    const framing = focusPosition(artworks[selected]);
-    Object.assign(player, { x: framing.position.x, z: framing.position.z });
-    const look = orientation(
-      { x: player.x, y: 1.7, z: player.z },
-      framing.target,
-    );
-    yaw = look.yaw;
-    pitch = look.pitch;
-  }
   invalidate();
 }
 addEventListener("resize", resize);
@@ -683,6 +755,16 @@ addEventListener("pageshow", (event) => {
   if (event.persisted) invalidate();
 });
 try {
+  catalogue = await loadCatalogue({ publicOnly: true });
+  for (const collection of catalogue.collections) {
+    const works = catalogue.works.filter(
+      (work) => work.collection === collection.id,
+    );
+    for (let i = 0; i < works.length; i += 8)
+      rooms.push({ collection, works: works.slice(i, i + 8) });
+  }
+  if (!rooms.length) throw new Error("Il catalogo fotografico è vuoto.");
+  buildCollection();
   renderer = new T.WebGLRenderer({
     antialias: true,
     alpha: false,
@@ -699,38 +781,27 @@ try {
   renderer.toneMapping = T.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
   scene = new T.Scene();
-  scene.background = new T.Color(0xf4f3ee);
+  scene.background = new T.Color(0xffffff);
   scene.fog = null;
-  camera = new T.PerspectiveCamera(53, innerWidth / innerHeight, 0.05, 70);
+  camera = new T.PerspectiveCamera(
+    coarse.matches ? 70 : 60,
+    innerWidth / innerHeight,
+    0.05,
+    70,
+  );
   root.append(renderer.domElement);
   architecture = createArchitecture(scene, renderer);
+  renderer.shadowMap.autoUpdate = false;
+  renderer.shadowMap.needsUpdate = true;
   setView();
   renderer.render(scene, camera);
-  catalogue = await loadCatalogue();
-  for (const collection of catalogue.collections) {
-    const works = catalogue.works.filter(
-      (work) => work.collection === collection.id,
-    );
-    for (let i = 0; i < works.length; i += 8)
-      rooms.push({ collection, works: works.slice(i, i + 8) });
-  }
-  if (!rooms.length) throw new Error("Il catalogo fotografico è vuoto.");
   await loadRoom(0);
   attachControls();
-  entry.disabled = false;
-  entry.replaceChildren(document.createTextNode("Entra nella galleria"));
-  const arrow = document.createElement("span");
-  arrow.className = "button-arrow";
-  arrow.textContent = "↗";
-  entry.append(arrow);
   status.textContent = "";
   entered = true;
   document.body.classList.add("exploring");
   $("#hud").hidden = false;
-  $(".movement-hint").textContent =
-    innerWidth <= 700
-      ? "Trascina per guardare · Tocca il pavimento per camminare"
-      : "Trascina per guardare · Clicca sul pavimento per camminare · WASD / frecce";
+  if (!coarse.matches) renderer.domElement.focus({ preventScroll: true });
   resize();
   invalidate();
 } catch (error) {

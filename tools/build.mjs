@@ -1,27 +1,22 @@
 import { prepareVendor } from "./vendor.mjs";
 import { cp, mkdir, rm } from "node:fs/promises";
 await rm("dist", { recursive: true, force: true });
-await mkdir("dist");
+await mkdir("dist", { recursive: true });
+// The production experience has one HTML entry point. Legacy editorial source
+// remains in git, but is not shipped as a separate website.
 for (const path of [
   "index.html",
-  "editorial.html",
-  "exhibitions.html",
-  "collection.html",
-  "about.html",
-  "contact.html",
-  "journal.html",
-  "post.html",
-  "css",
-  "js",
-  "data",
-  "images",
+  "css/museum.css",
+  "js/museum",
+  "js/catalogue.js",
+  "data/catalogue.json",
+  "images/kavyar",
+  "images/site/favicon-32.png",
 ]) {
-  await cp(path, `dist/${path}`, {
+  await mkdir(`dist/${path.substring(0, path.lastIndexOf("/")) || "."}`, {
     recursive: true,
-    filter: (src) =>
-      !src.includes("private") && !src.endsWith("local-catalogue.json"),
   });
+  await cp(path, `dist/${path}`, { recursive: true });
 }
-console.log("Static website built in dist/. Private preview assets excluded.");
-
 await prepareVendor("dist");
+console.log("Single-page gallery built in dist/.");

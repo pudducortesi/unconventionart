@@ -47,3 +47,21 @@ try {
 console.log(
   `${pages.length} pages checked: local links, headings, IDs, catalogue references, production asset isolation.`,
 );
+
+const museum = await readFile("index.html", "utf8");
+const controller = await readFile("js/museum/main.js", "utf8");
+const museumIds = new Set(
+  [...museum.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]),
+);
+for (const [, id] of controller.matchAll(/\$\("#([\w-]+)"\)/g))
+  assert(museumIds.has(id), `Controller references missing element: ${id}`);
+assert(
+  !/href="[^"#]*\.html/.test(museum),
+  "The gallery must not link to other pages",
+);
+assert.deepEqual(
+  (await readdir("dist")).filter((path) => path.endsWith(".html")),
+  ["index.html"],
+  "One production page",
+);
+console.log("Gallery controller elements and single-page build checked.");

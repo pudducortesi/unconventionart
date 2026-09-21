@@ -4,5 +4,11 @@
   "installCommand": "npm ci --ignore-scripts",
   "buildCommand": "node tools/build.mjs",
   "outputDirectory": "dist",
-  "cleanUrls": false
+  "cleanUrls": false,
+  "rewrites": [
+    {
+      "source": "/(editorial|exhibitions|collection|about|contact|journal|post).html",
+      "destination": "/index.html"
+    }
+  ]
 }
