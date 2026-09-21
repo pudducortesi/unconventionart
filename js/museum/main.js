@@ -1,3 +1,4 @@
+import { createSelection, selectionFromHash, selectionLink } from "./selection.js";
 import { createPerformancePolicy } from "./performance-policy.js";
 import { createResolutionPolicy } from "./resolution-policy.js";
 import { createGuidedVisit } from "./guided-visit.js";
@@ -58,6 +59,7 @@ let viewport = { width: innerWidth, height: innerHeight };
 const performancePolicy = createPerformancePolicy();
 let movementPixelRatio = Math.min(devicePixelRatio, mobile ? 1.1 : performancePolicy.profile.ratio);
 const resolutionPolicy = createResolutionPolicy({ wake: invalidate });
+let savedSelection, selectionOnly = false;
 let detailArtwork = null;
 let focusRequest = 0;
 let realistic = true;
@@ -103,6 +105,34 @@ const guide = createGuidedVisit({
     $("#tour-status").textContent = state.paused ? "In pausa · esplora liberamente" : "Ti accompagniamo alla tappa. Prosegui quando vuoi.";
     announce(`${state.step.title}. ${state.paused ? "Guida in pausa." : state.step.description}`);
   },
+});
+$("#tour-pilot").addEventListener("click", () => {
+  $("#guided-tours").close();
+  if (!entered || !slots.length) return;
+  guide.start([
+    { hallIndex: slots[0].hallIndex, title: "01 / La soglia", description: "Metamorfosi — un prologo in tre tappe. Attraversa lo spazio e lascia che lo sguardo si abitui alla luce. Prosegui quando vuoi." },
+    { workIndex: 0, title: "02 / Presenza", description: slots[0].work.description || slots[0].work.alt },
+    { workIndex: 0, title: "03 / Il tuo sguardo", description: "Apri la fotografia in HD. Osserva i dettagli, poi salvala nella tua selezione: sarà il primo tassello del tuo percorso personale." },
+  ]);
+});
+$("#selection-filter").addEventListener("click", () => { selectionOnly = !selectionOnly; buildCollection(); });
+$("#selection-tour").addEventListener("click", () => {
+  if (!entered) return;
+  const steps = slots.flatMap((s, i) => savedSelection.has(s.work.id) ? [{ workIndex: i, title: s.work.title, description: s.work.description || s.work.alt }] : []);
+  $("#collection").close(); guide.start(steps);
+});
+$("#selection-share").addEventListener("click", async () => {
+  const link = selectionLink(location.href, savedSelection.ids());
+  $("#selection-link").hidden = false; $("#selection-link").value = link;
+  try { await navigator.clipboard.writeText(link); $("#selection-status").textContent = "Link copiato. Chi lo apre ritrova queste fotografie nell’indice Opere."; }
+  catch { $("#selection-link").select(); $("#selection-status").textContent = "Copia il link qui sotto per condividere la selezione."; }
+});
+$("#artwork-save").addEventListener("click", () => {
+  const work = slots[selected]?.work; if (!work) return;
+  savedSelection.toggle(work.id); buildCollection();
+  $("#artwork-save").setAttribute("aria-pressed", String(savedSelection.has(work.id)));
+  $("#artwork-save").textContent = savedSelection.has(work.id) ? "♥ Salvata · rimuovi" : "♡ Salva nella selezione";
+  announce(savedSelection.persistent ? "Selezione aggiornata su questo dispositivo." : "Selezione aggiornata per questa visita; usa Condividi per conservarla.");
 });
 $("#tour-spaces").addEventListener("click", () => {
   $("#guided-tours").close();
@@ -385,7 +415,20 @@ function buildMaps() {
 function buildCollection() {
   $("#work-count").textContent = String(slots.length).padStart(2, "0");
   $("#collection-list").replaceChildren();
+  if (!savedSelection) {
+    let storage; try { storage = localStorage; } catch {}
+    savedSelection = createSelection(slots.map(s => s.work.id), storage);
+    const shared = selectionFromHash(location.hash, slots.map(s => s.work.id));
+    if (shared !== null) { savedSelection.replace(shared); selectionOnly = true; }
+  }
+  const saved = savedSelection.ids();
+  $("#selection-filter").textContent = `La mia selezione · ${saved.length}`;
+  $("#selection-filter").setAttribute("aria-pressed", String(selectionOnly));
+  $("#selection-share").disabled = !saved.length;
+  $("#selection-tour").disabled = !saved.length || !entered;
+  $("#selection-status").textContent = selectionOnly && !saved.length ? "Apri una fotografia e premi Salva per iniziare la tua selezione." : "";
   slots.forEach((slot, index) => {
+    if (selectionOnly && !savedSelection.has(slot.work.id)) return;
     const work = slot.work,
       button = document.createElement("button");
     button.className = "collection-work";
@@ -512,6 +555,8 @@ function describeWork(index) {
 function inspect() {
   const work = slots[selected]?.work;
   if (!work) return;
+  $("#artwork-save").setAttribute("aria-pressed", String(savedSelection.has(work.id)));
+  $("#artwork-save").textContent = savedSelection.has(work.id) ? "♥ Salvata · rimuovi" : "♡ Salva nella selezione";
   $("#artwork-title").textContent = work.title;
   $("#artwork-series").textContent =
     collectionFor(work)?.title || "UnconventionArt";
@@ -949,6 +994,7 @@ try {
   });
   stream.update(player, { force: true });
   entered = true;
+  buildCollection();
   $("#hud").hidden = false;
   $("#next-room").hidden = false;
   $("#previous-work").disabled = slots.length < 2;

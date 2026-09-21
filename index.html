@@ -170,6 +170,7 @@
       <button class="dialog-close" data-close="guided-tours" aria-label="Chiudi">×</button>
       <span class="eyebrow">SCEGLI IL TUO PERCORSO</span><h2>Lasciati accompagnare.</h2>
       <p>Ti accompagniamo tra le tappe. Fermati quanto vuoi: decidi tu quando continuare. Se prendi i comandi, la guida va in pausa.</p>
+      <button id="tour-pilot" class="tour-choice"><strong>Metamorfosi — prologo</strong><span>Tre tappe · spazio, ritratto, osservazione</span></button>
       <button id="tour-spaces" class="tour-choice"><strong>Le dieci anime</strong><span>10 sale · architettura, arredi e atmosfere</span></button>
       <button id="tour-art" class="tour-choice"><strong>Le fotografie</strong><span id="tour-art-count">Le opere attualmente esposte</span></button>
     </dialog>
@@ -241,6 +242,9 @@
       <p class="collection-intro">
         Scegli una fotografia. Ti accompagniamo nella sua sala.
       </p>
+      <div class="selection-toolbar"><button id="selection-filter" aria-pressed="false">La mia selezione · 0</button><button id="selection-tour">Visita la selezione</button><button id="selection-share">Condividi</button></div>
+      <p id="selection-status" role="status" aria-live="polite"></p>
+      <input id="selection-link" readonly aria-label="Link alla selezione" hidden />
       <div id="collection-list"></div>
     </dialog>
     <dialog id="about" aria-labelledby="about-title">
@@ -304,6 +308,7 @@
           <h2 id="artwork-title"></h2>
         </div>
         <div class="artwork-actions">
+          <button id="artwork-save" aria-pressed="false">♡ Salva nella selezione</button>
           <a id="artwork-original" target="_blank" rel="noopener">Apri originale ↗</a>
           <button id="artwork-details">Leggi il cartellino ↗</button>
         </div>
