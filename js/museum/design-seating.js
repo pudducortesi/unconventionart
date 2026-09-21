@@ -45,8 +45,11 @@ export function createDesignSeating(room, own) {
   const add = (geometry, material, x, y, z, sx = 1, sy = 1, sz = 1, rx = 0, ry = 0, rz = 0) => {
     const key = `${geometry.uuid}/${material.uuid}`;
     if (!batches.has(key)) batches.set(key, { geometry, material, parts: [] });
-    const matrix = new T.Matrix4().compose(new T.Vector3(origin.x + x, y, origin.z + z),
+    const matrix = new T.Matrix4().compose(new T.Vector3(x, y, z),
       new T.Quaternion().setFromEuler(new T.Euler(rx, ry, rz)), new T.Vector3(sx, sy, sz));
+    const placement = new T.Matrix4().makeRotationY(origin.rotation || 0);
+    placement.setPosition(origin.x, 0, origin.z);
+    matrix.premultiply(placement);
     batches.get(key).parts.push(matrix);
   };
   const box = (x,y,z,w,h,d,mat=frame,rx=0) => add(cube,mat,x,y,z,w,h,d,rx);
@@ -154,13 +157,11 @@ export function createDesignSeating(room, own) {
       box(0,0.38,-0.4,0.94,0.03,0.03);
     }
   };
-  const sequence=['bibendum','discs','geometric','ribbed','cantilever','tufted','sling','nesting','bibendum','tufted'];
   for(const piece of FURNITURE) {
     origin=piece;
     leather=palette.black; frame=palette.chrome;
     lacquer=palette.darkWood; seam=palette.darkSeam;
-    if(piece.kind==='lounge') models[sequence[piece.hallIndex]]();
-    if(piece.kind==='bench') models.daybed();
+    if(piece.kind==='lounge') models[piece.model]();
   }
   const meshes=[];
   for(const {geometry,material,parts} of batches.values()) {

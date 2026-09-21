@@ -178,10 +178,10 @@ test("furniture click destinations are rejected and obstructed viewpoints are co
   assert.deepEqual(findPath({ x: NaN, z: 0 }, INITIAL), []);
 });
 
-test("routes keep their exact endpoints beside walls and at both sides of benches", () => {
+test("routes keep their exact endpoints beside walls and at both sides of seating islands", () => {
   for (const hall of HALLS) {
     const bench = FURNITURE.find(
-      (f) => f.hallIndex === hall.index && f.kind === "bench",
+      (f) => f.hallIndex === hall.index && f.kind === "lounge",
     );
     const start = { x: bench.x, z: bench.minZ - 0.31 };
     const goal = { x: bench.x + 0.127, z: bench.maxZ + 0.31 };
