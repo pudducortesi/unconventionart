@@ -680,7 +680,7 @@ try {
     200,
   );
   root.append(renderer.domElement);
-  architecture = createArchitecture(scene, renderer, { mobile });
+  architecture = createArchitecture(scene, renderer, { mobile, onReady: invalidate });
   stream = createArtStream({
     slots,
     limit: mobile ? 24 : 48,

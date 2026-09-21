@@ -5,7 +5,7 @@ import { BUILDING, HALLS, WALLS, FURNITURE } from "./layout.js";
 
 /** Ten connected white halls. Repeated construction is instanced by material,
  * so the size of the building does not multiply its lighting or draw calls. */
-export function createArchitecture(scene, renderer, { mobile = false } = {}) {
+export function createArchitecture(scene, renderer, { mobile = false, onReady = () => {} } = {}) {
   const room = new T.Group();
   room.name = "white-museum-200";
   scene.add(room);
@@ -97,7 +97,7 @@ export function createArchitecture(scene, renderer, { mobile = false } = {}) {
     }
   }
 
-  const features = furnishGallery({ room, own, box, plaster, stone, lacquer, recess, glow });
+  const features = furnishGallery({ room, own, box, plaster, stone, lacquer, recess, glow, onReady });
 
   // Include the real floor so the same raycast list supports tap-to-walk.
   const occluders = [floor, ...features, ...createDesignSeating(room, own)];
