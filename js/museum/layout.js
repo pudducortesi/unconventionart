@@ -1,6 +1,13 @@
 // One continuous museum: ten exhibition halls linked by a central promenade.
 // Architecture, pathfinding and the plan all use these same dimensions.
 export const CAPACITY = 200;
+export const PHOTO_SHARE = 0.6;
+export const HANGING_CENTER = 1.8;
+export const PHOTO_FORMATS = [
+  { width: 1.6, height: 2.4, label: '160 × 240 cm' },
+  { width: 2.4, height: 1.6, label: '240 × 160 cm' },
+  { width: 1.2, height: 1.8, label: '120 × 180 cm' },
+];
 export const BUILDING = {
   minX: -27,
   maxX: 27,
@@ -10,7 +17,7 @@ export const BUILDING = {
 };
 export const BOUNDS = { minX: -26.45, maxX: 26.45, minZ: -129.45, maxZ: 9.45 };
 export const INITIAL = { x: -19, y: 1.7, z: -10.9 };
-export const INITIAL_TARGET = { x: -26.7, y: 2.25, z: -10.9 };
+export const INITIAL_TARGET = { x: -26.7, y: HANGING_CENTER, z: -10.9 };
 export const HALLS = [];
 export const WALLS = [];
 export const FURNITURE = [];
@@ -75,7 +82,11 @@ for (let row = 0; row < 5; row++) {
     // Start with the outer wall visible from the doorway, then follow the perimeter.
     const order = [8, 9, 10, 11, 12, 13, 14, 15, 19, 18, 17, 16, 4, 3, 2, 1, 0, 5, 6, 7];
     hall.slots = order.map((previous, position) => ({
-      ...hall.slots[previous], id: `S${index + 1}-${String(position + 1).padStart(2, '0')}`,
+      ...hall.slots[previous],
+      formatIndex: position % PHOTO_FORMATS.length,
+      format: PHOTO_FORMATS[position % PHOTO_FORMATS.length],
+      plannedPhoto: Array.from({ length: 12 }, (_, n) => Math.floor(n * 20 / 12)).includes(position),
+      id: `S${index + 1}-${String(position + 1).padStart(2, '0')}`,
     }));
     HALLS.push(hall);
   }

@@ -1,7 +1,7 @@
 import * as T from "../../vendor/three.module.js";
 import { createDesignSeating } from "./design-seating.js";
 import { furnishGallery } from "./furnishings.js";
-import { BUILDING, HALLS, WALLS, FURNITURE } from "./layout.js";
+import { BUILDING, HALLS, WALLS, FURNITURE, HANGING_CENTER, PHOTO_FORMATS } from "./layout.js";
 
 /** Ten connected white halls. Repeated construction is instanced by material,
  * so the size of the building does not multiply its lighting or draw calls. */
@@ -88,19 +88,41 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   for (let z = -128; z < 10; z += 4)
     box(53.5, 0.002, 0.008, 0, -0.001, z, joint);
 
-  // Empty hanging positions: delicate corner marks, never imitation artworks.
+  // Full-size planning mockups: 60% of wall positions, no invented photographs.
   const occupied = new Set(occupiedSlots.map(slot => slot.id));
+  const frameInk = material({ color: 0x161616, roughness: 0.48 });
+  const paper = own(new T.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }));
+  const labelGeometry = own(new T.PlaneGeometry(0.62, 0.25));
+  const labelMaterials = PHOTO_FORMATS.map(format => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 768; canvas.height = 310;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 768, 310);
+    ctx.fillStyle = '#161616'; ctx.font = '28px sans-serif';
+    ctx.fillText('UNCONVENTIONART / FOTOGRAFIA', 24, 58);
+    ctx.font = '48px sans-serif'; ctx.fillText(format.label, 24, 151);
+    ctx.font = '28px sans-serif'; ctx.fillText('SAGOMA DI ALLESTIMENTO', 24, 253);
+    const texture = own(new T.CanvasTexture(canvas));
+    texture.colorSpace = T.SRGBColorSpace;
+    return own(new T.MeshBasicMaterial({ map: texture, toneMapped: false }));
+  });
   for (const slot of HALLS.flatMap(hall => hall.slots)) {
-    if (occupied.has(slot.id)) continue;
+    if (occupied.has(slot.id) || !slot.plannedPhoto) continue;
     const nx = Math.sin(slot.rotation), nz = Math.cos(slot.rotation);
     const rx = Math.cos(slot.rotation), rz = -Math.sin(slot.rotation);
-    for (const side of [-1, 1]) for (const top of [-1, 1]) {
-      const x = slot.x + nx * 0.012 + rx * side * 0.83;
-      const z = slot.z + nz * 0.012 + rz * side * 0.83;
-      box(0.012, 0.15, 0.012, x, 2.25 + top * 1.12, z, recess);
-      box(Math.abs(rx) * 0.15 + 0.012, 0.012, Math.abs(rz) * 0.15 + 0.012,
-        x - rx * side * 0.07, 2.25 + top * 1.19, z - rz * side * 0.07, recess);
-    }
+    const { width, height } = slot.format;
+    const panelBox = (w, h, d, offset, surface) => box(
+      Math.abs(rx) * w + Math.abs(nx) * d, h,
+      Math.abs(rz) * w + Math.abs(nz) * d,
+      slot.x + nx * offset, HANGING_CENTER, slot.z + nz * offset, surface);
+    panelBox(width + 0.04, height + 0.04, 0.05, 0, frameInk);
+    panelBox(width, height, 0.008, 0.03, paper);
+    const label = new T.Mesh(labelGeometry, labelMaterials[slot.formatIndex]);
+    label.position.set(slot.x + rx * (width / 2 + 0.42) + nx * 0.035,
+      1.15, slot.z + rz * (width / 2 + 0.42) + nz * 0.035);
+    label.rotation.y = slot.rotation;
+    label.name = `planning-${slot.id}`;
+    room.add(label);
   }
 
   // Contemporary white furniture, sharing the exact footprint used by physics.
@@ -260,10 +282,11 @@ export async function createArtwork(slot, renderer, { mobile = false } = {}) {
     mobile ? 2 : 4,
     renderer.capabilities.getMaxAnisotropy(),
   );
-  const height = Math.min(3.2, 2.6 / aspect);
+  const format = slot.format || { width: 2.6, height: 3.2 };
+  const height = Math.min(format.height, format.width / aspect);
   const width = height * aspect;
   const group = new T.Group();
-  group.position.set(slot.x, 2.55, slot.z);
+  group.position.set(slot.x, HANGING_CENTER, slot.z);
   group.rotation.y = slot.rotation;
   const resources = new Set([texture]);
   const mesh = (geometry, material, z = 0) => {
@@ -315,7 +338,7 @@ export async function createArtwork(slot, renderer, { mobile = false } = {}) {
     new T.MeshBasicMaterial({ map: labelTexture, toneMapped: false }),
     0.035,
   );
-  label.position.set(width / 2 + 0.59, -1.12, 0.035);
+  label.position.set(width / 2 + 0.59, 1.15 - HANGING_CENTER, 0.035);
   label.userData.work = slot.work;
   label.userData.isPlaque = true;
   // A white wall-mounted fixture; illumination comes from shared daylight.
