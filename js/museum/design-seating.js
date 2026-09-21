@@ -38,6 +38,13 @@ export function createDesignSeating(room, own) {
   position.needsUpdate = true;
   normals.needsUpdate = true;
   const cylinder = own(new T.CylinderGeometry(1, 1, 1, 48));
+  const discProfile = [new T.Vector2(0, -0.5)];
+  for (let i = 0; i <= 16; i++) {
+    const angle = -Math.PI / 2 + i * Math.PI / 16;
+    discProfile.push(new T.Vector2(0.9 + 0.1 * Math.cos(angle), 0.5 * Math.sin(angle)));
+  }
+  discProfile.push(new T.Vector2(0, 0.5));
+  const discCushion = own(new T.LatheGeometry(discProfile, 64));
   const sphere = own(new T.SphereGeometry(1, 24, 16));
   const geometries = new Map();
   const batches = new Map();
@@ -82,9 +89,9 @@ export function createDesignSeating(room, own) {
     discs() {
       const colors = [palette.ivory, palette.black, palette.red];
       for(let row=0;row<2;row++) for(let c=0;c<(row?4:5);c++)
-        add(cylinder,colors[(c + row * 2) % 3],(c-(row?1.5:2))*0.42,0.84+row*0.36,0.38,0.23,0.13,0.23,Math.PI/2);
+        add(discCushion,colors[(c + row * 2) % 3],(c-(row?1.5:2))*0.42,0.84+row*0.42,0.38,0.195,0.13,0.195,Math.PI/2);
       for(let row=0;row<2;row++)for(let c=0;c<(row?4:5);c++)
-        add(cylinder,colors[(c + row * 2) % 3],(c-(row?1.5:2))*0.42,0.46,-0.31+row*0.39,0.23,0.13,0.23);
+        add(discCushion,colors[(c + row * 2) % 3],(c-(row?1.5:2))*0.42,0.46,-0.31+row*0.43,0.195,0.13,0.195);
       legs(1.7,0.65,0.41);
       box(0,0.36,0,1.95,0.045,0.065);
       for(const x of [-0.65,0.65])box(x,0.79,0.45,0.035,0.86,0.035);
