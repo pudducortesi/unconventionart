@@ -1,13 +1,22 @@
 import * as T from "../../vendor/three.module.js";
 import { FURNITURE } from "./layout.js";
 
-// Lightweight interpretations of the supplied furniture photographs, in white.
+// Lightweight interpretations of the supplied furniture photographs, with their reference colours.
 // Parts are instanced across the museum; no external models or image textures.
 export function createDesignSeating(room, own) {
-  const leather = own(new T.MeshStandardMaterial({ color: 0xfaf9f6, roughness: 0.48 }));
-  const frame = own(new T.MeshStandardMaterial({ color: 0xf2f3f3, roughness: 0.24, metalness: 0.18 }));
-  const lacquer = own(new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.32 }));
-  const seam = own(new T.MeshStandardMaterial({ color: 0xdeddd9, roughness: 0.75 }));
+  const surface = (color, roughness = 0.48, metalness = 0) =>
+    own(new T.MeshStandardMaterial({ color, roughness, metalness }));
+  const palette = {
+    brown: surface(0x49332b), cognac: surface(0xb96d36),
+    terracotta: surface(0xa3482d), black: surface(0x202425),
+    ivory: surface(0xf1ede3), red: surface(0xb82e2e),
+    blue: surface(0x183d93, 0.32), vermilion: surface(0xcc1737, 0.32),
+    yellow: surface(0xf3d51b, 0.32), wood: surface(0x262322, 0.65),
+    darkWood: surface(0x16191a, 0.55), chrome: surface(0xe3e5e6, 0.20, 0.8),
+    darkSeam: surface(0x171a1a, 0.75), warmSeam: surface(0x713524, 0.75),
+  };
+  let leather = palette.black, frame = palette.chrome,
+    lacquer = palette.darkWood, seam = palette.darkSeam;
   const cube = own(new T.BoxGeometry(1, 1, 1));
   const pillow = own(new T.BoxGeometry(1, 1, 1, 4, 4, 4));
   const position = pillow.attributes.position;
@@ -46,6 +55,7 @@ export function createDesignSeating(room, own) {
   };
   const models = {
     bibendum() {
+      leather = palette.brown;
       pad(0,0.43,0,1.02,0.28,0.92);
       for(const y of [0.72,1.02]) {
         const points=[[-0.5,y,-0.3],[-0.53,y,0.12],[-0.40,y,0.39],[0,y,0.46],[0.40,y,0.39],[0.53,y,0.12],[0.5,y,-0.3]];
@@ -58,23 +68,31 @@ export function createDesignSeating(room, own) {
       tube('bibendum-base',[[-0.48,0.29,-0.35],[-0.48,0.04,-0.4],[0,0.04,0.4],[0.48,0.04,-0.4],[0.48,0.29,-0.35]],0.027);
     },
     discs() {
+      const colors = [palette.ivory, palette.black, palette.red];
       for(let row=0;row<2;row++) for(let c=0;c<(row?4:5);c++)
-        add(cylinder,leather,(c-(row?1.5:2))*0.42,0.84+row*0.36,0.38,0.23,0.13,0.23,Math.PI/2);
+        add(cylinder,colors[(c + row * 2) % 3],(c-(row?1.5:2))*0.42,0.84+row*0.36,0.38,0.23,0.13,0.23,Math.PI/2);
       for(let row=0;row<2;row++)for(let c=0;c<(row?4:5);c++)
-        add(cylinder,leather,(c-(row?1.5:2))*0.42,0.46,-0.31+row*0.39,0.23,0.13,0.23);
+        add(cylinder,colors[(c + row * 2) % 3],(c-(row?1.5:2))*0.42,0.46,-0.31+row*0.39,0.23,0.13,0.23);
       legs(1.7,0.65,0.41);
       box(0,0.36,0,1.95,0.045,0.065);
       for(const x of [-0.65,0.65])box(x,0.79,0.45,0.035,0.86,0.035);
     },
     geometric() {
+      frame = palette.darkWood;
       legs(0.76,0.75,0.47);
       for(const x of [-0.4,0.4]) {
         box(x,0.63,0.15,0.055,0.58,0.055, lacquer);
         box(x,0.78,-0.06,0.14,0.055,0.96,lacquer);
       }
-      box(0,0.4,-0.13,0.63,0.038,0.72,lacquer,0.13);
-      box(0,0.98,0.31,0.62,1.13,0.035,lacquer,0.25);
+      box(0,0.4,-0.13,0.63,0.038,0.72,palette.blue,0.13);
+      box(0,0.98,0.31,0.62,1.13,0.035,palette.vermilion,0.25);
       for(const z of [-0.4,0.32])box(0,0.24,z,0.97,0.055,0.055,lacquer);
+      for(const x of [-0.4,0.4]) {
+        box(x,0.78,-0.545,0.14,0.055,0.008,palette.yellow);
+        box(x,0.045,-0.395,0.056,0.056,0.008,palette.yellow);
+      }
+      for(const z of [-0.4,0.32])for(const x of [-0.489,0.489])
+        box(x,0.24,z,0.008,0.055,0.055,palette.yellow);
     },
     nesting() {
       for(let i=0;i<4;i++) {
@@ -87,6 +105,7 @@ export function createDesignSeating(room, own) {
       }
     },
     ribbed() {
+      leather = palette.cognac;
       for(let i=0;i<11;i++) {
         const t=i/10,z=-0.65+t*1.2,y=t<0.42?0.42+0.08*Math.sin(t*7):0.45+(t-0.42)*1.35;
         pad(0,y,z,0.72,0.10,0.15,t<0.42?0:-0.9);
@@ -108,6 +127,7 @@ export function createDesignSeating(room, own) {
       }
     },
     daybed() {
+      leather = palette.terracotta; seam = palette.warmSeam; lacquer = palette.wood;
       box(0,0.32,0,2.25,0.11,0.86,lacquer);
       legs(2,0.65,0.3);
       tuft(2.2,0.85,0.45,0,4,10);
@@ -128,6 +148,8 @@ export function createDesignSeating(room, own) {
   const sequence=['bibendum','discs','geometric','ribbed','cantilever','tufted','sling','nesting','bibendum','tufted'];
   for(const piece of FURNITURE) {
     origin=piece;
+    leather=palette.black; frame=palette.chrome;
+    lacquer=palette.darkWood; seam=palette.darkSeam;
     if(piece.kind==='lounge') models[sequence[piece.hallIndex]]();
     if(piece.kind==='bench') models.daybed();
   }
