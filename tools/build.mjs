@@ -9,7 +9,7 @@ await mkdir('dist', { recursive:true });
 await prepareVendor();
 await buildARModel();
 // Preserve the catalogue, original photographs and logo byte-for-byte.
-for (const path of ['data/catalogue.json','data/experience.json','models','images/kavyar','images/site/favicon-32.png','images/site/brand-original.svg']) {
+for (const path of ['data/catalogue.json','data/experience.json','models','images/kavyar','images/site/favicon-32.png','images/site/brand-original.svg','images/palazzo/fresco-vault.webp','images/palazzo/paintings-atlas.webp']) {
   await mkdir(`dist/${path.substring(0,path.lastIndexOf('/'))}`, {recursive:true});
   await cp(path,`dist/${path}`,{recursive:true});
 }
