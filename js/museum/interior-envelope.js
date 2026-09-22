@@ -59,7 +59,7 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
     const accentPaint = own(plaster.clone()); accentPaint.color.setHex(palette.accent);
     const ceilingPaint = own(plaster.clone()); ceilingPaint.color.setHex(palette.ceiling);
     const skirting = own(new T.MeshStandardMaterial({color: palette.trim, roughness: .6}));
-    addRoomWallFinishes(hall, box, wallPaint, accentPaint, skirting);
+    addRoomWallFinishes(hall, box, wallPaint, accentPaint, skirting, h);
     // Continuous coloured soffit behind the room's coffers, fins or rafts.
     box(21.62, .025, 25.62, x, h - .035, z, ceilingPaint);
     // Shadow gaps and concealed light establish thickness around the ceiling.

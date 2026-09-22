@@ -2,7 +2,7 @@ import { ROOM_FINISHES } from '../js/museum/room-finishes.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from '../vendor/three.module.js';
-import { INITIAL, INITIAL_TARGET, HALLS, FURNITURE } from '../js/museum/layout.js';
+import { INITIAL, INITIAL_TARGET, HALLS, FURNITURE, BUILDING } from '../js/museum/layout.js';
 import { createArchitecture } from '../js/museum/architecture.js';
 
 for (const mobile of [false, true]) {
@@ -63,6 +63,15 @@ for (const mobile of [false, true]) {
       bakedTextures.add(surface.lightMap); bakedTextures.add(surface.aoMap);
       assert.equal(ROOM_FINISHES[hall.index].wall, 0xffffff, 'Exhibition walls are white');
       assert.equal(ROOM_FINISHES[hall.index].accent, 0xffffff, 'Entrance walls are white');
+      const ceilingRay = new T.Raycaster(new T.Vector3(hall.center.x + 9, 2, hall.center.z + 10),
+        new T.Vector3(0, 1, 0), 0, BUILDING.height);
+      const ceilingHit = ceilingRay.intersectObjects(architecture.occluders, true)[0];
+      assert(ceilingHit?.point.y > 12 && ceilingHit.point.y <= BUILDING.height,
+        'Every hall ceiling rises to the new double-height envelope');
+      const lintelRay = new T.Raycaster(new T.Vector3(0, 8, hall.center.z),
+        new T.Vector3(hall.side, 0, 0), 0, 5.6);
+      assert(lintelRay.intersectObjects(architecture.occluders, true).length > 0,
+        'Raising the roof must not leave an open gap over the original doorway');
     }
     for (const x of [0, -4.2, 4.2]) {
       for (const z of [-13, -39, -65, -91, -117]) {
@@ -101,12 +110,14 @@ for (const mobile of [false, true]) {
         'The sign face must be visible in front of the wall');
     }
     const roofHeights = [0, 3.8].map(x => {
-      const ray = new T.Raycaster(new T.Vector3(x, 1.7, -13), new T.Vector3(0, 1, 0), 0, 6);
+      const ray = new T.Raycaster(new T.Vector3(x, 1.7, -13), new T.Vector3(0, 1, 0), 0, BUILDING.height);
       const hit = ray.intersectObjects(architecture.occluders, true)[0];
       assert.equal(hit?.object.name, 'corridor-barrel-vault');
       return hit.point.y;
     });
-    assert(roofHeights[0] > roofHeights[1] + .5 && roofHeights[0] < 6.6,
+    assert.equal(BUILDING.height, 13.2);
+    assert(Math.abs(roofHeights[0] - 12.9) < .01);
+    assert(roofHeights[0] > roofHeights[1] + 1 && roofHeights[0] < BUILDING.height,
       'The vault is genuinely curved and fits below the existing roof');
     const stoneFloor = scene.getObjectByName('promenade-stone-floor');
     assert(stoneFloor?.material.isMeshPhysicalMaterial);

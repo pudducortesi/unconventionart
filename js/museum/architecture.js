@@ -53,7 +53,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   for (const hall of HALLS) {
     const { x, z } = hall.center;
     // Doorway lintels stay above eye level and never obstruct the 5m opening.
-    box(0.34, 1.9, 5, hall.side * 5, ceiling - 0.95, z);
+    box(0.34, ceiling - 4.7, 5, hall.side * 5, (ceiling + 4.7) / 2, z);
     for (const edge of [-1, 1]) {
       box(0.38, 4.7, 0.055, hall.side * 5, 2.35, z + edge * 2.5, lacquer);
       box(0.385, 4.7, 0.012, hall.side * 5, 2.35, z + edge * 2.53, recess);

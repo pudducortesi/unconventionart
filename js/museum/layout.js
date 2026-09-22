@@ -15,7 +15,7 @@ export const BUILDING = {
   maxX: 27,
   minZ: -130,
   maxZ: 10,
-  height: 6.6,
+  height: 13.2,
 };
 export const BOUNDS = { minX: -26.45, maxX: 26.45, minZ: -129.45, maxZ: 9.45 };
 export const INITIAL = { x: -19, y: 1.7, z: -10.9 };

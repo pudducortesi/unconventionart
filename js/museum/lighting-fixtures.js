@@ -10,6 +10,7 @@ export function pendantPositions(hall) {
 
 // Shared geometries and instanced fittings keep the 100 track heads affordable.
 export function createLightingFixtures({ room, own, box }) {
+  const lift = BUILDING.height - 6.6;
   const pbr = options => own(new T.MeshStandardMaterial(options));
   const white = pbr({ color: 0xf4f1e9, roughness: .46, metalness: .18 });
   const metal = pbr({ color: 0xb4b5b3, metalness: .88, roughness: .28 });
@@ -36,23 +37,23 @@ export function createLightingFixtures({ room, own, box }) {
     const {x,z} = hall.center;
     const enamel = pbr({color:hall.profile.color, roughness:.3, metalness:.22});
     // Service canopy: mounting plate, two roof fixings, individual cord grippers.
-    box(3.5,.085,1.3,x,5.94,z+4.8,white);
+    box(3.5,.085,1.3,x,5.94+lift,z+4.8,white);
     for (const dx of [-.55,.55]) {
       rod(.045,.035,x+dx,BUILDING.height-.115,z+4.8,white);
-      rod(.015,.49,x+dx,6.225,z+4.8,metal);
+      rod(.015,.49,x+dx,6.225+lift,z+4.8,metal);
     }
     if (hall.profile.light === 'linear') {
       box(3.4,.09,.16,x,3.22,z+4.8,enamel);
       box(3.3,.022,.105,x,3.168,z+4.8,diffuser);
       for (const dx of [-1.3,1.3]) {
-        rod(.028,.045,x+dx,5.88,z+4.8,metal);
-        rod(.0035,2.59,x+dx,4.57,z+4.8,cable);
+        rod(.028,.045,x+dx,5.88+lift,z+4.8,metal);
+        rod(.0035,2.59+lift,x+dx,4.57+lift/2,z+4.8,cable);
         rod(.018,.055,x+dx,3.29,z+4.8,metal);
       }
     } else for (const [dx,y,dz] of pendantPositions(hall)) {
       const top = y+.42;
-      rod(.034,.045,x+dx,5.88,z+dz,metal);
-      rod(.0035,5.855-top,x+dx,(5.855+top)/2,z+dz,cable);
+      rod(.034,.045,x+dx,5.88+lift,z+dz,metal);
+      rod(.0035,5.855+lift-top,x+dx,(5.855+lift+top)/2,z+dz,cable);
       rod(.027,.06,x+dx,y+.405,z+dz,metal);
       part(shade,enamel,x+dx,y,z+dz);
       part(inner,reflector,x+dx,y,z+dz);
@@ -62,18 +63,18 @@ export function createLightingFixtures({ room, own, box }) {
     }
     // Track heads have adapters, tilting cylindrical housings and recessed optics.
     for (const dz of [-9.7,9.7]) {
-      box(17.5,.075,.095,x,5.65,z+dz,white);
-      box(17.4,.015,.03,x,5.603,z+dz,cavity);
-      for (const dx of [-7,0,7]) rod(.009,.82,x+dx,6.10,z+dz,metal);
+      box(17.5,.075,.095,x,5.65+lift,z+dz,white);
+      box(17.4,.015,.03,x,5.603+lift,z+dz,cavity);
+      for (const dx of [-7,0,7]) rod(.009,.82,x+dx,6.10+lift,z+dz,metal);
       for (const dx of [-7,-3.5,0,3.5,7]) {
-        box(.16,.08,.12,x+dx,5.56,z+dz,white);
-        rod(.035,.13,x+dx,5.47,z+dz,metal);
+        box(.16,.08,.12,x+dx,5.56+lift,z+dz,white);
+        rod(.035,.13,x+dx,5.47+lift,z+dz,metal);
         const angle = -Math.sign(dz)*.5;
-        part(cylinder,white,x+dx,5.27,z+dz,.105,.29,.105,angle);
+        part(cylinder,white,x+dx,5.27+lift,z+dz,.105,.29,.105,angle);
         // The optical assembly follows the tilted cylinder's lower axis.
         const sy = Math.cos(angle), sz = Math.sin(angle);
-        part(cylinder,cavity,x+dx,5.27-sy*.148,z+dz-sz*.148,.091,.012,.091,angle);
-        part(cylinder,diffuser,x+dx,5.27-sy*.157,z+dz-sz*.157,.065,.006,.065,angle);
+        part(cylinder,cavity,x+dx,5.27+lift-sy*.148,z+dz-sz*.148,.091,.012,.091,angle);
+        part(cylinder,diffuser,x+dx,5.27+lift-sy*.157,z+dz-sz*.157,.065,.006,.065,angle);
       }
     }
   }
