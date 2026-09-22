@@ -47,7 +47,7 @@ for (const mobile of [false, true]) {
       const hit = floorRay.intersectObjects(architecture.occluders, true)[0];
       assert(hit?.object.userData.walkable, 'Finished floors must preserve tap-to-walk');
       assert(hit.object.name.startsWith(hall.id + '-'), 'Room finish must cover the structural slab');
-      assert.equal(hit.object.material.color.getHex(), 0xffffff, 'Wood colour comes from the shared mahogany texture');
+      assert.equal(hit.object.material.color.getHex(), 0xffffff, 'Wood colour comes from the shared mosaic parquet texture');
       assert(hit.object.material.map?.image.data, 'All rooms have parquet rather than a flat fill');
       const surface = hit.object.material, geometry = hit.object.geometry;
       assert.equal(surface.map.colorSpace, T.SRGBColorSpace);

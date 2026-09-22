@@ -1,27 +1,33 @@
-// A seamless 3 x 3 m module: 16 staggered 18.75 cm boards, 1.5 m long.
+// A seamless 3 x 3 m mosaic: 37.5 cm squares, four strips per square.
+// Adjacent squares rotate 90 degrees, as in the gallery reference photograph.
 // Colour remains independent of surface height and roughness (both linear data).
 export function createParquetData() {
   const size = 512, count = size * size;
   const colour = new Uint8Array(count * 4), normal = new Uint8Array(count * 4);
   const roughness = new Uint8Array(count * 4), height = new Float32Array(count);
   for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-    const row = Math.floor(x / 32), across = x % 32;
-    const along = (y + (row % 2) * 128) % 256;
-    const segment = Math.floor(((y + (row % 2) * 128) % 512) / 256);
-    const board = Math.sin(row * 37.1 + segment * 19.7) * 6;
-    const wave = Math.sin(y * Math.PI / 256 + row) * 1.4;
-    const grain = Math.sin(across * 2.3 + wave) * 2.3 + Math.sin(across * .65 + wave) * 3;
-    const pore = Math.sin(x * 41.3 + y * 17.7) * 1.2;
+    const column = Math.floor(x / 64), row = Math.floor(y / 64);
+    const rotated = (column + row) % 2;
+    const u = rotated ? y % 64 : x % 64;
+    const along = rotated ? x % 64 : y % 64;
+    const across = u % 16, strip = Math.floor(u / 16);
+    const seed = column * 37.1 + row * 19.7 + strip * 13.3;
+    const board = Math.sin(seed + 1.7) * 12 + Math.sin(column * 9 + row * 7) * 5;
+    const wave = Math.sin(along * .052 + seed) * 1.6 + Math.sin(along * .12 + seed * .3) * .45;
+    const rings = across * .76 + wave + seed;
+    const grain = Math.sin(rings) * 3.8 + Math.sin(rings * 2.7) * 1.8;
+    const pore = Math.sin(across * 41.3 + along * 17.7 + seed) * 1.3;
     const joint = across === 0 || along === 0;
-    const bevel = across === 1 || across === 31 || along === 1 || along === 255;
-    const variation = board + grain + pore - (bevel ? 5 : 0);
+    const bevel = across === 1 || across === 15 || along === 1 || along === 63;
+    const variation = board + grain + pore;
+    const edge = joint ? .76 : bevel ? .96 : 1;
     const pixel = y * size + x, index = pixel * 4;
-    colour[index] = joint ? 32 : 85 + variation;
-    colour[index + 1] = joint ? 16 : 42 + variation * .62;
-    colour[index + 2] = joint ? 12 : 28 + variation * .4;
+    colour[index] = Math.round((160 + variation) * edge);
+    colour[index + 1] = Math.round((119 + variation * .82) * edge);
+    colour[index + 2] = Math.round((77 + variation * .61) * edge);
     colour[index + 3] = 255;
-    height[pixel] = joint ? -.00065 : (bevel ? -.00018 : 0) + grain * .000012;
-    const finish = joint ? .84 : bevel ? .57 : .46 + board * .007 + grain * .008;
+    height[pixel] = joint ? -.00045 : (bevel ? -.00010 : 0) + grain * .000010;
+    const finish = joint ? .72 : bevel ? .57 : .52 + board * .002 + grain * .004;
     roughness[index] = roughness[index + 1] = roughness[index + 2] = Math.round(finish * 255);
     roughness[index + 3] = 255;
   }
