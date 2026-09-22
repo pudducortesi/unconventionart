@@ -105,8 +105,8 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     panelBox(width + 0.04, height + 0.04, 0.05, 0, frameInk);
     panelBox(width, height, 0.008, 0.03, paper);
     const label = new T.Mesh(labelGeometry, labelMaterials[slot.formatIndex]);
-    label.position.set(slot.x + rx * (width / 2 + 0.42) + nx * 0.035,
-      1.15, slot.z + rz * (width / 2 + 0.42) + nz * 0.035);
+    label.position.set(slot.x + nx * 0.035,
+      HANGING_CENTER - height / 2 - 0.28, slot.z + nz * 0.035);
     label.rotation.y = slot.rotation;
     label.name = `planning-${slot.id}`;
     room.add(label);
@@ -351,7 +351,7 @@ export async function createArtwork(slot, renderer, { mobile = false } = {}) {
     new T.MeshBasicMaterial({ map: labelTexture, toneMapped: false }),
     0.035,
   );
-  label.position.set(width / 2 + 0.59, 1.15 - HANGING_CENTER, 0.035);
+  label.position.set(0, -height / 2 - 0.30, 0.035);
   label.userData.work = slot.work;
   label.userData.isPlaque = true;
   // A white wall-mounted fixture; illumination comes from shared daylight.

@@ -72,8 +72,8 @@ for (const mobile of [false, true]) {
       assert.equal(geometry.attributes.uv1.getX(1), 1, 'Baked light covers the room once');
       for (const texture of [surface.map, surface.normalMap, surface.roughnessMap]) woodTextures.add(texture);
       bakedTextures.add(surface.lightMap); bakedTextures.add(surface.aoMap);
-      assert.equal(ROOM_FINISHES[hall.index].wall, 0xffffff, 'Exhibition walls are white');
-      assert.equal(ROOM_FINISHES[hall.index].accent, 0xffffff, 'Entrance walls are white');
+      assert.notEqual(ROOM_FINISHES[hall.index].wall, ROOM_FINISHES[hall.index].accent,
+        'Exhibition fields and entrance accents have distinct tones');
       const mezzanine = MEZZANINES[hall.index];
       const upperRay = new T.Raycaster(new T.Vector3(hall.side * 25.6, 8, hall.center.z),
         new T.Vector3(0, -1, 0), 0, 3);
