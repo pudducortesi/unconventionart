@@ -65,6 +65,26 @@ a {
   width: 100%;
   height: 100dvh;
 }
+/* Safari must treat the immersive surface as controls, not selectable content.
+   Keep this scoped: the dialogs outside #museum retain normal copy/paste. */
+#museum,
+#museum * {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+#museum input,
+#museum textarea,
+#museum [contenteditable]:not([contenteditable="false"]) {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+#scene canvas,
+#museum img {
+  -webkit-user-drag: none;
+}
 #scene canvas {
   display: block;
   width: 100%;
