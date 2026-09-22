@@ -7,7 +7,7 @@ function setup() {
   let id = 0, wakes = 0;
   const policy = createResolutionPolicy({
     wake: () => wakes++,
-    schedule: (fn, delay) => { assert.equal(delay, 1200); pending.set(++id, fn); return id; },
+    schedule: (fn, delay) => { assert.equal(delay, 650); pending.set(++id, fn); return id; },
     cancel: id => pending.delete(id),
   });
   return { policy, pending, get wakes() { return wakes; }, settle() {

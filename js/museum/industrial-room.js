@@ -40,10 +40,10 @@ export function createWornPlaster(own) {
   };
   for(let y=0;y<size;y++)for(let x=0;x<size;x++) {
     const field=noise(x,y,5)*.5+noise(x,y,13)*.3+noise(x,y,43)*.2;
-    const chipped=field<.42;
-    const grain=hash(x,y)*9;
-    const value=chipped?130+field*55+grain:184+field*37+grain;
-    const i=(y*size+x)*4, height=chipped?90:180+grain;
+    // Continuous tonal wear avoids the hard, camouflage-like threshold.
+    const grain=(hash(x,y)-.5)*4;
+    const value=184+field*22+grain;
+    const i=(y*size+x)*4, height=135+field*30+grain;
     colour.set([value,value-8,value-18,255],i);bump.set([height,height,height,255],i);
   }
   const map=(bytes,space)=>{
@@ -52,7 +52,7 @@ export function createWornPlaster(own) {
     t.generateMipmaps=true;t.minFilter=T.LinearMipmapLinearFilter;t.magFilter=T.LinearFilter;t.needsUpdate=true;
     return t;
   };
-  return {map:map(colour,T.SRGBColorSpace),bumpMap:map(bump,T.NoColorSpace),bumpScale:.018};
+  return {map:map(colour,T.SRGBColorSpace),bumpMap:map(bump,T.NoColorSpace),bumpScale:.005};
 }
 
 export function furnishIndustrialRoom(hall, box, own, room) {

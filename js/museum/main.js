@@ -995,6 +995,11 @@ try {
       `Il catalogo supera le ${CAPACITY} postazioni disponibili.`,
     );
   slots = layoutWorks(catalogue.works);
+  // Start the first visible previews while the renderer and effects initialise.
+  [...slots].sort((a,b) =>
+    Math.hypot(a.x-INITIAL.x,a.z-INITIAL.z,a.floorY||0) -
+    Math.hypot(b.x-INITIAL.x,b.z-INITIAL.z,b.floorY||0)
+  ).slice(0,6).forEach(slot => { void displayImageURL(slot.work.mobilePreview || slot.work.preview || slot.work.image).catch(() => {}); });
   buildCollection();
   buildMaps();
   renderer = new T.WebGLRenderer({
@@ -1027,8 +1032,8 @@ try {
   stream = createArtStream({
     slots,
     retainAll: true,
-    concurrency: 2,
-    load: (slot) => createArtwork(slot, renderer, { mobile, maxTextureEdge: mobile ? 512 : 768, resolveSource: displayImageURL }),
+    concurrency: 6,
+    load: (slot) => createArtwork(slot, renderer, { mobile, maxTextureEdge: mobile ? 768 : 1024, resolveSource: displayImageURL }),
     mount: mountArtwork,
     unmount: unmountArtwork,
     onError: () =>

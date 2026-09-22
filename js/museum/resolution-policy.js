@@ -1,6 +1,6 @@
 // Keep consecutive touch gestures in one resolution session. A timer wakes the
 // demand-driven renderer once; waiting for detail must not run an animation loop.
-export function createResolutionPolicy({ wake, schedule = setTimeout, cancel = clearTimeout, delay = 1200 }) {
+export function createResolutionPolicy({ wake, schedule = setTimeout, cancel = clearTimeout, delay = 650 }) {
   let timer = null;
   let detail = false;
   return {
