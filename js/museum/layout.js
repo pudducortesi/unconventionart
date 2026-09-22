@@ -4,11 +4,11 @@ import { CORRIDOR_BENCHES } from './corridor-layout.js';
 // Architecture, pathfinding and the plan all use these same dimensions.
 export const CAPACITY = 200;
 export const PHOTO_SHARE = 0.6;
-export const HANGING_CENTER = 1.8;
+export const HANGING_CENTER = 2.5;
 export const PHOTO_FORMATS = [
-  { width: 1.6, height: 2.4, label: '160 × 240 cm' },
-  { width: 2.4, height: 1.6, label: '240 × 160 cm' },
-  { width: 1.2, height: 1.8, label: '120 × 180 cm' },
+  { width: 2.6, height: 3.9, label: '260 × 390 cm' },
+  { width: 3.4, height: 2.267, label: '340 × 227 cm' },
+  { width: 2.1, height: 3.15, label: '210 × 315 cm' },
 ];
 export const BUILDING = {
   minX: -27,
