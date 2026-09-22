@@ -8,7 +8,15 @@ import {
 
 class Target {
   handlers = new Map();
-  style = {};
+  style = {
+    setProperty(name, value) {
+      this[name] = value;
+    },
+    removeProperty(name) {
+      delete this[name];
+    },
+  };
+  dataset = {};
   captured = new Set();
   addEventListener(type, handler, options) {
     const list = this.handlers.get(type) || [];
@@ -46,12 +54,21 @@ function fixture() {
     knob = new Target();
   doc.defaultView = win;
   doc.hidden = false;
+  doc.pointerLockElement = null;
   canvas.ownerDocument = stick.ownerDocument = doc;
   canvas.clientWidth = 390;
   canvas.clientHeight = 844;
   canvas.focus = () => {
     doc.activeElement = canvas;
     doc.emit("focusin", {});
+  };
+  canvas.requestPointerLock = () => {
+    doc.pointerLockElement = canvas;
+    doc.emit("pointerlockchange", {});
+  };
+  doc.exitPointerLock = () => {
+    doc.pointerLockElement = null;
+    doc.emit("pointerlockchange", {});
   };
   stick.getBoundingClientRect = () => ({
     left: 0,
@@ -246,10 +263,32 @@ test("right mouse button and disposed controls cannot start new input", () => {
 test("touch joystick starts at the thumb without a jump and responds to a short drag", () => {
   const f = fixture();
   f.fire(f.stick, "pointerdown", { clientX: 95, clientY: 25 });
+  assert.equal(f.stick.dataset.active, "true");
+  assert.equal(f.stick.style["--stick-x"], "95px");
+  assert.equal(f.stick.style["--stick-y"], "25px");
+  assert.match(f.knob.style.transform, /-50%/);
   assert.equal(f.control.sample(1 / 60).forward, 0);
   assert.equal(f.control.sample(1 / 60).sideways, 0);
   f.fire(f.stick, "pointermove", { clientX: 95, clientY: 15 });
   assert(f.control.sample(1 / 60).forward > 0);
+  f.fire(f.stick, "pointerup", { clientX: 95, clientY: 15 });
+  assert.equal(f.stick.dataset.active, "false");
+  assert.equal(f.stick.style["--stick-x"], undefined);
+  f.control.dispose();
+});
+
+test("pointer lock provides effortless mouse-look and click interaction", () => {
+  const f = fixture();
+  assert.equal(f.control.requestPointerLock(), true);
+  assert.equal(f.doc.pointerLockElement, f.canvas);
+  f.fire(f.doc, "mousemove", { movementX: 24, movementY: -12 });
+  const input = f.control.sample(1 / 60);
+  assert(input.lookX > 0);
+  assert(input.lookY < 0);
+  f.fire(f.canvas, "pointerdown", { pointerType: "mouse", button: 0 });
+  assert.deepEqual(f.keyboard, ["interact"]);
+  assert.equal(f.control.exitPointerLock(), true);
+  assert.equal(f.doc.pointerLockElement, null);
   f.control.dispose();
 });
 
