@@ -98,6 +98,7 @@ export function createControls({
   onTap = () => {},
   onActivity = () => {},
   onKeyboardAction = () => {},
+  onPointerLockChange = () => {},
   onWheel = () => {},
 }) {
   const doc = canvas.ownerDocument;
@@ -145,6 +146,11 @@ export function createControls({
     stickPointer = null;
     stick = { x: 0, y: 0 };
     if (knobElement) knobElement.style.transform = "";
+    if (joystickElement) {
+      joystickElement.dataset.active = "false";
+      joystickElement.style.removeProperty?.("--stick-x");
+      joystickElement.style.removeProperty?.("--stick-y");
+    }
     if (id !== undefined) release(joystickElement, id);
   }
   function stop(notify = true) {
@@ -183,6 +189,17 @@ export function createControls({
     canvas,
     "pointerdown",
     (event) => {
+      if (
+        enabled() &&
+        event.pointerType === "mouse" &&
+        event.button === 0 &&
+        doc.pointerLockElement === canvas
+      ) {
+        event.preventDefault();
+        focus();
+        onKeyboardAction("interact");
+        return;
+      }
       if (
         !enabled() ||
         lookPointer ||
@@ -287,6 +304,21 @@ export function createControls({
   listen(canvas, "contextmenu", (event) => {
     if (enabled()) event.preventDefault();
   });
+  listen(doc, "mousemove", (event) => {
+    if (doc.pointerLockElement !== canvas || !enabled()) return;
+    const dx = Number.isFinite(event.movementX) ? event.movementX : 0;
+    const dy = Number.isFinite(event.movementY) ? event.movementY : 0;
+    if (!dx && !dy) return;
+    filter.addLook(dx * 0.00225, dy * 0.00225, 0.01);
+    activity("look");
+  });
+  listen(doc, "pointerlockchange", () => {
+    const locked = doc.pointerLockElement === canvas;
+    if (!locked) filter.stopLook();
+    onPointerLockChange(locked);
+    activity(locked ? "lock" : "unlock");
+  });
+  listen(doc, "pointerlockerror", () => onPointerLockChange(false));
   listen(
     canvas,
     "wheel",
@@ -306,8 +338,13 @@ export function createControls({
     const ratio = Math.min(1, radius / Math.max(distance, 0.001));
     stick = normalizeStick(dx, dy, radius);
     if (lookPointer && (stick.x || stick.y)) lookPointer.noTap = true;
-    if (knobElement)
-      knobElement.style.transform = `translate(${dx * ratio}px, ${dy * ratio}px)`;
+    if (knobElement) {
+      const offsetX = dx * ratio,
+        offsetY = dy * ratio;
+      knobElement.style.transform = stickPointer.dynamic
+        ? `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`
+        : `translate(${offsetX}px, ${offsetY}px)`;
+    }
     activity("move");
   }
   if (joystickElement) {
@@ -324,18 +361,23 @@ export function createControls({
         event.preventDefault();
         focus();
         const rect = joystickElement.getBoundingClientRect();
+        const dynamic = event.pointerType === "touch";
+        const originX = dynamic ? event.clientX : rect.left + rect.width / 2;
+        const originY = dynamic ? event.clientY : rect.top + rect.height / 2;
         stickPointer = {
           id: event.pointerId,
-          x:
-            event.pointerType === "touch"
-              ? event.clientX
-              : rect.left + rect.width / 2,
-          y:
-            event.pointerType === "touch"
-              ? event.clientY
-              : rect.top + rect.height / 2,
-          radius: Math.min(rect.width, rect.height) * 0.28,
+          x: originX,
+          y: originY,
+          radius: dynamic
+            ? Math.min(54, Math.max(42, Math.min(canvas.clientWidth, canvas.clientHeight) * 0.12))
+            : Math.min(rect.width, rect.height) * 0.28,
+          dynamic,
         };
+        if (dynamic) {
+          joystickElement.dataset.active = "true";
+          joystickElement.style.setProperty?.("--stick-x", `${originX - rect.left}px`);
+          joystickElement.style.setProperty?.("--stick-y", `${originY - rect.top}px`);
+        }
         if (lookPointer) lookPointer.noTap = true;
         capture(joystickElement, event.pointerId);
         updateStick(event);
@@ -368,7 +410,9 @@ export function createControls({
   listen(win, "keydown", (event) => {
     if (
       !enabled() ||
-      (doc.activeElement !== canvas && doc.activeElement !== joystickElement) ||
+      (doc.activeElement !== canvas &&
+        doc.activeElement !== joystickElement &&
+        doc.pointerLockElement !== canvas) ||
       event.altKey ||
       event.ctrlKey ||
       event.metaKey
@@ -427,8 +471,27 @@ export function createControls({
     },
     stop,
     focus,
+    requestPointerLock() {
+      if (!enabled() || !canvas.requestPointerLock) return false;
+      focus();
+      canvas.requestPointerLock();
+      return true;
+    },
+    exitPointerLock() {
+      if (doc.pointerLockElement !== canvas) return false;
+      doc.exitPointerLock?.();
+      return true;
+    },
+    togglePointerLock() {
+      if (doc.pointerLockElement === canvas) return this.exitPointerLock();
+      return this.requestPointerLock();
+    },
+    pointerLocked() {
+      return doc.pointerLockElement === canvas;
+    },
     dispose() {
       if (disposed) return;
+      if (doc.pointerLockElement === canvas) doc.exitPointerLock?.();
       stop();
       disposed = true;
       disposers.forEach((dispose) => dispose());
