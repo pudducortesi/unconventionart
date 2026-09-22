@@ -203,15 +203,17 @@ export function furnishCorridor({ room, own, box, renderer, onReady = () => {} }
     box(5.15,.06,.25,0,4.6+edge*2.92,-129.655,antiqueGold);
   }
 
-  // Room plaques remain legible and in front of the wall fields.
-  const canvas=document.createElement('canvas'); canvas.width=512; canvas.height=1024;
-  const ctx=canvas.getContext('2d'); ctx.fillStyle='#e6dfd1'; ctx.fillRect(0,0,512,1024);
+  // Fourfold text resolution for close-up reading; share one atlas across all
+  // twenty signs, with anisotropic filtering for oblique corridor views.
+  const canvas=document.createElement('canvas'); canvas.width=2048; canvas.height=4096;
+  const ctx=canvas.getContext('2d'); ctx.fillStyle='#e6dfd1'; ctx.fillRect(0,0,2048,4096);
   for (const hall of HALLS) {
-    const y=hall.index*100; ctx.fillStyle='#443b30'; ctx.font='40px serif';
-    ctx.fillText(String(hall.index+1).padStart(2,'0'),20,y+60);
-    ctx.font='25px serif'; ctx.fillText(hall.profile.name,110,y+57);
+    const y=hall.index*400; ctx.fillStyle='#443b30'; ctx.font='160px serif';
+    ctx.fillText(String(hall.index+1).padStart(2,'0'),80,y+240);
+    ctx.font='100px serif'; ctx.fillText(hall.profile.name,440,y+228);
   }
   const texture=own(new T.CanvasTexture(canvas)); texture.colorSpace=T.SRGBColorSpace;
+  texture.anisotropy = Math.min(8, renderer?.capabilities?.getMaxAnisotropy?.() || 1);
   const material=own(new T.MeshBasicMaterial({map:texture,toneMapped:false}));
   for (const hall of HALLS) for (const end of [-1,1]) {
     const geometry=own(new T.PlaneGeometry(1.8,.352));
