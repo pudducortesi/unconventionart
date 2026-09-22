@@ -53,6 +53,7 @@ function fixture() {
     stick = new Target(),
     knob = new Target();
   doc.defaultView = win;
+  doc.documentElement = new Target();
   doc.hidden = false;
   doc.pointerLockElement = null;
   canvas.ownerDocument = stick.ownerDocument = doc;
@@ -300,6 +301,110 @@ test("pointer lock provides effortless mouse-look and click interaction", () => 
   assert.equal(f.control.sample(1 / 60).active, false);
   assert.deepEqual(f.keyStates.at(-1), []);
   assert.deepEqual(f.keyboard, ["interact", "escape"]);
+  f.control.dispose();
+});
+
+function enableFullscreen(f) {
+  const calls = [];
+  const lock = f.canvas.requestPointerLock;
+  f.canvas.requestPointerLock = () => { calls.push('pointer'); return lock(); };
+  f.doc.fullscreenElement = null;
+  f.doc.documentElement.requestFullscreen = () => {
+    calls.push('fullscreen');
+    f.doc.fullscreenElement = f.doc.documentElement;
+    f.doc.emit('fullscreenchange', {});
+    return Promise.resolve();
+  };
+  f.doc.exitFullscreen = () => {
+    calls.push('exit-fullscreen');
+    f.doc.fullscreenElement = null;
+    f.doc.emit('fullscreenchange', {});
+    return Promise.resolve();
+  };
+  return calls;
+}
+
+test('entering a visit locks the pointer before opening the whole page in fullscreen', async () => {
+  const f = fixture(), calls = enableFullscreen(f);
+  assert.equal(f.control.togglePointerLock(), true);
+  assert.deepEqual(calls, ['pointer', 'fullscreen'], 'Keep both requests within the click activation');
+  assert.equal(f.doc.fullscreenElement, f.doc.documentElement, 'Keep the HUD and dialogs visible');
+  await Promise.resolve();
+  f.fire(f.win, 'keydown', { code: 'KeyW' });
+  assert(f.control.sample(1 / 60).forward > 0);
+  f.fire(f.win, 'keydown', { code: 'Escape' });
+  assert.equal(f.doc.fullscreenElement, null);
+  assert.equal(f.doc.pointerLockElement, null);
+  assert.equal(f.control.sample(1 / 60).active, false);
+  f.fire(f.canvas, 'pointerdown', { pointerType: 'mouse', button: 0 });
+  assert.equal(calls.filter(call => call === 'fullscreen').length, 1, 'Re-entry requires the visit command');
+  f.control.dispose();
+});
+
+test('the exit command and a browser fullscreen exit both release the visit', async () => {
+  for (const exitThroughBrowser of [false, true]) {
+    const f = fixture(); enableFullscreen(f);
+    f.control.togglePointerLock();
+    await Promise.resolve();
+    f.fire(f.win, 'keydown', { code: 'ArrowRight' });
+    if (exitThroughBrowser) f.doc.exitFullscreen();
+    else f.control.togglePointerLock();
+    assert.equal(f.doc.fullscreenElement, null);
+    assert.equal(f.doc.pointerLockElement, null);
+    assert.equal(f.control.sample(1 / 60).active, false);
+    assert.deepEqual(f.keyStates.at(-1), []);
+    f.control.dispose();
+  }
+});
+
+test('a refused fullscreen request leaves mouse-look usable in the normal window', async () => {
+  const f = fixture(); enableFullscreen(f);
+  f.doc.documentElement.requestFullscreen = () => Promise.reject(Error('Fullscreen denied'));
+  assert.equal(f.control.requestPointerLock(), true);
+  await Promise.resolve();
+  assert.equal(f.doc.fullscreenElement, null);
+  assert.equal(f.doc.pointerLockElement, f.canvas);
+  f.fire(f.doc, 'mousemove', { movementX: 20, movementY: 0 });
+  assert(f.control.sample(1 / 60).lookX > 0);
+  f.control.dispose();
+});
+
+test('a late fullscreen response cannot re-enter after Escape or disposal', async () => {
+  for (const dispose of [false, true]) {
+    const f = fixture(); enableFullscreen(f);
+    let complete;
+    f.doc.documentElement.requestFullscreen = () => new Promise(resolve => { complete = resolve; });
+    f.control.requestPointerLock();
+    if (dispose) f.control.dispose();
+    else f.fire(f.win, 'keydown', { code: 'Escape' });
+    f.doc.fullscreenElement = f.doc.documentElement;
+    f.doc.emit('fullscreenchange', {});
+    complete();
+    await Promise.resolve();
+    assert.equal(f.doc.fullscreenElement, null);
+    assert.equal(f.doc.pointerLockElement, null);
+    if (!dispose) f.control.dispose();
+  }
+});
+
+test('a rejected pointer lock also leaves fullscreen and does not leak a rejected promise', async () => {
+  const f = fixture(); enableFullscreen(f);
+  f.canvas.requestPointerLock = () => Promise.reject(Error('Pointer lock denied'));
+  f.control.requestPointerLock();
+  await Promise.resolve();
+  assert.equal(f.doc.fullscreenElement, null);
+  assert.equal(f.doc.pointerLockElement, null);
+  assert.equal(f.control.sample(1 / 60).active, false);
+  f.control.dispose();
+});
+
+test('leaving a visit preserves fullscreen that was already enabled separately', () => {
+  const f = fixture(), calls = enableFullscreen(f);
+  f.doc.fullscreenElement = f.doc.documentElement;
+  f.control.requestPointerLock();
+  f.control.exitPointerLock();
+  assert.equal(f.doc.fullscreenElement, f.doc.documentElement);
+  assert.deepEqual(calls, ['pointer']);
   f.control.dispose();
 });
 

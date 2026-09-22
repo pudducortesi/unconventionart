@@ -1,3 +1,5 @@
+import { createVisitFullscreen } from './visit-fullscreen.js';
+
 // Input stays independent of the scene: two thumbs may walk and look at once.
 const KEY_ACTIONS = new Map([
   ["KeyW", "forward"],
@@ -112,6 +114,11 @@ export function createControls({
     stickPointer = null,
     stick = { x: 0, y: 0 };
   let disposed = false;
+  const fullscreen = createVisitFullscreen(doc, () => {
+    stop();
+    if (doc.pointerLockElement === canvas) doc.exitPointerLock?.();
+    onKeyboardAction('escape');
+  });
   const previousCanvasTouchAction = canvas.style.touchAction;
   const previousStickTouchAction = joystickElement?.style.touchAction;
   canvas.style.touchAction = "none";
@@ -320,11 +327,15 @@ export function createControls({
   });
   listen(doc, "pointerlockchange", () => {
     const locked = doc.pointerLockElement === canvas;
-    if (!locked) stop(false);
+    if (!locked) { stop(false); fullscreen.exit(); }
     onPointerLockChange(locked);
     activity(locked ? "lock" : "unlock");
   });
-  listen(doc, "pointerlockerror", () => onPointerLockChange(false));
+  function pointerLockFailed() {
+    fullscreen.exit();
+    if (!disposed) { stop(false); onPointerLockChange(false); }
+  }
+  listen(doc, "pointerlockerror", pointerLockFailed);
   listen(
     canvas,
     "wheel",
@@ -427,6 +438,7 @@ export function createControls({
     if (event.code === "Escape" || event.key === "Escape") {
       event.preventDefault();
       if (doc.pointerLockElement === canvas) doc.exitPointerLock?.();
+      fullscreen.exit();
       stop();
       onKeyboardAction("escape");
       return;
@@ -484,10 +496,15 @@ export function createControls({
     requestPointerLock() {
       if (!enabled() || !canvas.requestPointerLock) return false;
       focus();
-      canvas.requestPointerLock();
+      try {
+        const request = canvas.requestPointerLock();
+        request?.catch(pointerLockFailed);
+        fullscreen.enter();
+      } catch { pointerLockFailed(); return false; }
       return true;
     },
     exitPointerLock() {
+      fullscreen.exit();
       if (doc.pointerLockElement !== canvas) return false;
       doc.exitPointerLock?.();
       return true;
@@ -502,6 +519,7 @@ export function createControls({
     dispose() {
       if (disposed) return;
       if (doc.pointerLockElement === canvas) doc.exitPointerLock?.();
+      fullscreen.dispose();
       stop();
       disposed = true;
       disposers.forEach((dispose) => dispose());
