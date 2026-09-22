@@ -1,5 +1,4 @@
 import { BUILDING, HALLS } from './layout.js';
-import { CORRIDOR_COFFERS } from './corridor-layout.js';
 
 // Shared by the visible ceiling geometry and the offline floor-lighting bake.
 export const CEILING_SCHEMES = [
@@ -19,9 +18,8 @@ export function floorEmitters(region) {
   const add = (x, z, width, depth, power, height = h - .2) =>
     sources.push({ x, z, width, depth, height, power });
   if (region.hallIndex === undefined) {
-    for (const fixture of CORRIDOR_COFFERS)
-      add(0, fixture.z, fixture.width, fixture.depth, fixture.power, h - .175);
-    for (const side of [-1, 1]) add(side * 4.24, -60, .035, 138, 22, h - .359);
+    for (let z=-5.65;z>-130;z-=13)
+      for (const side of [-1,1]) add(side*4.5,z,.025,.23,13,4.30);
   } else {
     const { x, z } = region;
     for (const side of [-1, 1]) {
