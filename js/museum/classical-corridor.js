@@ -1,5 +1,6 @@
 import * as T from '../../vendor/three.module.js';
-import { HALLS, FURNITURE } from './layout.js';
+import { HALLS, FURNITURE, BUILDING } from './layout.js';
+const heightScale = BUILDING.height / 6.6;
 
 // Elliptical barrel vault fitted below the existing roof. Geometry is shared
 // by all ribs; no imported sculpture, fabricated artwork or extra light pool.
@@ -9,7 +10,7 @@ export function vaultGeometry(rx, rise, thickness, depth) {
     const angle = i / segments * Math.PI;
     for (const z of [-depth / 2, depth / 2])
       for (const offset of [0, thickness])
-        positions.push((rx + offset) * Math.cos(angle), 4.85 + (rise + offset) * Math.sin(angle), z);
+        positions.push((rx + offset) * Math.cos(angle), (4.85 + (rise + offset) * Math.sin(angle)) * heightScale, z);
   }
   const quad = (a, b, c, d) => indices.push(a, b, c, a, c, d);
   for (let i = 0; i < segments; i++) {
@@ -48,34 +49,34 @@ export function furnishCorridor({ room, own, box }) {
     for (const end of [-1, 1]) place(bead, stone, z + end * .23, 'corridor-arch-moulding');
     for (const side of [-1, 1]) {
       // Pilasters stay behind the existing collision boundary at |x|=4.56.
-      box(.22, 4.18, .64, side * 4.73, 2.39, z, stone);
+      box(.22, 4.48 * heightScale - .30, .64, side * 4.73, (4.48 * heightScale + .30) / 2, z, stone);
       box(.26, .30, .80, side * 4.73, .15, z, stone);
       box(.28, .12, .84, side * 4.73, .36, z, stone);
       for (const dz of [-.21, -.105, 0, .105, .21])
-        box(.012, 3.68, .023, side * 4.613, 2.40, z + dz, shadow);
+        box(.012, 4.24 * heightScale - .56, .023, side * 4.613, (4.24 * heightScale + .56) / 2, z + dz, shadow);
       for (const [height, width, projection, y] of [[.14,.76,.28,4.52],[.12,.88,.38,4.65],[.13,1.0,.48,4.775]])
-        box(projection, height, width, side * 4.68, y, z, stone);
+        box(projection, height * heightScale, width, side * 4.68, y * heightScale, z, stone);
       // Small picture-light fittings; warm lighting comes from the bounded pool.
-      box(.18, .12, .32, side * 4.60, 4.36, z + .85, dark);
-      box(.025, .045, .23, side * 4.501, 4.32, z + .85, lamp);
+      box(.18, .12, .32, side * 4.60, 4.36 * heightScale, z + .85, dark);
+      box(.025, .045, .23, side * 4.501, 4.32 * heightScale, z + .85, lamp);
     }
   }
   for (const side of [-1, 1]) {
     // Layered entablature and dentils replace the modern illuminated rails.
     for (const [w,h,y] of [[.24,.16,4.60],[.38,.10,4.73],[.48,.10,4.84]])
-      box(w,h,139.6,side*4.72,y,-60,stone);
+      box(w,h * heightScale,139.6,side*4.72,y * heightScale,-60,stone);
     for (let z = 9.4; z > -129.5; z -= .55)
-      box(.25,.09,.16,side*4.68,4.63,z,stone);
+      box(.25,.09 * heightScale,.16,side*4.68,4.63 * heightScale,z,stone);
   }
   // Longitudinal mouldings outline the curved ceiling panels.
   for (const angle of [Math.PI/5, Math.PI*2/5, Math.PI*3/5, Math.PI*4/5])
-    box(.035,.04,139.5,4.79*Math.cos(angle),4.85+1.55*Math.sin(angle),-60,stone);
+    box(.035,.04,139.5,4.79*Math.cos(angle),(4.85+1.55*Math.sin(angle))*heightScale,-60,stone);
 
   for (const hall of HALLS) {
     const side = hall.side, z = hall.center.z;
     for (const end of [-1, 1]) {
       // Painted wall fields and classical dado; openings retain their width.
-      box(.022,4.55,10.25,side*4.822,2.30,z+end*7.72,ivory);
+      box(.022,4.85*heightScale,10.25,side*4.822,2.425*heightScale,z+end*7.72,ivory);
       box(.06,.38,10.2,side*4.80,.19,z+end*7.75,stone);
       box(.075,.065,10.2,side*4.795,.405,z+end*7.75,stone);
       box(.16,4.46,.16,side*4.75,2.23,z+end*2.62,stone);
@@ -87,7 +88,7 @@ export function furnishCorridor({ room, own, box }) {
       }
     }
     box(.17,.22,5.40,side*4.75,4.45,z,stone);
-    box(.022,1.8,5.0,side*4.817,5.60,z,ivory);
+    box(.022,BUILDING.height-4.7,5.0,side*4.817,(BUILDING.height+4.7)/2,z,ivory);
   }
   for (const bench of FURNITURE.filter(piece => piece.kind === 'corridor-bench')) {
     box(bench.width,.10,bench.depth,bench.x,bench.height-.05,bench.z,dark);

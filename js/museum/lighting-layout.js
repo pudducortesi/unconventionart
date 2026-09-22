@@ -16,10 +16,12 @@ export const FLOOR_REGIONS = [
 export function floorEmitters(region) {
   const sources = [], h = BUILDING.height;
   const add = (x, z, width, depth, power, height = h - .2) =>
-    sources.push({ x, z, width, depth, height, power });
+    // Higher emitters overlap more broadly; linear compensation avoids clipping
+    // the baked light to a uniform white field across the floor.
+    sources.push({ x, z, width, depth, height, power: power * h / 6.6 });
   if (region.hallIndex === undefined) {
     for (let z=-5.65;z>-130;z-=13)
-      for (const side of [-1,1]) add(side*4.5,z,.025,.23,13,4.30);
+      for (const side of [-1,1]) add(side*4.5,z,.025,.23,13,4.30 * h / 6.6);
   } else {
     const { x, z } = region;
     for (const side of [-1, 1]) {
