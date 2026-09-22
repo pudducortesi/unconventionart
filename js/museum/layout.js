@@ -18,8 +18,8 @@ export const BUILDING = {
   height: 13.2,
 };
 export const BOUNDS = { minX: -26.45, maxX: 26.45, minZ: -129.45, maxZ: 9.45 };
-export const INITIAL = { x: -19, y: 1.7, z: -10.9 };
-export const INITIAL_TARGET = { x: -26.7, y: HANGING_CENTER, z: -10.9 };
+export const INITIAL = { x: 0, y: 1.7, z: 3 };
+export const INITIAL_TARGET = { x: 0, y: 3.4, z: 9.55 };
 export const HALLS = [];
 export const WALLS = [];
 export const FURNITURE = [];
@@ -184,6 +184,14 @@ export const EXHIBITION_ZONES = HALLS.flatMap(hall => hall.slots.map(slot => {
 for (let i = FURNITURE.length - 1; i >= 0; i--) if (FURNITURE[i].hallIndex === 0) FURNITURE.splice(i, 1);
 for (let i = RUGS.length - 1; i >= 0; i--) if (RUGS[i].hallIndex === 0) RUGS.splice(i, 1);
 for (const dz of [-4, 4]) FURNITURE.push(rectangle(-16, -13 + dz, 3.2, .78, {kind:'industrial-bench',hallIndex:0}));
+// Replace both former arrival wings with a single welcome hall.
+for (let i=FURNITURE.length-1;i>=0;i--) if(FURNITURE[i].z>0) FURNITURE.splice(i,1);
+for (let i=RUGS.length-1;i>=0;i--) if(RUGS[i].z>0) RUGS.splice(i,1);
+FURNITURE.push(rectangle(10,5,4.48,1.55,{kind:'welcome-desk'}));
+FURNITURE.push(rectangle(-10,6,3.4,1.3,{kind:'lounge',model:'daybed'}));
+FURNITURE.push(rectangle(-13.2,4.3,1.6,1.6,{kind:'lounge',model:'bibendum'}));
+FURNITURE.push(rectangle(-9.8,3.8,1.4,1.4,{kind:'coffee'}));
+FURNITURE.push(rectangle(4,5.5,1.3,.7,{kind:'directory'}));
 export const OBSTACLES = [...WALLS, ...FURNITURE];
 export function locateHall(position) {
   const hall = HALLS.find(

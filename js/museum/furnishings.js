@@ -1,3 +1,4 @@
+import { furnishWelcomeHall } from "./welcome-hall.js";
 import { createLightingFixtures } from "./lighting-fixtures.js";
 import * as T from "../../vendor/three.module.js";
 import { ROOM_PROFILES } from "./room-profiles.js";
@@ -38,25 +39,7 @@ export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess
     return mesh;
   };
 
-  // Arrival wall: quiet identity, floating canopy and light-lined reception.
-  const brandTexture = own(new T.TextureLoader().load(
-    "images/site/brand-original.svg", onReady,
-  ));
-  brandTexture.colorSpace = T.SRGBColorSpace;
-  brandTexture.anisotropy = 4;
-  const brand = new T.Mesh(
-    own(new T.PlaneGeometry(6, 6 * 335 / 860)),
-    own(new T.MeshBasicMaterial({ map: brandTexture, toneMapped: false })),
-  );
-  brand.position.set(16.5, 3.3, 9.81);
-  brand.rotation.y = Math.PI;
-  brand.userData.dialog = "about";
-  brand.name = "original-brand-sign";
-  room.add(brand);
-  targets.push(brand);
-  box(12, 0.18, 5.5, 15, 4.8, 5, plaster);
-  box(10.8, 0.025, 0.045, 15, 4.69, 2.5, glow);
-  box(4.15, 0.03, 0.025, 17.5, 0.19, 4.18, glow);
+  targets.push(...furnishWelcomeHall({room,own,box}));
 
   const chrome = own(new T.MeshStandardMaterial({ color: 0xc5c7c9, metalness: 0.95, roughness: 0.24 }));
   const tableTop = own(new T.MeshStandardMaterial({ color: 0xededeb, roughness: 0.3 }));
