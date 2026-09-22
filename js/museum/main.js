@@ -100,6 +100,7 @@ let yaw = initialLook.yaw,
   pitch = initialLook.pitch,
   path = [],
   finalLook = null;
+let assistedMovement = false;
 const plaques = new Map(),
   ray = new T.Raycaster(),
   pointerCoords = new T.Vector2();
@@ -235,6 +236,17 @@ function stop() {
   controls?.stop();
   path = [];
   finalLook = null;
+  updateNavigationState();
+}
+function updateNavigationState() {
+  const active = path.length > 0 || !!finalLook;
+  if (active === assistedMovement) return;
+  assistedMovement = active;
+  $("#stop-walk").hidden = !active;
+  document.body.classList.toggle("auto-walking", active);
+}
+function dismissVisitChoice() {
+  $("#visit-choice").hidden = true;
 }
 function clearSelection() {
   if (selected < 0) return;
@@ -245,6 +257,8 @@ function clearSelection() {
 function openDialog(id) {
   guide.pause();
   stop();
+  dismissVisitChoice();
+  controls?.exitPointerLock();
   modalOpen = true;
   document.getElementById(id).showModal();
 }
@@ -264,6 +278,30 @@ for (const dialog of document.querySelectorAll("dialog")) {
   });
 }
 $("#help-open").addEventListener("click", () => openDialog("help"));
+$("#assist-start").addEventListener("click", () => {
+  dismissVisitChoice();
+  focusWork(0);
+});
+$("#free-start").addEventListener("click", () => {
+  dismissVisitChoice();
+  if (mobile) {
+    controls?.focus();
+    announce("Tocca nella metà sinistra per muoverti e trascina a destra per guardare.");
+  } else if (!controls?.requestPointerLock()) {
+    controls?.focus();
+    announce("Clicca a terra per spostarti e trascina per guardare.");
+  }
+});
+$("#free-look").addEventListener("click", () => {
+  dismissVisitChoice();
+  controls?.togglePointerLock();
+});
+$("#stop-walk").addEventListener("click", () => {
+  stop();
+  announce("Spostamento interrotto. Esplora liberamente.");
+  controls?.focus();
+  invalidate();
+});
 function updateMotion() {
   $("#motion-toggle").textContent = smooth
     ? "Movimento fluido"
@@ -362,12 +400,14 @@ function updateHud(moving = false) {
   }
 }
 function walkTo(destination, look = null) {
+  dismissVisitChoice();
   controls?.stop();
   path = findPath(player, destination);
   finalLook = look;
   if (!path.length) {
     finalLook = null;
     announce("Scegli un punto libero nella sala.");
+    updateNavigationState();
     return;
   }
   if (!smooth) {
@@ -381,10 +421,12 @@ function walkTo(destination, look = null) {
     }
     stream.update(player, { selected, force: true });
   }
+  updateNavigationState();
   invalidate();
 }
 function visitHall(index) {
   if (!entered) return;
+  dismissVisitChoice();
   clearSelection();
   const hall = HALLS[index];
   const first = slots.find(slot => slot.hallIndex === index) || hall.slots[0];
@@ -604,6 +646,7 @@ $("#artwork-image").addEventListener("error", () => {
 });
 async function focusWork(index) {
   if (!slots.length) return;
+  dismissVisitChoice();
   stop();
   selected = (index + slots.length) % slots.length;
   const request = focusRequest;
@@ -700,6 +743,7 @@ function updateAim() {
 $("#interact").addEventListener("click", () => { if (!$("#interact").disabled) tap({ clientX: viewport.width / 2, clientY: viewport.height / 2 }); });
 function tap(event) {
   if (!entered || modalOpen || photoBusy || photoRender) return;
+  dismissVisitChoice();
   guide.pause();
   const hit = pick(event.clientX, event.clientY);
   if (!hit) return;
@@ -794,6 +838,7 @@ function render(time) {
       if (remaining < 0.001) finalLook = null;
       moving = true;
     }
+    updateNavigationState();
     if (time - lastStream > 650) {
       stream.update(player, { selected });
       lastStream = time;
@@ -978,7 +1023,7 @@ try {
   canvas.tabIndex = 0;
   canvas.setAttribute(
     "aria-label",
-    "Galleria 3D: trascina per guardare, WASD o frecce per camminare. Da telefono usa il joystick.",
+    "Galleria 3D: clicca a terra per spostarti o scegli un’opera. In esplorazione libera usa mouse e tastiera; da telefono tocca a sinistra per muoverti.",
   );
   controls = createControls({
     canvas,
@@ -1003,6 +1048,15 @@ try {
         clearSelection();
       }
     },
+    onPointerLockChange: (locked) => {
+      document.body.classList.toggle("pointer-locked", locked);
+      $("#free-look").setAttribute("aria-pressed", String(locked));
+      $("#free-look").textContent = locked ? "Libera il cursore" : "Esplora liberamente";
+      $("#movement-hint").textContent = locked
+        ? "MUOVI IL MOUSE PER GUARDARE · WASD PER CAMMINARE · CLICCA PER INTERAGIRE · ESC ESCE"
+        : "CLICCA A TERRA PER SPOSTARTI · TRASCINA PER GUARDARE";
+      invalidate();
+    },
     onWheel: (event) => {
       guide.pause();
       clearSelection();
@@ -1016,6 +1070,7 @@ try {
       );
     },
   });
+  if (!canvas.requestPointerLock) $("#free-look").hidden = true;
   canvas.addEventListener("webglcontextlost", (event) => {
     event.preventDefault();
     fail(
@@ -1029,7 +1084,7 @@ try {
   $("#next-room").hidden = false;
   $("#previous-work").disabled = slots.length < 2;
   $("#next-work").disabled = !slots.length;
-  $("#next-work").innerHTML = slots.length > 1 ? 'Opere <span>→</span>' : 'Opera <span>↗</span>';
+  $("#next-work").innerHTML = slots.length > 1 ? 'Prossima opera <span>→</span>' : 'Guarda l’opera <span>↗</span>';
   document.body.classList.add("exploring");
   $("#loading-status").textContent = "";
   if (!mobile && !modalOpen) controls.focus();
