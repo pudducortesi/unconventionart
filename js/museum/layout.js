@@ -188,9 +188,9 @@ for (const dz of [-4, 4]) FURNITURE.push(rectangle(-16, -13 + dz, 3.2, .78, {kin
 for (let i=FURNITURE.length-1;i>=0;i--) if(FURNITURE[i].z>0) FURNITURE.splice(i,1);
 for (let i=RUGS.length-1;i>=0;i--) if(RUGS[i].z>0) RUGS.splice(i,1);
 FURNITURE.push(rectangle(10,5,4.48,1.55,{kind:'welcome-desk'}));
-FURNITURE.push(rectangle(-10,6,3.4,1.3,{kind:'lounge',model:'daybed'}));
-FURNITURE.push(rectangle(-13.2,4.3,1.6,1.6,{kind:'lounge',model:'bibendum'}));
-FURNITURE.push(rectangle(-9.8,3.8,1.4,1.4,{kind:'coffee'}));
+FURNITURE.push(rectangle(-10,6,3.4,1.3,{kind:'welcome-sofa'}));
+FURNITURE.push(rectangle(-13.2,4.3,1.6,1.6,{kind:'welcome-chair'}));
+FURNITURE.push(rectangle(-9.8,3.8,1.4,1.4,{kind:'welcome-table'}));
 FURNITURE.push(rectangle(4,5.5,1.3,.7,{kind:'directory'}));
 export const OBSTACLES = [...WALLS, ...FURNITURE];
 export function locateHall(position) {
