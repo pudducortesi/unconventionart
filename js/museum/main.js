@@ -1,3 +1,4 @@
+import { welcomeRoute } from "./welcome-route.js";
 import { exhibitionAccess } from "./exhibition-access.js";
 import { displayImageURL } from "./image-cache.js";
 import { createSelection, selectionFromHash, selectionLink } from "./selection.js";
@@ -129,7 +130,8 @@ const announce = (text) => {
 const guide = createGuidedVisit({
   go(step) {
     stop(); clearSelection();
-    if (step.workIndex !== undefined) focusWork(step.workIndex);
+    if (step.position) walkTo(step.position, step.look);
+    else if (step.workIndex !== undefined) focusWork(step.workIndex);
     else visitHall(step.hallIndex);
     controls?.focus();
   },
@@ -137,7 +139,8 @@ const guide = createGuidedVisit({
   onChange(state) {
     $("#tour-panel").hidden = !state.active;
     document.body.classList.toggle("guided", state.active);
-    if (!state.active) { announce("Visita terminata. Esplorazione libera."); return; }
+    if (!state.active) { $("#next-work").innerHTML = guide.state().active ? 'Prossima tappa <span>→</span>' : player.z > 0 ? 'Inizia la visita <span>→</span>' : 'Prossima opera <span>→</span>'; announce("Visita terminata. Esplorazione libera."); return; }
+    $("#next-work").innerHTML = 'Prossima tappa <span>→</span>';
     $("#tour-count").textContent = `VISITA GUIDATA · ${state.index + 1} / ${state.total}`;
     $("#tour-title").textContent = state.step.title;
     $("#tour-description").textContent = state.step.description;
@@ -152,11 +155,7 @@ const guide = createGuidedVisit({
 $("#tour-pilot").addEventListener("click", () => {
   $("#guided-tours").close();
   if (!entered || !slots.length) return;
-  guide.start([
-    { hallIndex: slots[0].hallIndex, title: "01 / La soglia", description: "Metamorfosi — un prologo in tre tappe. Attraversa lo spazio e lascia che lo sguardo si abitui alla luce. Prosegui quando vuoi." },
-    { workIndex: 0, title: "02 / Presenza", description: slots[0].work.description || slots[0].work.alt },
-    { workIndex: 0, title: "03 / Il tuo sguardo", description: "Apri la fotografia in HD. Osserva i dettagli, poi salvala nella tua selezione: sarà il primo tassello del tuo percorso personale." },
-  ]);
+  guide.start(welcomeRoute(slots));
 });
 $("#selection-filter").addEventListener("click", () => { selectionOnly = !selectionOnly; buildCollection(); });
 $("#selection-tour").addEventListener("click", () => {
@@ -294,7 +293,7 @@ for (const dialog of document.querySelectorAll("dialog")) {
 $("#help-open").addEventListener("click", () => openDialog("help"));
 $("#assist-start").addEventListener("click", () => {
   dismissVisitChoice();
-  focusWork(0);
+  guide.start(welcomeRoute(slots));
 });
 $("#free-start").addEventListener("click", () => {
   dismissVisitChoice();
@@ -401,13 +400,15 @@ function updateHud(moving = false) {
   );
   const current = locateHall(player);
   const level = player.floorY < .15 ? "PIANO TERRA" : player.floorY < MEZZANINE_HEIGHT - .15 ? "SCALA" : "SOPPALCO";
-  if (current !== hallIndex || level !== hallLevel) {
-    hallIndex = current;
+  const locationKey = current < 0 && player.z > 0 ? -3 : current;
+  if (locationKey !== hallIndex || level !== hallLevel) {
+    hallIndex = locationKey;
     hallLevel = level;
     $("#room-label").textContent =
       current < 0
-        ? `PROMENADE / ${access.open.size} ${access.open.size === 1 ? "SALA APERTA" : "SALE APERTE"}`
+        ? player.z > 0 ? "HALL / BENVENUTO A UNCONVENTIONART" : `PROMENADE / ${access.open.size} ${access.open.size === 1 ? "SALA APERTA" : "SALE APERTE"}`
         : `${HALLS[current].title.toUpperCase()} / ${level} / ${slots.filter((slot) => slot.hallIndex === current).length} OPERE ESPOSTE`;
+    $("#next-work").innerHTML = guide.state().active ? 'Prossima tappa <span>→</span>' : player.z > 0 ? 'Inizia la visita <span>→</span>' : 'Prossima opera <span>→</span>';
     $("#change-level").hidden = current < 0;
     $("#change-level").textContent = player.floorY > .15 ? "Scendi ↓" : "Soppalco ↑";
     $("#change-level").setAttribute("aria-label", player.floorY > .15 ? "Scendi al piano terra usando la scala" : "Sali al soppalco usando la scala");
@@ -695,7 +696,11 @@ $("#leave-work").addEventListener("click", () => {
   controls?.focus();
   invalidate();
 });
-$("#next-work").addEventListener("click", () => focusWork(selected + 1));
+$("#next-work").addEventListener("click", () => {
+  if (guide.state().active) guide.next();
+  else if (player.z > 0) { dismissVisitChoice(); guide.start(welcomeRoute(slots)); }
+  else focusWork(selected + 1);
+});
 $("#previous-work").addEventListener("click", () =>
   focusWork(selected < 0 ? slots.length - 1 : selected - 1),
 );
@@ -1095,7 +1100,7 @@ try {
   $("#next-room").hidden = false;
   $("#previous-work").disabled = slots.length < 2;
   $("#next-work").disabled = !slots.length;
-  $("#next-work").innerHTML = slots.length > 1 ? 'Prossima opera <span>→</span>' : 'Guarda l’opera <span>↗</span>';
+  $("#next-work").innerHTML = 'Inizia la visita <span>→</span>';
   document.body.classList.add("exploring");
   $("#loading-status").textContent = "";
   if (!mobile && !modalOpen) controls.focus();

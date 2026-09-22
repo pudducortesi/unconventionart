@@ -239,10 +239,11 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     const x = hall ? hall.center.x : 0;
     const z = hall ? hall.center.z : Math.round(position.z / 20) * 20;
     const level = Math.round((position.floorY ?? 0) / 2) * 2;
-    const zone = `${x}/${z}/${level}`;
+    const zone = `${x}/${z}/${level}/${!hall && position.z > 0}`;
     if (zone === litZone) return;
     litZone = zone;
     const industrial = hall?.index === 0;
+    const welcome = !hall && position.z > 0;
     sky.intensity = industrial ? .78 : hall ? 1.1 : .9;
     scene.environmentIntensity = industrial ? .38 : hall ? .55 : .7;
     if (scene.fog) {
@@ -254,14 +255,14 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     daylight.color.setHex(hall ? 0xffffff : 0xffefd8);
     daylight.position.set(x - (hall ? 4 : 3.7), hall ? Math.min(ceiling - .5, 6 + level) : 8.8, z + 3);
     daylight.target.position.set(x, level, z);
-    const positions = industrial ? [[-7.5,11.7,-7],[7.5,11.7,0],[-7.5,11.7,7]] : hall ? pendantPositions(hall) : [];
+    const positions = welcome ? [[-4,5.7,8],[4,5.7,8],[10,5.7,5]] : industrial ? [[-7.5,11.7,-7],[7.5,11.7,0],[-7.5,11.7,7]] : hall ? pendantPositions(hall) : [];
     pendantLights.forEach((light, i) => {
       const point = positions[i];
       light.intensity = point ? 48 : 0;
       if (!point) return;
       const [dx, height, dz] = point;
       light.position.set(x + dx, height - .035, z + dz);
-      light.target.position.set(x + dx, .3, z + dz);
+      light.target.position.set(x + dx, welcome && i < 2 ? 3.4 : .3, welcome && i < 2 ? 9.7 : z + dz);
     });
     renderer.shadowMap.needsUpdate = true;
   };
