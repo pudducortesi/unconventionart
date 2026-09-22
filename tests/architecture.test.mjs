@@ -154,7 +154,7 @@ for (const mobile of [false, true]) {
     assert(Math.abs(marbleUV.getY(0) - 130 / 13) < .001, 'Marble medallions repeat once per architectural bay');
     assert.equal(room.children.filter(object => object.name === 'corridor-classical-arch').length, 10);
     const palaceMaps = loadedTextures.filter(({ url }) => url.includes('images/palazzo/'));
-    assert.equal(palaceMaps.length, 60, '51 unique wall paintings and nine unique ceiling compositions');
+    assert.equal(palaceMaps.length, 61, '51 wall paintings, nine ceiling compositions and one end mural');
     const vaults = room.children.filter(object => object.name === 'corridor-barrel-vault');
     assert.equal(vaults.length, 9, 'All nine full corridor bays have painted compositions');
     assert.equal(new Set(vaults.map(v => v.material.map)).size, 9);
@@ -164,7 +164,19 @@ for (const mobile of [false, true]) {
     assert(vaultUV && [...vaultUV.array].every(Number.isFinite));
     assert(Math.max(...vaultUV.array) <= 1 && Math.min(...vaultUV.array) >= 0, 'Fresco appears exactly once in a single bay');
     assert.equal(vault.material.map.wrapT, T.ClampToEdgeWrapping);
-    assert.equal(vault.position.z, -13);
+    assert.equal(vault.position.z, -9.75);
+    for (const z of [-.5, -4, -20, -40, -80, -121, -125, -129.5]) {
+      const hit = new T.Raycaster(new T.Vector3(0, 2, z), new T.Vector3(0, 1, 0), 0, 14)
+        .intersectObjects(architecture.occluders, true)[0];
+      assert.equal(hit?.object.name, 'corridor-barrel-vault', `Painted ceiling coverage at ${z}`);
+    }
+    const mural = scene.getObjectByName('corridor-end-mural');
+    assert(mural?.material.map);
+    for (const [x,y] of [[-4,1],[4,8],[0,11.8]]) {
+      const hit = new T.Raycaster(new T.Vector3(x,y,-128), new T.Vector3(0,0,-1), 0, 3)
+        .intersectObjects(architecture.occluders, true)[0];
+      assert.equal(hit?.object, mural, 'The painted backdrop covers the formerly white end wall');
+    }
     assert.equal(scene.getObjectByName('corridor-plaster-vault').material.map, null);
     const paintings = room.children.filter(object => object.name === 'palazzo-painting');
     assert.equal(paintings.length, 50);
