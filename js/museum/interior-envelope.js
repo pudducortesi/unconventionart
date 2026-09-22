@@ -4,6 +4,7 @@ import { BUILDING, HALLS } from './layout.js';
 import { CEILING_SCHEMES } from './lighting-layout.js';
 import { createFloorLightmaps } from './baked-lighting.js';
 import { createParquetData } from './parquet-data.js';
+import { createStoneFloor } from './stone-floor.js';
 
 // Architectural finishes; each texel is data generated here, not an artwork.
 function floorFinish(own, anisotropy) {
@@ -26,7 +27,7 @@ function floorFinish(own, anisotropy) {
 
 export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, renderer }) {
   const anisotropy = Math.min(8, renderer.capabilities?.getMaxAnisotropy?.() ?? 1);
-  const finishes = { mosaic: floorFinish(own, anisotropy) };
+  const finishes = { mosaic: floorFinish(own, anisotropy), stone: createStoneFloor(own, anisotropy) };
   const floors = [];
   const surface = (width, depth, x, z, kind, name, regionId) => {
     const geometry = own(new T.PlaneGeometry(width, depth));
@@ -44,7 +45,7 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
     mesh.userData.walkable = true;
     room.add(mesh); floors.push(mesh);
   };
-  surface(10, 140, 0, -60, 'mosaic', 'promenade-mosaic-floor', 'promenade');
+  surface(10, 140, 0, -60, 'stone', 'promenade-stone-floor', 'promenade');
   const h = BUILDING.height;
   const lining = own(new T.MeshStandardMaterial({color:0xbcb8ae, roughness:.85}));
   const opal = own(new T.MeshStandardMaterial({color:0xf3eee2, roughness:.72, emissive:0xfff0d7, emissiveIntensity:.22}));

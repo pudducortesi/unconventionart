@@ -207,7 +207,10 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     const zone = `${x}/${z}`;
     if (zone === litZone) return;
     litZone = zone;
-    daylight.position.set(x - 4, 6, z + 3);
+    sky.intensity = hall ? 1.1 : .55;
+    daylight.intensity = hall ? 1.7 : 1.1;
+    daylight.color.setHex(hall ? 0xffffff : 0xffe0b8);
+    daylight.position.set(x - (hall ? 4 : 1), hall ? 6 : 4.7, z + 3);
     daylight.target.position.set(x, 0, z);
     const positions = hall ? pendantPositions(hall) : [];
     pendantLights.forEach((light, i) => {

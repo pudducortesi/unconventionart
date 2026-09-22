@@ -90,18 +90,28 @@ for (const mobile of [false, true]) {
       assert(hit && !hit.object.userData.walkable, 'A bench must block floor-click navigation');
       assert(Math.abs(hit.point.y - bench.height) < 1e-5, 'Rendered seating matches the collision/bake dimensions');
     }
-    const signs = room.children.filter(object => object.name.startsWith('corridor-junction-'));
-    assert.equal(signs.length, 10, 'Each junction has a sign facing each approach');
+    const signs = room.children.filter(object => object.name.startsWith('corridor-room-'));
+    assert.equal(signs.length, 20, 'Each doorway retains identification on both sides');
     for (const sign of signs) {
       const normal = new T.Vector3(0, 0, 1).applyQuaternion(sign.quaternion);
-      const localRight = new T.Vector3(1, 0, 0).applyQuaternion(sign.quaternion);
-      const [left, right] = sign.userData.halls.map(index => HALLS[index]);
-      assert(left.center.x * localRight.x < right.center.x * localRight.x,
-        'Direction labels must swap when approached from the opposite end');
+      assert(normal.x * HALLS[sign.userData.hallIndex].side < 0,
+        'Room plaques face the visitor in the corridor');
       const readSign = new T.Raycaster(sign.position.clone().add(normal), normal.negate(), 0, 1.1);
       assert.equal(readSign.intersectObjects(architecture.occluders, true)[0]?.object, sign,
-        'The sign face must be visible in front of its lintel');
+        'The sign face must be visible in front of the wall');
     }
+    const roofHeights = [0, 3.8].map(x => {
+      const ray = new T.Raycaster(new T.Vector3(x, 1.7, -13), new T.Vector3(0, 1, 0), 0, 6);
+      const hit = ray.intersectObjects(architecture.occluders, true)[0];
+      assert.equal(hit?.object.name, 'corridor-barrel-vault');
+      return hit.point.y;
+    });
+    assert(roofHeights[0] > roofHeights[1] + .5 && roofHeights[0] < 6.6,
+      'The vault is genuinely curved and fits below the existing roof');
+    const stoneFloor = scene.getObjectByName('promenade-stone-floor');
+    assert(stoneFloor?.material.isMeshPhysicalMaterial);
+    assert(stoneFloor.material.roughness < .3 && stoneFloor.material.clearcoat > .5);
+    assert.equal(room.children.filter(object => object.name === 'corridor-classical-arch').length, 10);
     const eye = new T.Vector3(INITIAL.x, INITIAL.y, INITIAL.z);
     const target = new T.Vector3(INITIAL_TARGET.x, INITIAL_TARGET.y, INITIAL_TARGET.z);
     const distance = eye.distanceTo(target);
