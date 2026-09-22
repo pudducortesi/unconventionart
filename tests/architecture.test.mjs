@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import * as T from '../vendor/three.module.js';
 import { INITIAL, INITIAL_TARGET, HALLS, FURNITURE, BUILDING } from '../js/museum/layout.js';
 import { createArchitecture } from '../js/museum/architecture.js';
+import { MEZZANINES, MEZZANINE_HEIGHT } from '../js/museum/mezzanine-layout.js';
 
 for (const mobile of [false, true]) {
   test(`complete gallery constructs and disposes (${mobile ? 'mobile' : 'desktop'})`, (t) => {
@@ -32,6 +33,11 @@ for (const mobile of [false, true]) {
     assert.equal(localLights.length, 3, 'Reuse a bounded light pool across all ten rooms');
     architecture.updateLighting(INITIAL);
     assert.equal(localLights.filter(light => light.intensity > 0).length, 3);
+    renderer.shadowMap.needsUpdate = false;
+    architecture.updateLighting({ ...INITIAL, floorY: MEZZANINE_HEIGHT });
+    assert.equal(renderer.shadowMap.needsUpdate, true, 'Changing floor refreshes the local light and shadows');
+    const daylight = scene.children.find(object => object.isDirectionalLight);
+    assert(daylight.position.y > MEZZANINE_HEIGHT + 1.7, 'Upper walkways are lit from above the visitor');
     architecture.updateLighting({x: 0, z: -39});
     assert(localLights.every(light => light.intensity === 0), 'Pendant light must not follow the visitor into the corridor');
     assert(architecture.floor.userData.walkable);
@@ -63,7 +69,18 @@ for (const mobile of [false, true]) {
       bakedTextures.add(surface.lightMap); bakedTextures.add(surface.aoMap);
       assert.equal(ROOM_FINISHES[hall.index].wall, 0xffffff, 'Exhibition walls are white');
       assert.equal(ROOM_FINISHES[hall.index].accent, 0xffffff, 'Entrance walls are white');
-      const ceilingRay = new T.Raycaster(new T.Vector3(hall.center.x + 9, 2, hall.center.z + 10),
+      const mezzanine = MEZZANINES[hall.index];
+      const upperRay = new T.Raycaster(new T.Vector3(hall.side * 25.6, 8, hall.center.z),
+        new T.Vector3(0, -1, 0), 0, 3);
+      const upperHit = upperRay.intersectObjects(architecture.occluders, true)[0];
+      assert(upperHit?.object.userData.walkable && upperHit.object.userData.mezzanine,
+        'Every upper deck supports tap-to-walk after spatial batching');
+      assert(Math.abs(upperHit.point.y - mezzanine.height) < .015);
+      const centerRay = new T.Raycaster(new T.Vector3(hall.center.x, 8, hall.center.z),
+        new T.Vector3(0, -1, 0), 0, 3);
+      assert.equal(centerRay.intersectObjects(architecture.occluders, true).length, 0,
+        'The horseshoe leaves the central double-height void open');
+      const ceilingRay = new T.Raycaster(new T.Vector3(hall.center.x + 9, 8, hall.center.z + 10),
         new T.Vector3(0, 1, 0), 0, BUILDING.height);
       const ceilingHit = ceilingRay.intersectObjects(architecture.occluders, true)[0];
       assert(ceilingHit?.point.y > 12 && ceilingHit.point.y <= BUILDING.height,

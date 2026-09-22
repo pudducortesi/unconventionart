@@ -18,14 +18,13 @@ import {
   locateHall,
 } from "./layout.js";
 import {
-  moveWithCollision,
   orientation,
   shortestAngle,
   layoutWorks,
-  findPath,
   viewingDistance,
-  safeViewpoint,
 } from "./navigation.js";
+import { MEZZANINES, MEZZANINE_HEIGHT } from "./mezzanine-layout.js";
+import { moveOnLevels, findLevelPath, safeLevelViewpoint } from "./level-navigation.js";
 
 // Fetch effects concurrently with the catalogue; initialization still precedes entry.
 const effectsModule = import('../../vendor/gallery-effects.js').then(module => ({module}), error => ({error}));
@@ -51,7 +50,8 @@ let entered = false,
   disposed = false,
   modalOpen = false,
   selected = -1,
-  hallIndex = -2;
+  hallIndex = -2,
+  hallLevel = "";
 let frame = 0,
   lastTime = 0,
   lastHud = 0,
@@ -99,7 +99,8 @@ let realistic = true;
 // Prefer restrained contact shading; the HBAO profile remains opt-in.
 let advanced = false;
 let photoRender = null, photoBusy = false, photoToken = 0;
-const player = { x: INITIAL.x, z: INITIAL.z };
+const player = { x: INITIAL.x, z: INITIAL.z, floorY: 0 };
+const eyePosition = () => ({ ...player, y: player.floorY + 1.7 });
 const initialLook = orientation(INITIAL, INITIAL_TARGET);
 let yaw = initialLook.yaw,
   pitch = initialLook.pitch,
@@ -316,7 +317,7 @@ function updateMotion() {
     Object.assign(player, path.at(-1));
     path = [];
     if (finalLook) {
-      const look = orientation({ ...player, y: 1.7 }, finalLook);
+      const look = orientation(eyePosition(), finalLook);
       yaw = look.yaw;
       pitch = look.pitch;
       finalLook = null;
@@ -347,7 +348,7 @@ function fail(message) {
   $("#hud").hidden = true;
 }
 function setView() {
-  camera.position.set(player.x, 1.7, player.z);
+  camera.position.set(player.x, player.floorY + 1.7, player.z);
   camera.rotation.set(pitch, yaw, 0, "YXZ");
   camera.updateMatrixWorld();
 }
@@ -361,7 +362,7 @@ function updateHud(moving = false) {
   let nearest = null,
     nearestDistance = 12;
   for (const [index, art] of stream.values()) {
-    const distance = Math.hypot(player.x - art.slot.x, player.z - art.slot.z);
+    const distance = Math.hypot(player.x - art.slot.x, player.z - art.slot.z, player.floorY);
     if (index === selected) {
       nearest = art;
       break;
@@ -371,7 +372,7 @@ function updateHud(moving = false) {
       nearestDistance = distance;
     }
   }
-  const closeEnough = nearest && Math.hypot(player.x-nearest.slot.x,player.z-nearest.slot.z) <= (nearest===detailArtwork ? 7 : 5.5);
+  const closeEnough = nearest && Math.hypot(player.x-nearest.slot.x,player.z-nearest.slot.z,player.floorY) <= (nearest===detailArtwork ? 7 : 5.5);
   const detail = closeEnough && (!moving || nearest===detailArtwork) ? nearest : null;
   if (detail !== detailArtwork) {
     detailArtwork?.setDetail(false);
@@ -391,12 +392,17 @@ function updateHud(moving = false) {
     `translate(${point.x} ${point.y}) rotate(${180 + (yaw * 180) / Math.PI})`,
   );
   const current = locateHall(player);
-  if (current !== hallIndex) {
+  const level = player.floorY < .15 ? "PIANO TERRA" : player.floorY < MEZZANINE_HEIGHT - .15 ? "SCALA" : "SOPPALCO";
+  if (current !== hallIndex || level !== hallLevel) {
     hallIndex = current;
+    hallLevel = level;
     $("#room-label").textContent =
       current < 0
         ? "PROMENADE / 10 SALE"
-        : `${HALLS[current].title.toUpperCase()} / ${slots.filter((slot) => slot.hallIndex === current).length} OPERE ESPOSTE`;
+        : `${HALLS[current].title.toUpperCase()} / ${level} / ${slots.filter((slot) => slot.hallIndex === current).length} OPERE ESPOSTE`;
+    $("#change-level").hidden = current < 0;
+    $("#change-level").textContent = player.floorY > .15 ? "Scendi ↓" : "Soppalco ↑";
+    $("#change-level").setAttribute("aria-label", player.floorY > .15 ? "Scendi al piano terra usando la scala" : "Sali al soppalco usando la scala");
     for (const button of document.querySelectorAll("[data-hall]"))
       button.setAttribute(
         "aria-current",
@@ -407,7 +413,7 @@ function updateHud(moving = false) {
 function walkTo(destination, look = null) {
   dismissVisitChoice();
   controls?.stop();
-  path = findPath(player, destination);
+  path = findLevelPath(player, destination);
   finalLook = look;
   if (!path.length) {
     finalLook = null;
@@ -419,7 +425,7 @@ function walkTo(destination, look = null) {
     Object.assign(player, path.at(-1));
     path = [];
     if (look) {
-      const angle = orientation({ ...player, y: 1.7 }, look);
+      const angle = orientation(eyePosition(), look);
       yaw = angle.yaw;
       pitch = angle.pitch;
       finalLook = null;
@@ -445,6 +451,20 @@ $("#entrance").addEventListener("click", () => {
 $("#next-room").addEventListener("click", () =>
   openDialog("floorplan"),
 );
+$("#change-level").addEventListener("click", () => {
+  if (!entered || modalOpen) return;
+  const mezzanine = MEZZANINES[locateHall(player)];
+  if (!mezzanine) return;
+  guide.pause();
+  clearSelection();
+  const descend = player.floorY > .15;
+  const stair = mezzanine.stair;
+  const destination = descend
+    ? { x: stair.bottom.x, z: stair.bottom.z + .6, floorY: 0 }
+    : { x: stair.top.x, z: stair.top.z - .6, floorY: mezzanine.height };
+  walkTo(destination, { x: HALLS[mezzanine.hallIndex].center.x, y: 2.6, z: HALLS[mezzanine.hallIndex].center.z });
+  announce(descend ? "Discesa al piano terra lungo la scala." : "Salita al soppalco lungo la scala.");
+});
 
 function buildMaps() {
   $("#map-art").replaceChildren();
@@ -689,7 +709,7 @@ async function focusWork(index) {
     bounds.minZ + 0.7,
     bounds.maxZ - 0.7,
   );
-  const position = safeViewpoint(desired);
+  const position = safeLevelViewpoint(desired);
   $("#work-title").textContent = slot.work.title;
   $("#work-series").textContent =
     collectionFor(slot.work)?.title || "UnconventionArt";
@@ -766,7 +786,7 @@ function tap(event) {
     hit.object === architecture.floor
   ) {
     clearSelection();
-    walkTo(hit.point);
+    walkTo({ x: hit.point.x, z: hit.point.z, floorY: hit.object.userData.mezzanine ? Math.max(0, hit.point.y) : 0 });
   }
 }
 function render(time) {
@@ -806,7 +826,7 @@ function render(time) {
       if (walking)
         Object.assign(
           player,
-          moveWithCollision(
+          moveOnLevels(
             player,
             (-Math.sin(yaw) * input.forward + Math.cos(yaw) * input.sideways) *
               delta *
@@ -828,14 +848,14 @@ function render(time) {
       } else
         Object.assign(
           player,
-          moveWithCollision(
+          moveOnLevels(
             player,
             (dx / distance) * step,
             (dz / distance) * step,
           ),
         );
       // On long routes face the route; turn toward the photograph only on arrival.
-      const look = path.length > 1 ? { ...next, y: 1.7 } : finalLook;
+      const look = path.length > 1 ? { ...next, y: (next.floorY ?? 0) + 1.7 } : finalLook;
       if (look) turnToward(look, delta);
       moving = true;
     } else if (finalLook) {
@@ -898,7 +918,7 @@ function render(time) {
   else lastTime = 0;
 }
 function turnToward(target, delta) {
-  const desired = orientation({ ...player, y: 1.7 }, target);
+  const desired = orientation(eyePosition(), target);
   const difference = shortestAngle(yaw, desired.yaw),
     blend = 1 - Math.exp(-delta * 5);
   yaw += difference * blend;
@@ -1082,7 +1102,7 @@ try {
       clearSelection();
       const sign = Math.sign(event.deltaY);
       walkTo(
-        moveWithCollision(
+        moveOnLevels(
           player,
           -Math.sin(yaw) * sign * 2.2,
           -Math.cos(yaw) * sign * 2.2,
