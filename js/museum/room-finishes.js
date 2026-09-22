@@ -1,6 +1,6 @@
 // Muted exhibition fields and distinct architectural relief for each room.
 export const ROOM_FINISHES = [
-  { name: 'Soglia', wall: 0xe5e3de, accent: 0xd6d4ce, ceiling: 0xf0efeb, trim: 0x777772, floor: 0xa0774d, finish: 'mosaic', treatment: 'gallery', detail: 'Calce grigio perla, dettagli in grafite e parquet naturale. Pareti continue per le sequenze fotografiche in bianco e nero.' },
+  { name: 'Officina', wall: 0xa7a69f, accent: 0x777973, ceiling: 0x858680, trim: 0x343832, floor: 0x93918a, finish: 'concrete', treatment: 'gallery', detail: 'Cemento, travi e soppalco in acciaio annerito. Una ex officina dedicata alle sequenze fotografiche in bianco e nero.' },
   { name: 'Atelier', wall: 0xe1dac8, accent: 0xb5a17b, ceiling: 0xe9e0c9, trim: 0x806b4e, floor: 0xa0774d, finish: 'mosaic', treatment: 'battens', detail: 'Pareti lino, listelli verticali color rovere e un fregio da atelier.' },
   { name: 'Contrasto', wall: 0xa9b5c5, accent: 0x344961, ceiling: 0xd9dee6, trim: 0x26364d, floor: 0xa0774d, finish: 'mosaic', treatment: 'grid', detail: 'Blu ardesia, cornici scure e una griglia geometrica in rilievo.' },
   { name: 'Movimento', wall: 0xc1d0c6, accent: 0x5c8078, ceiling: 0xd8e4da, trim: 0x426a64, floor: 0xa0774d, finish: 'mosaic', treatment: 'rhythm', detail: 'Verde salvia e sequenze di lamelle alternate, come un ritmo in movimento.' },

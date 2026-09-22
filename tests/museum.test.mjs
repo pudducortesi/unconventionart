@@ -181,7 +181,7 @@ test("furniture click destinations are rejected and obstructed viewpoints are co
 test("routes keep their exact endpoints beside walls and at both sides of seating islands", () => {
   for (const hall of HALLS) {
     const bench = FURNITURE.find(
-      (f) => f.hallIndex === hall.index && f.kind === "lounge",
+      (f) => f.hallIndex === hall.index && ["lounge", "industrial-bench"].includes(f.kind),
     );
     const start = { x: bench.x, z: bench.minZ - 0.31 };
     const goal = { x: bench.x + 0.127, z: bench.maxZ + 0.31 };

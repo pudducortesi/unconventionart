@@ -180,6 +180,10 @@ export const EXHIBITION_ZONES = HALLS.flatMap(hall => hall.slots.map(slot => {
     Math.abs(nx) > 0.5 ? 4 : 3.8, Math.abs(nx) > 0.5 ? 3.8 : 4,
     { slotId: slot.id, hallIndex: hall.index });
 }));
+// The portrait universe has two benches and a clear central circulation area.
+for (let i = FURNITURE.length - 1; i >= 0; i--) if (FURNITURE[i].hallIndex === 0) FURNITURE.splice(i, 1);
+for (let i = RUGS.length - 1; i >= 0; i--) if (RUGS[i].hallIndex === 0) RUGS.splice(i, 1);
+for (const dz of [-4, 4]) FURNITURE.push(rectangle(-16, -13 + dz, 3.2, .78, {kind:'industrial-bench',hallIndex:0}));
 export const OBSTACLES = [...WALLS, ...FURNITURE];
 export function locateHall(position) {
   const hall = HALLS.find(

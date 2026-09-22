@@ -1,3 +1,4 @@
+import { createConcrete, furnishIndustrialRoom } from './industrial-room.js';
 import { ROOM_FINISHES, addRoomWallFinishes } from './room-finishes.js';
 import * as T from '../../vendor/three.module.js';
 import { BUILDING, HALLS } from './layout.js';
@@ -27,7 +28,7 @@ function floorFinish(own, anisotropy) {
 
 export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, renderer }) {
   const anisotropy = Math.min(8, renderer.capabilities?.getMaxAnisotropy?.() ?? 1);
-  const finishes = { mosaic: floorFinish(own, anisotropy), stone: createStoneFloor(own, anisotropy) };
+  const finishes = { concrete: createConcrete(own, anisotropy), mosaic: floorFinish(own, anisotropy), stone: createStoneFloor(own, anisotropy) };
   const floors = [];
   const surface = (width, depth, x, z, kind, name, regionId) => {
     const geometry = own(new T.PlaneGeometry(width, depth));
@@ -65,6 +66,12 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
     addRoomWallFinishes(hall, box, wallPaint, accentPaint, skirting, h);
     // Continuous coloured soffit behind the room's coffers, fins or rafts.
     box(21.62, .025, 25.62, x, h - .035, z, ceilingPaint);
+    if (hall.index === 0) {
+      wallPaint.roughness = .98; wallPaint.bumpScale = .003;
+      ceilingPaint.roughness = .96;
+      furnishIndustrialRoom(hall, box, own);
+      continue;
+    }
     // Shadow gaps and concealed light establish thickness around the ceiling.
     for (const dx of [-9.7, 9.7]) {
       box(.14, .04, 23.4, x + dx, h - .25, z, recess);
