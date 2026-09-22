@@ -1,4 +1,5 @@
-import { publishingConfig, publicationPatch, validateUpload } from './publishing.js';
+import {mediaInfo, prepareMedia, uploadWithProgress} from './media-upload.js';
+import { publishingConfig, publicationPatch } from './publishing.js';
 import { ROOM_PROFILES } from './museum/room-profiles.js';
 const $ = s => document.querySelector(s);
 let config, session = null, works = [], filter = 'all', refreshTimer, busy = false, renderVersion = 0;
@@ -6,6 +7,7 @@ const thumbnails = new Set();
 const notice = (text, error = false) => { $('#notice').textContent = text; $('#notice').dataset.error = String(error); };
 async function request(path, { method = 'GET', body, raw = false } = {}) {
   const response = await fetch(config.supabaseUrl + path, {
+    signal: AbortSignal.timeout(45000),
     method, headers: { apikey: config.publishableKey, ...(session ? {Authorization: `Bearer ${session.access_token}`} : {}),
       ...(body ? {'Content-Type': raw ? body.type : 'application/json'} : {}), Prefer: 'return=representation' },
     body: body ? (raw ? body : JSON.stringify(body)) : undefined,
@@ -64,7 +66,8 @@ $('#set-password').addEventListener('submit', async event => {
 function element(tag, text, className) { const node = document.createElement(tag); if (text) node.textContent = text; if (className) node.className = className; return node; }
 function field(form, text, input) { const label = element('label', text); label.append(input); form.append(label); return input; }
 async function loadWorks() {
-  works = await (await request('/rest/v1/gallery_artworks?select=*&order=created_at.desc')).json();
+  const [photos,videos] = await Promise.all(['/rest/v1/gallery_artworks?select=*&order=created_at.desc','/rest/v1/gallery_videos?select=*&order=created_at.desc'].map(async path=>(await request(path)).json()));
+  works = [...photos,...videos.map(w=>({...w,isVideo:true}))];
   await render();
 }
 async function render() {
@@ -79,12 +82,12 @@ async function render() {
     if (!session || version !== renderVersion) break;
     const card = element('article', '', 'work'), photo = element('div', '', 'photo'), img = element('img');
     img.alt = work.title; img.draggable = false; img.loading = 'lazy';
-    photo.append(img, element('span', work.published ? 'IN GALLERIA' : 'BOZZA')); card.append(photo);
+    photo.append(img, element('span', (work.isVideo ? 'VIDEO · ' : '') + (work.published ? 'IN GALLERIA' : 'BOZZA'))); card.append(photo);
     const form = element('form');
     const title = field(form, 'Titolo', element('input')); title.value = work.title; title.required = true; title.maxLength = 160;
     const description = field(form, 'Descrizione', element('textarea')); description.value = work.description; description.maxLength = 3000;
-    const hall = field(form, 'Sala', element('select')); hall.append(new Option('Assegna automaticamente', ''));
-    ROOM_PROFILES.forEach((room, i) => hall.append(new Option(`${String(i + 1).padStart(2,'0')} · ${room.name}`, String(i))));
+    const hall = field(form, 'Sala', element('select')); if (!work.isVideo) hall.append(new Option('Assegna automaticamente', ''));
+    ROOM_PROFILES.forEach((room, i) => {if(!work.isVideo || [3,5].includes(i)) hall.append(new Option(`${String(i + 1).padStart(2,'0')} · ${room.name}`, String(i)));});
     hall.value = work.hall_index === null ? '' : String(work.hall_index);
     const actions = element('div', '', 'actions'), save = element('button', 'Salva', 'secondary'), publish = element('button', work.published ? 'Ritira dalla galleria' : 'Pubblica →');
     save.type = 'submit'; publish.type = 'button'; publish.disabled = config.liveCatalogue === false;
@@ -95,7 +98,7 @@ async function render() {
       busy = true; save.disabled = publish.disabled = true;
       try {
         const patch = publicationPatch(title.value, description.value, hall.value, published);
-        await request(`/rest/v1/gallery_artworks?id=eq.${work.id}`, {method:'PATCH',body:patch});
+        await request(`/rest/v1/${work.isVideo ? 'gallery_videos' : 'gallery_artworks'}?id=eq.${work.id}`, {method:'PATCH',body:patch});
         await loadWorks(); notice(published ? 'Opera pubblicata. La galleria si aggiorna automaticamente entro un minuto.' : 'Bozza salvata. L’opera non è esposta in galleria.');
       } catch (error) { notice(error.message, true); }
       finally { busy = false; save.disabled = false; publish.disabled = config.liveCatalogue === false; }
@@ -115,44 +118,55 @@ for (const button of document.querySelectorAll('[data-filter]')) button.addEvent
   for (const item of document.querySelectorAll('[data-filter]')) item.setAttribute('aria-pressed', String(item === button));
   await render();
 });
-async function preview(file) {
-  const bitmap = await createImageBitmap(file, {imageOrientation:'from-image'});
+let pendingFiles = [];
+const uploadIds = new WeakMap();
+async function uploadBatch(files) {
+  if (busy || !session || !files.length) return;
+  busy = true; $('#files').disabled = true; $('#retry-files').hidden = true; $('#upload-results').replaceChildren();
+  let uploaded = 0; const failed = [];
+  const rows = files.map(file=>{const row=element('li',file.name+' · In attesa');$('#upload-results').append(row);return row;});
   try {
-    if (bitmap.width * bitmap.height > 80000000) throw Error('Fotografia troppo grande: esporta una copia sotto gli 80 megapixel.');
-    const scale = Math.min(1, 1536 / Math.max(bitmap.width, bitmap.height));
-    const canvas = document.createElement('canvas'); canvas.width = Math.round(bitmap.width * scale); canvas.height = Math.round(bitmap.height * scale);
-    const ctx = canvas.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', .9));
-    if (!blob || blob.size > 4 * 1024 * 1024) throw Error('Impossibile creare l’anteprima.');
-    return {blob, width:bitmap.width, height:bitmap.height};
-  } finally { bitmap.close(); }
-}
-$('#files').addEventListener('change', async event => {
-  if (busy || !session) return;
-  busy = true; const files = Array.from(event.target.files); event.target.disabled = true;
-  let uploaded = 0; const failures = [];
-  for (const [index, file] of files.entries()) {
-    if (!session) { failures.push('Caricamento interrotto: accedi di nuovo.'); break; }
-    const id = crypto.randomUUID(), ext = {'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[file.type];
-    const master = `${id}/original.${ext}`, derivative = `${id}/preview.jpg`; const created = [];
-    $('#upload-progress').textContent = `${index + 1} / ${files.length} · ${file.name}`;
-    try {
-      validateUpload(file); const {blob, width, height} = await preview(file);
-      await request(`/storage/v1/object/gallery-originals/${master}`, {method:'POST',body:file,raw:true}); created.push(['gallery-originals',master]);
-      await request(`/storage/v1/object/gallery-previews/${derivative}`, {method:'POST',body:blob,raw:true}); created.push(['gallery-previews',derivative]);
-      await request('/rest/v1/gallery_artworks', {method:'POST',body:{id,title:file.name.replace(/\.[^.]+$/,'').slice(0,160),original_path:master,preview_path:derivative,width,height}});
-      uploaded++;
-    } catch (error) {
-      failures.push(`${file.name}: ${error.message}`);
-      // A failed draft must not leave unreferenced private files behind.
-      for (const [bucket,path] of created) try { await request(`/storage/v1/object/${bucket}`,{method:'DELETE',body:{prefixes:[path]}}); } catch {}
+    for (const [index,file] of files.entries()) {
+      if(!session) { failed.push(...files.slice(index)); break; }
+      const row=rows[index],retry=uploadIds.has(file),id=uploadIds.get(file)||crypto.randomUUID(),created=[];
+      uploadIds.set(file,id);
+      const status=text=>{row.textContent=file.name+' · '+text;$('#upload-progress').textContent=`${index+1} / ${files.length} · ${text}`;};
+      try {
+        const info=mediaInfo(file);status('Preparazione anteprima…');
+        const {blob,width,height,duration}=await prepareMedia(file,info);
+        const bucket=info.video?'gallery-videos':'gallery-originals',master=`${id}/${info.video?'clip':'original'}.${info.ext}`,derivative=`${id}/${info.video?'poster':'preview'}.jpg`;
+        if(retry){
+          const saved=await (await request(`/rest/v1/${info.video?'gallery_videos':'gallery_artworks'}?id=eq.${id}&select=id`)).json();
+          if(saved.length){uploaded++;status('Già caricato ✓');continue;}
+          for(const [b,p] of [[bucket,master],['gallery-previews',derivative]])await request(`/storage/v1/object/${b}`,{method:'DELETE',body:{prefixes:[p]}});
+        }
+        const upload=async(bucket,path,body,type,label)=>{
+          if(!session)throw Error('Sessione scaduta. Accedi di nuovo.');
+          await uploadWithProgress({url:config.supabaseUrl+`/storage/v1/object/${bucket}/${path}`,headers:{apikey:config.publishableKey,Authorization:`Bearer ${session.access_token}`,'Content-Type':type},body,onProgress:value=>status(label+(value===null?'…':` ${Math.round(value*100)}%`))});
+          created.push([bucket,path]);
+        };
+        await upload(bucket,master,file,info.type,'Invio file');
+        await upload('gallery-previews',derivative,blob,'image/jpeg','Invio anteprima');
+        status('Salvataggio bozza…');
+        await request('/rest/v1/'+(info.video?'gallery_videos':'gallery_artworks'),{method:'POST',body:{id,title:file.name.replace(/\.[^.]+$/,'').slice(0,160)||'Senza titolo',preview_path:derivative,width,height,...(info.video?{video_path:master,duration,hall_index:Number($('#video-hall').value)}:{original_path:master})}});
+        uploaded++;status('Caricato in bozza ✓');
+      } catch(error) {
+        failed.push(file);row.textContent=file.name+' · '+error.message;row.dataset.error='true';
+        for(const [bucket,path] of created)try{await request(`/storage/v1/object/${bucket}`,{method:'DELETE',body:{prefixes:[path]}});}catch{}
+      }
     }
+  } finally {
+    pendingFiles=failed;busy=false;$('#files').disabled=false;$('#files').value='';$('#retry-files').hidden=!failed.length;
+    $('#upload-progress').textContent=`${uploaded} caricati · ${failed.length} da riprovare`;
+    notice(failed.length ? 'Alcuni file non sono stati caricati. Leggi il motivo nella lista e premi Riprova.' : 'Caricamento completato: tutti i file sono in bozza.',!!failed.length);
+    try{if(session)await loadWorks();}catch(error){notice(error.message,true);}
   }
-  event.target.value = ''; event.target.disabled = false; busy = false;
-  $('#upload-progress').textContent = `${uploaded} fotografie caricate in bozza.`;
-  try { if (session) await loadWorks(); } catch (error) { failures.push(error.message); }
-  notice(failures.length ? failures.join(' · ') : 'Caricamento completato. Scegli le sale e pubblica le opere.', !!failures.length);
-});
+}
+$('#files').addEventListener('change',event=>uploadBatch(Array.from(event.target.files)));
+$('#files').addEventListener('click',()=>{if(!busy)notice('Conferma la selezione con la spunta del dispositivo. Se le foto sono su iCloud, attendi che siano scaricate prima dell’invio.');});
+$('#retry-files').addEventListener('click',()=>uploadBatch(pendingFiles));
+window.addEventListener('beforeunload',event=>{if(busy){event.preventDefault();event.returnValue='';}});
+
 try {
   config = await publishingConfig();
   $('#setup').hidden = config.enabled; $('#login').hidden = !config.enabled;

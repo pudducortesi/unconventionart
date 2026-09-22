@@ -186,9 +186,10 @@ export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess
       // A freestanding screening wall, white on its reverse, with a slim inset display.
       box(w, 3.65, d, x, 1.825, z, plaster);
       box(w - 0.6, 2.82, 0.06, x, 2, z + d / 2 + 0.025, lacquer);
-      panel({ width: w - 0.82, height: 2.58, x, y: 2, z: z + d / 2 + 0.062,
+      const display = panel({ width: w - 0.82, height: 2.58, x, y: 2, z: z + d / 2 + 0.062,
         kicker: "UNCONVENTIONART / MOVING IMAGE", title: "Corpo. Luce. Tempo.",
         subtitle: "Programmazione prossimamente     /     Tocca per esplorare", dark: true, dialog: "moving-image" });
+      display.userData.videoHall = piece.hallIndex;
       box(w - 0.7, 0.025, 0.03, x, 0.21, z + d / 2 + 0.02, glow);
       box(w + 0.7, 0.12, 2.8, x, BUILDING.height - 0.85, z, plaster);
     }
