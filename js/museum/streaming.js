@@ -19,7 +19,7 @@ export function createArtStream({
   now = () => Date.now(),
 }) {
   const capacity = Math.max(1, Math.floor(retainAll ? slots.length : limit));
-  const parallel = Math.max(1, Math.min(2, Math.floor(concurrency)));
+  const parallel = Math.max(1, Math.min(6, Math.floor(concurrency)));
   const resident = new Map();
   const loading = new Map();
   const requests = new Map();

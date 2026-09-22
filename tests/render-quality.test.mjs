@@ -45,3 +45,10 @@ test('small screens are not upscaled beyond their display and GPU texture limit 
   const limited = selectPixelRatios({ ...desktop, width: 9000, maxTextureSize: 2048 });
   assert(limited.detail * 9000 <= 2048);
 });
+
+test('iPad restores a three-megapixel settled view while retaining the motion budget', () => {
+  const ipad = {width:1366,height:1024,pixelRatio:2,mobile:true,profile:balanced};
+  const ratios = selectPixelRatios(ipad);
+  assert(pixels(ipad,ratios.detail) >= 2_999_999);
+  assert(pixels(ipad,ratios.motion) <= 1_200_001);
+});

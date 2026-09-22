@@ -255,3 +255,13 @@ test('persistent previews retry after a failure even without visitor movement', 
   assert.equal(h.mounted.size,1);
   h.stream.dispose();
 });
+
+test('persistent exhibition fills six download slots without exceeding the cap', async () => {
+  const h = harness(Array.from({length:78},(_,i)=>({x:i,z:0})),{retainAll:true,concurrency:6});
+  h.stream.update({x:0,z:0});
+  assert.equal(h.pending.size,6);
+  await h.finishAll();
+  assert.equal(h.peakActive,6);
+  assert.equal(h.mounted.size,78);
+  h.stream.dispose();
+});
