@@ -6,7 +6,7 @@ import { FURNITURE, HALLS, BUILDING, RUGS } from "./layout.js";
 
 // Static exhibition fittings: shared box batches and a handful of text panels.
 // No video downloads or animation loops until actual films are programmed.
-export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess, glow, onReady = () => {} }) {
+export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess, glow, openHalls, onReady = () => {} }) {
   const targets = [];
   const panel = ({ width, height, x, y, z, rotation = 0, title, subtitle, kicker, dark = false, dialog }) => {
     const canvas = document.createElement("canvas");
@@ -39,7 +39,7 @@ export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess
     return mesh;
   };
 
-  targets.push(...furnishWelcomeHall({room,own,box}));
+  targets.push(...furnishWelcomeHall({room,own,box,openHalls}));
 
   const chrome = own(new T.MeshStandardMaterial({ color: 0xc5c7c9, metalness: 0.95, roughness: 0.24 }));
   const tableTop = own(new T.MeshStandardMaterial({ color: 0xededeb, roughness: 0.3 }));

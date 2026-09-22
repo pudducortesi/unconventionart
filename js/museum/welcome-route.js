@@ -5,6 +5,8 @@ export function welcomeRoute(slots) {
   const upper=slots.findIndex(slot=>slot.floorY>0);
   return [
     {position:INITIAL,look:INITIAL_TARGET,title:'Benvenuto / UnconventionArt',description:'Prenditi un momento nella hall. Avanza quando vuoi: cammineremo insieme verso la mostra. Puoi sempre fermarti e muoverti liberamente.'},
+    {position:{x:-16,z:7.8,floorY:0},look:{x:-16,y:4.65,z:.34},title:'Orientarsi / Il museo',description:'Quattro piani, quaranta sale nel progetto complessivo. Tocca la grande mappa: le sale aperte sono evidenziate, quelle chiuse e previste restano visibili.'},
+    {position:{x:16,z:7.8,floorY:0},look:{x:16,y:4.65,z:.34},title:'La presentazione / LED wall',description:'Qui prende forma il racconto del museo. Tocca lo schermo per aprire la presentazione; prosegui quando vuoi verso la collezione.'},
     {position:{x:0,z:-7,floorY:0},look:{x:-5,y:2.3,z:-13},title:'La soglia / Verso Officina',description:'La promenade introduce la mostra. La sala aperta è sulla sinistra: scegli Prossima tappa per entrare.'},
     ...(ground<0?[]:[{hallIndex:slots[ground].hallIndex,title:'Officina / La collezione',description:`${slots.length} fotografie, due livelli e composizioni da osservare con calma. Prima incontriamo le opere al piano terra.`},
       {workIndex:ground,title:'Piano terra / Guarda da vicino',description:'Clicca la fotografia per aprirla su fondo scuro. Chiudila per ritrovarti nello stesso punto. Prossima tappa ti accompagna al livello superiore.'}]),

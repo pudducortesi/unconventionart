@@ -1,3 +1,4 @@
+import { welcomeDisplays } from "./welcome-displays.js";
 import * as T from '../../vendor/three.module.js';
 import { BRAND_CONTOURS } from './brand-contours.js';
 
@@ -26,7 +27,7 @@ export function createBrandRelief() {
 }
 
 // One continuous contemporary foyer replaces the former reception/lounge wings.
-export function furnishWelcomeHall({room,own,box}) {
+export function furnishWelcomeHall({room,own,box,openHalls}) {
   const plaster=own(new T.MeshStandardMaterial({color:0xd9d4c8,roughness:.88}));
   const limestone=own(new T.MeshStandardMaterial({color:0xc4bba9,roughness:.66}));
   const bronze=own(new T.MeshStandardMaterial({color:0x716954,metalness:.68,roughness:.48}));
@@ -125,5 +126,6 @@ export function furnishWelcomeHall({room,own,box}) {
     box(.018,.018,9.4,side*26.6,9.89,4.9,light);
   }
   box(10.38,.065,.18,0,5.72,.27,bronze);
+  targets.push(...welcomeDisplays({room,own,box,openHalls}));
   return targets;
 }
