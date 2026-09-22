@@ -17,7 +17,7 @@ export function createDesignSeating(room, own) {
     ivory: surface(0xf1ede3), red: surface(0xb82e2e),
     blue: surface(0x183d93, 0.32), vermilion: surface(0xcc1737, 0.32),
     yellow: surface(0xf3d51b, 0.32), wood: surface(0x262322, 0.65),
-    darkWood: surface(0x16191a, 0.55), chrome: surface(0xe3e5e6, 0.20, 0.8),
+    darkWood: surface(0x16191a, 0.55), chrome: surface(0xe3e5e6, 0.20, 0.95),
     darkSeam: surface(0x171a1a, 0.75), warmSeam: surface(0x713524, 0.75),
   };
   const roomUpholstery = ROOM_PROFILES.map(profile => surface(profile.color));
