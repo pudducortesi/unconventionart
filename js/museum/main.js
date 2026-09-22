@@ -368,7 +368,7 @@ function updateHud(moving = false) {
   let nearest = null,
     nearestDistance = 12;
   for (const [index, art] of stream.values()) {
-    const distance = Math.hypot(player.x - art.slot.x, player.z - art.slot.z, player.floorY);
+    const distance = Math.hypot(player.x - art.slot.x, player.z - art.slot.z, player.floorY - (art.slot.floorY || 0));
     if (index === selected) {
       nearest = art;
       break;
@@ -378,7 +378,7 @@ function updateHud(moving = false) {
       nearestDistance = distance;
     }
   }
-  const closeEnough = nearest && Math.hypot(player.x-nearest.slot.x,player.z-nearest.slot.z,player.floorY) <= (nearest===detailArtwork ? 7 : 5.5);
+  const closeEnough = nearest && Math.hypot(player.x-nearest.slot.x,player.z-nearest.slot.z,player.floorY - (nearest.slot.floorY || 0)) <= (nearest===detailArtwork ? 7 : 5.5);
   const detail = closeEnough && (!moving || nearest===detailArtwork) ? nearest : null;
   if (detail !== detailArtwork) {
     detailArtwork?.setDetail(false);
@@ -573,13 +573,14 @@ function mountArtwork(art, index) {
   button.hidden = true;
   button.setAttribute(
     "aria-label",
-    `Leggi il cartellino: ${art.slot.work.title}`,
+    `Dettagli della fotografia ${index + 1}`,
   );
-  const title = document.createElement("strong");
-  title.textContent = art.slot.work.title;
-  const hint = document.createElement("span");
-  hint.textContent = "Informazioni ↗";
-  button.append(title, hint);
+  button.type = "button";
+  button.title = "Dettagli dell’opera";
+  const icon = document.createElement("span");
+  icon.textContent = "i";
+  icon.setAttribute("aria-hidden", "true");
+  button.append(icon);
   button.addEventListener("click", () => describeWork(index));
   plaques.set(index, {
     button,
@@ -714,7 +715,7 @@ async function focusWork(index) {
     bounds.minZ + 0.7,
     bounds.maxZ - 0.7,
   );
-  const position = safeLevelViewpoint(desired);
+  const position = safeLevelViewpoint(slot.viewpoint || desired);
   $("#work-title").textContent = slot.work.title;
   $("#work-series").textContent =
     collectionFor(slot.work)?.title || "UnconventionArt";

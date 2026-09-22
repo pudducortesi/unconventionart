@@ -77,6 +77,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
 
   // Full-size planning mockups: 60% of wall positions, no invented photographs.
   const occupied = new Set(occupiedSlots.map(slot => slot.id));
+  const composedHalls = new Set(occupiedSlots.filter(slot => slot.id.startsWith("portrait-")).map(slot => slot.hallIndex));
   const frameInk = material({ color: 0x161616, roughness: 0.48 });
   const paper = own(new T.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }));
   const labelGeometry = own(new T.PlaneGeometry(0.62, 0.25));
@@ -94,7 +95,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     return own(new T.MeshBasicMaterial({ map: texture, toneMapped: false }));
   });
   for (const slot of HALLS.flatMap(hall => hall.slots)) {
-    if (occupied.has(slot.id) || !slot.plannedPhoto) continue;
+    if (composedHalls.has(slot.hallIndex) || occupied.has(slot.id) || !slot.plannedPhoto) continue;
     const nx = Math.sin(slot.rotation), nz = Math.cos(slot.rotation);
     const rx = Math.cos(slot.rotation), rz = -Math.sin(slot.rotation);
     const { width, height } = slot.format;
@@ -299,7 +300,7 @@ export async function createArtwork(slot, renderer, { mobile = false } = {}) {
   const height = Math.min(format.height, format.width / aspect);
   const width = height * aspect;
   const group = new T.Group();
-  group.position.set(slot.x, HANGING_CENTER, slot.z);
+  group.position.set(slot.x, slot.y ?? HANGING_CENTER, slot.z);
   group.rotation.y = slot.rotation;
   const resources = new Set([texture]);
   const mesh = (geometry, material, z = 0) => {
@@ -328,30 +329,24 @@ export async function createArtwork(slot, renderer, { mobile = false } = {}) {
   photograph.userData.work = slot.work;
   photograph.userData.slot = slot;
   const canvas = document.createElement("canvas");
-  canvas.width = mobile ? 512 : 768;
-  canvas.height = mobile ? 288 : 432;
+  canvas.width = 64;
+  canvas.height = 64;
   const ctx = canvas.getContext("2d");
-  ctx.scale(canvas.width / 768, canvas.height / 432);
   ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, 768, 432);
+  ctx.fillRect(0, 0, 64, 64);
   ctx.fillStyle = "#303030";
-  ctx.font = "500 39px sans-serif";
-  ctx.fillText(slot.work.title, 34, 79, 694);
-  ctx.font = "25px sans-serif";
-  ctx.fillText(slot.work.credit || "UnconventionArt", 34, 135, 694);
-  ctx.fillStyle = "#727272";
-  ctx.font = "23px sans-serif";
-  ctx.fillText(slot.work.medium || "Fotografia", 34, 228, 694);
-  ctx.fillText("Scopri l’opera  ↗", 34, 366, 694);
+  ctx.font = "italic 44px Georgia, serif";
+  ctx.textAlign = "center";
+  ctx.fillText("i", 32, 47);
   const labelTexture = new T.CanvasTexture(canvas);
   labelTexture.colorSpace = T.SRGBColorSpace;
   resources.add(labelTexture);
   const label = mesh(
-    new T.PlaneGeometry(0.78, 0.43875),
+    new T.PlaneGeometry(0.16, 0.16),
     new T.MeshBasicMaterial({ map: labelTexture, toneMapped: false }),
     0.035,
   );
-  label.position.set(0, -height / 2 - 0.30, 0.035);
+  label.position.set(width / 2 + 0.24, -height / 2 + 0.16, 0.035);
   label.userData.work = slot.work;
   label.userData.isPlaque = true;
   // A white wall-mounted fixture; illumination comes from shared daylight.
