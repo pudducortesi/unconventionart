@@ -371,40 +371,6 @@ img, canvas, model-viewer {
   width: 36px;
   font-size: 20px;
 }
-#plaque-labels {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-}
-.wall-plaque {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  width: 44px;
-  height: 44px;
-  padding: 9px;
-  border: 0;
-  background: transparent;
-  color: #303030;
-  pointer-events: auto;
-  cursor: pointer;
-}
-.wall-plaque span {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border: 1px solid #bcb8ae;
-  border-radius: 50%;
-  background: #fffffff2;
-  font: italic 19px Georgia, serif;
-  box-shadow: 0 1px 4px #00000015;
-}
-.wall-plaque:hover span, .wall-plaque:focus-visible span {
-  background: #303030;
-  color: #fff;
-}
-.wall-plaque:focus-visible { outline: 2px solid #796242; outline-offset: 1px; }
 .touch-controls {
   display: none;
 }
@@ -861,12 +827,6 @@ dialog dd {
   border-bottom: 1px solid var(--line);
   font-size: 11px;
   margin-top: 14px;
-}
-.wall-plaque {
-  top: 0;
-  left: 0;
-  will-change: transform;
-  contain: layout style;
 }
 .map {
   width: 58px;

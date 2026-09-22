@@ -332,27 +332,6 @@ export async function createArtwork(slot, renderer, { mobile = false, maxTexture
   );
   photograph.userData.work = slot.work;
   photograph.userData.slot = slot;
-  const canvas = document.createElement("canvas");
-  canvas.width = 64;
-  canvas.height = 64;
-  const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, 64, 64);
-  ctx.fillStyle = "#303030";
-  ctx.font = "italic 44px Georgia, serif";
-  ctx.textAlign = "center";
-  ctx.fillText("i", 32, 47);
-  const labelTexture = new T.CanvasTexture(canvas);
-  labelTexture.colorSpace = T.SRGBColorSpace;
-  resources.add(labelTexture);
-  const label = mesh(
-    new T.PlaneGeometry(0.16, 0.16),
-    new T.MeshBasicMaterial({ map: labelTexture, toneMapped: false }),
-    0.035,
-  );
-  label.position.set(width / 2 + 0.24, -height / 2 + 0.16, 0.035);
-  label.userData.work = slot.work;
-  label.userData.isPlaque = true;
   // One discreet picture light for each six-print composition, above its
   // upper centre print; individual large prints retain their own fixture.
   const portraitIndex = composed ? Number(slot.id.slice(9)) % 39 : -1;
@@ -417,7 +396,6 @@ export async function createArtwork(slot, renderer, { mobile = false, maxTexture
   return {
     group,
     photograph,
-    label,
     width,
     height,
     normal,

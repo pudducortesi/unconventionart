@@ -114,11 +114,8 @@ let yaw = initialLook.yaw,
   path = [],
   finalLook = null;
 let assistedMovement = false;
-const plaques = new Map(),
-  ray = new T.Raycaster(),
+const ray = new T.Raycaster(),
   pointerCoords = new T.Vector2();
-const scratch = new T.Vector3(),
-  direction = new T.Vector3();
 const collectionFor = (work) =>
   catalogue.collections.find((c) => c.id === work.collection);
 const announce = (text) => {
@@ -562,74 +559,18 @@ function buildCollection() {
 }
 function mountArtwork(art, index) {
   art.photograph.userData.cannotReceiveAO = true;
-  art.label.userData.cannotReceiveAO = true;
   if (disposed) {
     art.dispose();
     return;
   }
   scene.add(art.group);
   art.group.updateMatrixWorld(true);
-  const button = document.createElement("button");
-  button.className = "wall-plaque";
-  button.hidden = true;
-  button.setAttribute(
-    "aria-label",
-    `Dettagli della fotografia ${index + 1}`,
-  );
-  button.type = "button";
-  button.title = "Dettagli dell’opera";
-  const icon = document.createElement("span");
-  icon.textContent = "i";
-  icon.setAttribute("aria-hidden", "true");
-  button.append(icon);
-  button.addEventListener("click", () => describeWork(index));
-  plaques.set(index, {
-    button,
-    position: art.label.getWorldPosition(new T.Vector3()),
-  });
-  $("#plaque-labels").append(button);
   lastHud = 0;
   invalidate();
 }
 function unmountArtwork(art, index) {
   scene?.remove(art.group);
   art.dispose();
-  plaques.get(index)?.button.remove();
-  plaques.delete(index);
-}
-function positionPlaques(time) {
-  for (const [index, data] of plaques) {
-    const art = stream.get(index);
-    if (!art) continue;
-    const distance = camera.position.distanceTo(data.position);
-    const facing =
-      direction.subVectors(camera.position, data.position).dot(art.normal) > 0;
-    scratch.copy(data.position).project(camera);
-    let visible =
-      entered &&
-      facing &&
-      distance < 11 &&
-      scratch.z > -1 &&
-      scratch.z < 1 &&
-      Math.abs(scratch.x) < 0.88 &&
-      Math.abs(scratch.y) < 0.73;
-    if (visible) {
-      if (!data.occlusionAt || time - data.occlusionAt >= 100) {
-        ray.set(
-          camera.position,
-          direction.subVectors(data.position, camera.position).normalize(),
-        );
-        ray.far = distance - 0.06;
-        data.occluded =
-          ray.intersectObjects(architecture.occluders, false).length > 0;
-        data.occlusionAt = time;
-      }
-      visible = !data.occluded;
-    }
-    if (data.button.hidden === visible) data.button.hidden = !visible;
-    if (visible)
-      data.button.style.transform = `translate3d(${((scratch.x + 1) * viewport.width) / 2}px,${((1 - scratch.y) * viewport.height) / 2}px,0) translate(-50%,-50%)`;
-  }
 }
 function describeWork(index) {
   const slot = slots[index];
@@ -758,7 +699,7 @@ function pick(clientX, clientY, interactiveOnly = false) {
   pointerCoords.set((clientX / viewport.width) * 2 - 1, 1 - (clientY / viewport.height) * 2);
   ray.far = 190;
   ray.setFromCamera(pointerCoords, camera);
-  const artworks = stream.values().flatMap(([, art]) => [art.photograph, art.label]);
+  const artworks = stream.values().map(([, art]) => art.photograph);
   if (interactiveOnly) {
     // Most frames point at a blank wall/floor. Find an actionable candidate
     // before raycasting detailed furniture just to decide cursor appearance.
@@ -778,7 +719,7 @@ function updateAim() {
   const available = !!(data?.work || data?.dialog);
   $("#reticle").classList.toggle("ready", available);
   $("#interact").disabled = !available;
-  $("#interact-label").textContent = data?.isPlaque ? "Cartellino" : data?.work ? "Apri in HD" : data?.dialog ? "Esplora" : "Inquadra un’opera";
+  $("#interact-label").textContent = data?.work ? "Apri in HD" : data?.dialog ? "Esplora" : "Inquadra un’opera";
 }
 $("#interact").addEventListener("click", () => { if (!$("#interact").disabled) tap({ clientX: viewport.width / 2, clientY: viewport.height / 2 }); });
 function tap(event) {
@@ -794,8 +735,8 @@ function tap(event) {
   const work = hit.object.userData.work;
   if (work) {
     const index = slots.findIndex((slot) => slot.work.id === work.id);
-    if (hit.object.userData.isPlaque) describeWork(index);
-    else { selected = index; inspect(); }
+    selected = index;
+    inspect();
   } else if (
     hit.object.userData.walkable ||
     hit.object === architecture.floor
@@ -922,7 +863,6 @@ function render(time) {
       renderer.setRenderTarget(null); renderer.render(scene, camera);
     } finally { renderer.debug.onShaderError = previousError; }
   } else { renderer.setRenderTarget(null); renderer.render(scene, camera); }
-  positionPlaques(time);
   if (!moving || time - lastHud > 80) {
     updateHud(moving);
     updateAim();
