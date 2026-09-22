@@ -11,7 +11,7 @@ import { BUILDING, HALLS, WALLS, FURNITURE, HANGING_CENTER, PHOTO_FORMATS } from
 
 /** Ten connected white halls. Repeated construction is instanced by material,
  * so the size of the building does not multiply its lighting or draw calls. */
-export function createArchitecture(scene, renderer, { mobile = false, onReady = () => {}, occupiedSlots = [] } = {}) {
+export function createArchitecture(scene, renderer, { mobile = false, onReady = () => {}, occupiedSlots = [], closedDoors = [] } = {}) {
   const room = new T.Group();
   room.name = "white-museum-200";
   scene.add(room);
@@ -36,6 +36,35 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     if (!batches.has(surface)) batches.set(surface, []);
     batches.get(surface).push({ w, h, d, x, y, z });
   };
+  const doorMetal = material({color:0x343932, roughness:.58, metalness:.45});
+  const doorTrim = material({color:0xb6a27e, roughness:.4, metalness:.72});
+  for (const door of closedDoors) {
+    box(.30,4.58,4.98,door.x,2.29,door.z,doorMetal);
+    // Flush double leaves, fine brass reveals and paired handles.
+    box(.32,4.4,.018,door.x,2.2,door.z,doorTrim);
+    for (const side of [-1,1]) {
+      box(.34,.028,4.8,door.x,side===1?4.42:.15,door.z,doorTrim);
+      box(.40,.48,.035,door.x,1.25,door.z+side*.17,doorTrim);
+    }
+  }
+  if (closedDoors.length) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024; canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#343932'; ctx.fillRect(0,0,1024,128);
+    ctx.fillStyle = '#d6c9af'; ctx.font = '32px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('IN ALLESTIMENTO',512,76);
+    const map = own(new T.CanvasTexture(canvas)); map.colorSpace = T.SRGBColorSpace;
+    map.anisotropy = Math.min(8, renderer.capabilities?.getMaxAnisotropy?.() || 1);
+    const face = own(new T.MeshBasicMaterial({map,toneMapped:false}));
+    const geometry = own(new T.PlaneGeometry(2,.25));
+    for (const door of closedDoors) {
+      const sign = new T.Mesh(geometry,face);
+      sign.position.set(door.x-Math.sign(door.x)*.161,2.25,door.z);
+      sign.rotation.y = door.x<0 ? Math.PI/2 : -Math.PI/2;
+      sign.name = 'closed-room-sign'; room.add(sign);
+    }
+  }
   const ceiling = BUILDING.height;
   const floorGeometry = own(new T.BoxGeometry(54, 0.2, 140));
   const floor = new T.Mesh(floorGeometry, terrazzo);
