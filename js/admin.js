@@ -22,7 +22,7 @@ function endSession() {
   renderVersion++;
   session = null; clearTimeout(refreshTimer); works = [];
   for (const url of thumbnails) URL.revokeObjectURL(url); thumbnails.clear();
-  $('#works').replaceChildren(); $('#workspace').hidden = true; $('#login').hidden = !config?.enabled;
+  $('#works').replaceChildren(); $('#workspace').hidden = true; $('#set-password').hidden = true; $('#login').hidden = !config?.enabled;
 }
 function scheduleRefresh() {
   clearTimeout(refreshTimer);
@@ -48,6 +48,18 @@ $('#login').addEventListener('submit', async event => {
 $('#logout').addEventListener('click', async () => {
   try { await request('/auth/v1/logout', {method:'POST'}); } catch {}
   endSession(); notice('Hai lasciato l’atelier.');
+});
+$('#set-password').addEventListener('submit', async event => {
+  event.preventDefault(); const button = event.submitter; button.disabled = true;
+  try {
+    const password = $('#new-password').value;
+    if (password.length < 12 || password !== $('#repeat-password').value) throw Error('Le password devono coincidere e contenere almeno 12 caratteri.');
+    await request('/auth/v1/user', {method:'PUT',body:{password}});
+    $('#new-password').value = $('#repeat-password').value = '';
+    try { await request('/auth/v1/logout',{method:'POST'}); } catch {}
+    endSession(); notice('Password salvata. Accedi con la tua email e la nuova password.');
+  } catch (error) { notice(error.message,true); }
+  finally { button.disabled = false; }
 });
 function element(tag, text, className) { const node = document.createElement(tag); if (text) node.textContent = text; if (className) node.className = className; return node; }
 function field(form, text, input) { const label = element('label', text); label.append(input); form.append(label); return input; }
@@ -145,4 +157,17 @@ try {
   config = await publishingConfig();
   $('#setup').hidden = config.enabled; $('#login').hidden = !config.enabled;
   notice(config.enabled ? 'Accedi per gestire la tua collezione.' : 'Pannello creato · archivio privato da attivare');
+  const callback = new URLSearchParams(location.hash.slice(1));
+  if (callback.has('access_token') || callback.has('error')) {
+    history.replaceState(null,'',location.pathname);
+    if (!config.enabled || callback.has('error') || !['invite','recovery'].includes(callback.get('type')) || !callback.get('refresh_token')) throw Error('Link non valido o scaduto. Richiedi un nuovo invito.');
+    session = {access_token:callback.get('access_token'),refresh_token:callback.get('refresh_token'),expires_in:Number(callback.get('expires_in')) || 3600};
+    try {
+      const user = await (await request('/auth/v1/user')).json();
+      const admins = await (await request('/rest/v1/gallery_admins?select=user_id')).json();
+      if (!admins.some(a=>a.user_id === user.id)) throw Error('Questo account non è abilitato all’atelier.');
+      session.user = user; scheduleRefresh(); $('#login').hidden = true; $('#set-password').hidden = false;
+      notice('Indirizzo verificato. Scegli la password per il tuo atelier.');
+    } catch (error) { endSession(); throw error; }
+  }
 } catch (error) { notice(error.message, true); }
