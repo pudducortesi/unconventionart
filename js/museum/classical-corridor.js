@@ -68,11 +68,6 @@ export function furnishCorridor({ room, own, box, renderer, onReady = () => {} }
   const fresco = textureMaterial('/images/palazzo/fresco-vault.webp', {
     roughness: .92, emissive: 0xffffff, emissiveIntensity: .24,
   }, 0xd9c9aa);
-  if (fresco.map) {
-    fresco.map.wrapT = T.RepeatWrapping;
-    // Repeated image edges fall under the transverse ribs, not mid-vault.
-    fresco.map.offset.y = -6.3 / 13;
-  }
   const paintings = textureMaterial('/images/palazzo/paintings-atlas.webp', {
     roughness: .75, emissive: 0xffffff, emissiveIntensity: .12,
   }, 0x4a3725);
@@ -83,7 +78,9 @@ export function furnishCorridor({ room, own, box, renderer, onReady = () => {} }
     mesh.receiveShadow = true; mesh.castShadow = true;
     room.add(mesh); targets.push(mesh); return mesh;
   };
-  place(own(vaultGeometry(4.82, 1.60, .025, 139.6)), fresco, -60, 'corridor-barrel-vault');
+  place(own(vaultGeometry(4.82, 1.60, .025, 139.6)), ivory, -60, 'corridor-plaster-vault');
+  // One fresco, in one complete bay; no repeated or stretched imagery.
+  place(own(vaultGeometry(4.81, 1.59, .005, 13)), fresco, -13, 'corridor-barrel-vault');
   const rib = own(vaultGeometry(4.60, 1.38, .16, .38));
   const bead = own(vaultGeometry(4.57, 1.35, .035, .065));
   for (let i = 0; i < 10; i++) {
@@ -128,7 +125,7 @@ export function furnishCorridor({ room, own, box, renderer, onReady = () => {} }
   for (const angle of [Math.PI/5, Math.PI*2/5, Math.PI*3/5, Math.PI*4/5])
     box(.04,.045,139.5,4.79*Math.cos(angle),(4.85+1.55*Math.sin(angle))*heightScale,-60,gold);
 
-  // Decorative canvases share four atlas cells and never receive artwork actions.
+  // Each atlas subject is shown once. The axial painting reserves cell 2.
   const paintingGeometry = Array.from({ length: 4 }, (_, index) => {
     const geometry=own(new T.PlaneGeometry(1,1)),uv=geometry.attributes.uv;
     const column=index%2,row=Math.floor(index/2),inset=2/1024;
@@ -137,6 +134,8 @@ export function furnishCorridor({ room, own, box, renderer, onReady = () => {} }
       (1-row)*.5+inset+uv.getY(i)*(.5-2*inset));
     return geometry;
   });
+  const usedSubjects = new Set([2]);
+  const panelGeometry = own(new T.PlaneGeometry(1,1));
   const wallPainting = (side,z,y,width,height,variant) => {
     box(.08,height+.44,width+.44,side*4.76,y,z,dark);
     for (const end of [-1,1]) {
@@ -153,10 +152,14 @@ export function furnishCorridor({ room, own, box, renderer, onReady = () => {} }
       for (const edge of [-1,1])
         ornaments.wallLeaf(side,4.575,y+end*(height/2+.11),z+edge*(width/2+.12),.15,end<0?Math.PI:0);
     }
-    const mesh=new T.Mesh(paintingGeometry[variant%4],paintings);
+    const subject = variant % 4;
+    const unique = !usedSubjects.has(subject);
+    usedSubjects.add(subject);
+    const mesh=new T.Mesh(unique ? paintingGeometry[subject] : panelGeometry, unique ? paintings : ivory);
+    if (unique) mesh.userData.decorativeSubject = subject;
     mesh.position.set(side*4.67,y,z); mesh.scale.set(width,height,1);
     mesh.rotation.y=side===-1?Math.PI/2:-Math.PI/2;
-    mesh.name='palazzo-painting'; mesh.userData.decorative=true;
+    mesh.name=unique ? 'palazzo-painting' : 'palazzo-stucco-panel'; mesh.userData.decorative=true;
     room.add(mesh); targets.push(mesh);
   };
   for (const hall of HALLS) {
@@ -194,7 +197,7 @@ export function furnishCorridor({ room, own, box, renderer, onReady = () => {} }
 
   const endCanvas=new T.Mesh(paintingGeometry[2],paintings);
   endCanvas.position.set(0,4.6,-129.70); endCanvas.scale.set(4.9,5.8,1);
-  endCanvas.name='palazzo-axial-painting'; endCanvas.userData.decorative=true;
+  endCanvas.name='palazzo-axial-painting'; endCanvas.userData.decorative=true; endCanvas.userData.decorativeSubject=2;
   room.add(endCanvas); targets.push(endCanvas);
   for (const edge of [-1,1]) {
     box(.20,6.25,.22,edge*2.62,4.6,-129.66,gold);
