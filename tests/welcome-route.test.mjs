@@ -24,11 +24,11 @@ test('welcome itinerary walks from the foyer through both levels and back, with 
   }
   assert.equal(from.z,INITIAL.z);
 });
-test('original identity is an extruded ten-metre relief with finite geometry',()=>{
+test('original identity is an extruded twenty-metre relief with finite geometry',()=>{
   const geometry=createBrandRelief();
   geometry.computeBoundingBox();
   const bounds=geometry.boundingBox;
-  assert.ok(bounds.max.x-bounds.min.x>9);
+  assert.ok(bounds.max.x-bounds.min.x>18);
   assert.ok(bounds.max.z-bounds.min.z>.09);
   assert.ok(bounds.max.z-bounds.min.z<.12);
   assert.ok(geometry.attributes.position.count>100);

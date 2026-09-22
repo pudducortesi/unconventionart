@@ -19,7 +19,7 @@ export const BUILDING = {
 };
 export const BOUNDS = { minX: -26.45, maxX: 26.45, minZ: -129.45, maxZ: 9.45 };
 export const INITIAL = { x: 0, y: 1.7, z: 3 };
-export const INITIAL_TARGET = { x: 0, y: 3.4, z: 9.55 };
+export const INITIAL_TARGET = { x: 0, y: 5.2, z: 9.55 };
 export const HALLS = [];
 export const WALLS = [];
 export const FURNITURE = [];
