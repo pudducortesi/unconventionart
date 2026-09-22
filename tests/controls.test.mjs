@@ -6,6 +6,24 @@ import {
   normalizeStick,
 } from "../js/museum/controls.js";
 
+test("native selection and dragging are blocked only on control surfaces, and listeners are released", () => {
+  const f = fixture();
+  let prevented = 0;
+  const event = { preventDefault() { prevented++; } };
+  for (const type of ["selectstart", "dragstart"]) {
+    f.fire(f.canvas, type, event);
+    f.fire(f.stick, type, event);
+  }
+  assert.equal(prevented, 4);
+  for (const target of [f.doc, f.win])
+    for (const type of ["selectstart", "dragstart"]) f.fire(target, type, event);
+  assert.equal(prevented, 4, "No global handler may prevent text selection in dialogs");
+  f.control.dispose();
+  for (const target of [f.canvas, f.stick])
+    for (const type of ["selectstart", "dragstart"]) f.fire(target, type, event);
+  assert.equal(prevented, 4, "Disposal removes the surface guards");
+});
+
 class Target {
   handlers = new Map();
   style = {

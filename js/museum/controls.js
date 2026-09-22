@@ -317,6 +317,11 @@ export function createControls({
   listen(canvas, "contextmenu", (event) => {
     if (enabled()) event.preventDefault();
   });
+  // Do not let Safari's native selection/drag compete with camera gestures.
+  // No document-wide cancellation: text fields and detail dialogs stay usable.
+  for (const surface of [canvas, joystickElement].filter(Boolean))
+    for (const name of ["selectstart", "dragstart"])
+      listen(surface, name, (event) => event.preventDefault());
   listen(doc, "mousemove", (event) => {
     if (doc.pointerLockElement !== canvas || !enabled()) return;
     const dx = Number.isFinite(event.movementX) ? event.movementX : 0;
