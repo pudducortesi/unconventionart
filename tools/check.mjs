@@ -56,12 +56,12 @@ const museumIds = new Set(
 for (const [, id] of controller.matchAll(/\$\("#([\w-]+)"\)/g))
   assert(museumIds.has(id), `Controller references missing element: ${id}`);
 assert(
-  !/href="[^"#]*\.html/.test(museum),
-  "The gallery must not link to other pages",
+  !/href="(?!corridor-credits\.html")[^"#]*\.html/.test(museum),
+  "Only the image attribution page may open outside the gallery",
 );
 assert.deepEqual(
   (await readdir("dist")).filter((path) => path.endsWith(".html")),
-  ["admin.html", "index.html"],
+  ["admin.html", "corridor-credits.html", "index.html"],
   "Public gallery and separate private atelier",
 );
 console.log("Gallery controller elements and single-page build checked.");
