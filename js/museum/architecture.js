@@ -6,6 +6,7 @@ import { createSurfaceDetail } from "./surface-detail.js";
 import * as T from "../../vendor/three.module.js";
 import { createDesignSeating } from "./design-seating.js";
 import { furnishGallery } from "./furnishings.js";
+import { createMezzanines } from "./mezzanines.js";
 import { BUILDING, HALLS, WALLS, FURNITURE, HANGING_CENTER, PHOTO_FORMATS } from "./layout.js";
 
 /** Ten connected white halls. Repeated construction is instanced by material,
@@ -121,9 +122,10 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   }
 
   const features = furnishGallery({ room, own, box, plaster, stone, lacquer, recess, glow, onReady });
+  const mezzanines = createMezzanines(room, own, box);
 
   // Include the real floor so the same raycast list supports tap-to-walk.
-  const occluders = [floor, ...finishedFloors, ...corridorSigns, ...features, ...createDesignSeating(room, own)];
+  const occluders = [floor, ...finishedFloors, ...corridorSigns, ...features, ...mezzanines, ...createDesignSeating(room, own)];
   const transform = new T.Object3D();
   for (const [surface, instances] of batches) {
     const mesh = new T.InstancedMesh(boxGeometry, surface, instances.length);
@@ -204,14 +206,15 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     const hall = HALLS.find(h => position.x > h.bounds.minX && position.x < h.bounds.maxX && position.z > h.bounds.minZ && position.z < h.bounds.maxZ);
     const x = hall ? hall.center.x : 0;
     const z = hall ? hall.center.z : Math.round(position.z / 20) * 20;
-    const zone = `${x}/${z}`;
+    const level = Math.round((position.floorY ?? 0) / 2) * 2;
+    const zone = `${x}/${z}/${level}`;
     if (zone === litZone) return;
     litZone = zone;
     sky.intensity = hall ? 1.1 : .55;
     daylight.intensity = hall ? 1.7 : 1.1;
     daylight.color.setHex(hall ? 0xffffff : 0xffe0b8);
-    daylight.position.set(x - (hall ? 4 : 1), hall ? 6 : 4.7, z + 3);
-    daylight.target.position.set(x, 0, z);
+    daylight.position.set(x - (hall ? 4 : 1), hall ? Math.min(ceiling - .5, 6 + level) : 4.7, z + 3);
+    daylight.target.position.set(x, level, z);
     const positions = hall ? pendantPositions(hall) : [];
     pendantLights.forEach((light, i) => {
       const point = positions[i];

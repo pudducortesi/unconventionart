@@ -1051,18 +1051,18 @@ dialog dd {
   .joystick[data-active="true"] .joystick-track,.joystick[data-active="true"] #joystick-knob { opacity: 1; }
   .joystick-caption { top: auto; left: max(18px, env(safe-area-inset-left)); bottom: calc(env(safe-area-inset-bottom) + 22px); width: auto; padding: 8px 11px; border-radius: 18px; background: #ffffffe6; color: #414541; font-size: 7px; }
   .joystick[data-active="true"] .joystick-caption { opacity: 0; }
-  .look-hint { display: block; right: max(18px, env(safe-area-inset-right)); bottom: calc(env(safe-area-inset-bottom) + 170px); width: 112px; color: #343b36; font-size: 8px; line-height: 1.5; pointer-events: none; }
+  .look-hint { display: block; right: max(18px, env(safe-area-inset-right)); bottom: calc(env(safe-area-inset-bottom) + 285px); width: 112px; color: #343b36; font-size: 8px; line-height: 1.5; pointer-events: none; }
   .look-hint span { font-size: 23px; margin-bottom: 3px; }
   .navigation-dock { left: auto; right: max(14px, env(safe-area-inset-right)); bottom: calc(env(safe-area-inset-bottom) + 14px); transform: none; width: min(178px, 44vw); display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 5px; white-space: normal; }
   .navigation-dock > button,.navigation-dock #next-room { width: 100%; min-height: 44px; padding: 0 9px; font-size: 10px; line-height: 1.2; }
-  #next-work,#stop-walk { grid-column: 1 / -1; }
+  #next-work,#change-level,#stop-walk { grid-column: 1 / -1; }
   #entrance,#previous-work { display: none; }
-  .game-interact { left: auto; right: max(18px, env(safe-area-inset-right)); bottom: calc(env(safe-area-inset-bottom) + 163px); transform: none; width: 142px; min-height: 50px; justify-content: center; padding: 9px; text-align: center; border-radius: 14px; }
+  .game-interact { left: auto; right: max(18px, env(safe-area-inset-right)); bottom: calc(env(safe-area-inset-bottom) + 222px); transform: none; width: 142px; min-height: 50px; justify-content: center; padding: 9px; text-align: center; border-radius: 14px; }
   .game-interact kbd { display: none; }
   .visit-choice { bottom: 120px; width: min(430px, calc(100% - 28px)); padding: 19px; }
   .visit-choice > div { grid-template-columns: 1fr; }
   .visit-choice button { min-height: 62px; }
-  .work-panel { bottom: calc(env(safe-area-inset-bottom) + 210px); width: max-content; max-width: calc(100% - 28px); }
+  .work-panel { bottom: calc(env(safe-area-inset-bottom) + 280px); width: max-content; max-width: calc(100% - 28px); }
   .tour-panel { left: 14px; top: 112px; width: min(340px, calc(100% - 28px)); max-height: calc(100dvh - 330px); padding: 10px 14px; }
   .guided .work-panel { display: none; }
   .guided #tour-open { background: #ffffff18; }
@@ -1079,6 +1079,12 @@ dialog dd {
   .work-panel { bottom: 132px; }
   .movement-hint,.look-hint { display: none; }
   .guided .tour-panel { left: 150px; width: min(310px, calc(100% - 315px)); }
+}
+@media (max-height: 540px) and (pointer: coarse) {
+  .navigation-dock { width: min(330px, 48vw); grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  #next-work,#change-level,#stop-walk { grid-column: auto; }
+  .game-interact { bottom: calc(env(safe-area-inset-bottom) + 125px); }
+  .work-panel { bottom: calc(env(safe-area-inset-bottom) + 185px); }
 }
 
 .photo-render-panel { position: fixed; inset: 0; z-index: 20; pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 20px 20px calc(25px + env(safe-area-inset-bottom)); background: transparent; }
