@@ -1,5 +1,6 @@
 import * as T from '../../vendor/three.module.js';
 import { HALLS, FURNITURE, BUILDING } from './layout.js';
+import { CORRIDOR_MASTERS } from './corridor-masters.js';
 import { createPalazzoOrnaments } from './palazzo-ornaments.js';
 const heightScale = BUILDING.height / 6.6;
 
@@ -65,12 +66,16 @@ export function furnishCorridor({ room, own, box, renderer, onReady = () => {} }
     textured.get(path).push(material);
     return material;
   };
-  const fresco = textureMaterial('/images/palazzo/fresco-vault.webp', {
+  const fresco = textureMaterial('/images/palazzo/colonna-ceiling.webp', {
     roughness: .92, emissive: 0xffffff, emissiveIntensity: .24,
   }, 0xd9c9aa);
-  const paintings = textureMaterial('/images/palazzo/paintings-atlas.webp', {
-    roughness: .75, emissive: 0xffffff, emissiveIntensity: .12,
-  }, 0x4a3725);
+  const masterMaterials = new Map();
+  const masterMaterial = work => {
+    if (!masterMaterials.has(work.id)) masterMaterials.set(work.id, textureMaterial(work.path, {
+      roughness: .82, emissive: 0xffffff, emissiveIntensity: .18,
+    }, 0x4a3725));
+    return masterMaterials.get(work.id);
+  };
   const ornaments = createPalazzoOrnaments({ room, own, gold, ivory: stone, crystal, candle });
   const place = (geometry, material, z, name) => {
     const mesh = new T.Mesh(geometry, material);
@@ -125,18 +130,14 @@ export function furnishCorridor({ room, own, box, renderer, onReady = () => {} }
   for (const angle of [Math.PI/5, Math.PI*2/5, Math.PI*3/5, Math.PI*4/5])
     box(.04,.045,139.5,4.79*Math.cos(angle),(4.85+1.55*Math.sin(angle))*heightScale,-60,gold);
 
-  // Each atlas subject is shown once. The axial painting reserves cell 2.
-  const paintingGeometry = Array.from({ length: 4 }, (_, index) => {
-    const geometry=own(new T.PlaneGeometry(1,1)),uv=geometry.attributes.uv;
-    const column=index%2,row=Math.floor(index/2),inset=2/1024;
-    for (let i=0;i<uv.count;i++) uv.setXY(i,
-      column*.5+inset+uv.getX(i)*(.5-2*inset),
-      (1-row)*.5+inset+uv.getY(i)*(.5-2*inset));
-    return geometry;
-  });
-  const usedSubjects = new Set([2]);
+  // One museum-identified work per frame; fit the frame to its original ratio.
   const panelGeometry = own(new T.PlaneGeometry(1,1));
-  const wallPainting = (side,z,y,width,height,variant) => {
+  let paintingIndex = 0;
+  const wallPainting = (side,z,y,width,height) => {
+    const work = CORRIDOR_MASTERS[paintingIndex++];
+    const ratio = work.width / work.height;
+    width = Math.min(width, height * ratio);
+    height = width / ratio;
     box(.08,height+.44,width+.44,side*4.76,y,z,dark);
     for (const end of [-1,1]) {
       box(.22,height+.48,.20,side*4.69,y,z+end*(width/2+.14),antiqueGold);
@@ -152,14 +153,12 @@ export function furnishCorridor({ room, own, box, renderer, onReady = () => {} }
       for (const edge of [-1,1])
         ornaments.wallLeaf(side,4.575,y+end*(height/2+.11),z+edge*(width/2+.12),.15,end<0?Math.PI:0);
     }
-    const subject = variant % 4;
-    const unique = !usedSubjects.has(subject);
-    usedSubjects.add(subject);
-    const mesh=new T.Mesh(unique ? paintingGeometry[subject] : panelGeometry, unique ? paintings : ivory);
-    if (unique) mesh.userData.decorativeSubject = subject;
+    const mesh=new T.Mesh(panelGeometry, masterMaterial(work));
+    mesh.userData.decorativeSubject = work.id;
+    mesh.userData.historicalWork = work;
     mesh.position.set(side*4.67,y,z); mesh.scale.set(width,height,1);
     mesh.rotation.y=side===-1?Math.PI/2:-Math.PI/2;
-    mesh.name=unique ? 'palazzo-painting' : 'palazzo-stucco-panel'; mesh.userData.decorative=true;
+    mesh.name='palazzo-painting'; mesh.userData.decorative=true;
     room.add(mesh); targets.push(mesh);
   };
   for (const hall of HALLS) {
@@ -170,14 +169,14 @@ export function furnishCorridor({ room, own, box, renderer, onReady = () => {} }
       box(.085,.06,10.2,side*4.785,.455,z+end*7.75,gold);
       box(.16,4.60,.18,side*4.75,2.30,z+end*2.62,stone);
       box(.18,4.57,.038,side*4.725,2.32,z+end*2.70,gold);
-      wallPainting(side,z+end*9.4,2.91,4.05,3.46,hall.index+(end+1)/2);
-      wallPainting(side,z+end*9.4,7.03,4.05,3.15,hall.index+(end+1)/2+2);
+      wallPainting(side,z+end*9.4,2.91,4.05,3.46);
+      wallPainting(side,z+end*9.4,7.03,4.05,3.15);
     }
     // Door head decoration stays above the existing 5 m wide opening.
     box(.17,.20,5.40,side*4.75,4.62,z,stone);
     box(.022,BUILDING.height-4.7,5.0,side*4.817,(BUILDING.height+4.7)/2,z,ivory);
     box(.24,.09,5.5,side*4.71,4.77,z,gold);
-    wallPainting(side,z,7.03,3.75,3.15,hall.index+1);
+    wallPainting(side,z,7.03,3.75,3.15);
     ornaments.wallCurl(side,4.48,5.03,z-.34,.22,.4);
     ornaments.wallCurl(side,4.48,5.03,z+.34,.22,-.4);
     ornaments.add('bead','gold',side*4.45,5.13,z,.06,.23,.18);
@@ -195,15 +194,18 @@ export function furnishCorridor({ room, own, box, renderer, onReady = () => {} }
   for (let i=0;i<5;i++) for (const side of [-1,1])
     ornaments.chandelier(side*3.40,-6.5-i*26);
 
-  const endCanvas=new T.Mesh(paintingGeometry[2],paintings);
-  endCanvas.position.set(0,4.6,-129.70); endCanvas.scale.set(4.9,5.8,1);
-  endCanvas.name='palazzo-axial-painting'; endCanvas.userData.decorative=true; endCanvas.userData.decorativeSubject=2;
+  const endWork = CORRIDOR_MASTERS[50];
+  const endWidth = Math.min(4.9, 5.8 * endWork.width / endWork.height);
+  const endHeight = endWidth * endWork.height / endWork.width;
+  const endCanvas=new T.Mesh(panelGeometry,masterMaterial(endWork));
+  endCanvas.position.set(0,4.6,-129.70); endCanvas.scale.set(endWidth,endHeight,1);
+  endCanvas.name='palazzo-axial-painting'; endCanvas.userData.decorative=true; endCanvas.userData.decorativeSubject=endWork.id; endCanvas.userData.historicalWork=endWork;
   room.add(endCanvas); targets.push(endCanvas);
   for (const edge of [-1,1]) {
-    box(.20,6.25,.22,edge*2.62,4.6,-129.66,gold);
-    box(5.45,.20,.22,0,4.6+edge*3.025,-129.66,gold);
-    box(.06,6.10,.25,edge*2.50,4.6,-129.655,antiqueGold);
-    box(5.15,.06,.25,0,4.6+edge*2.92,-129.655,antiqueGold);
+    box(.20,endHeight+.45,.22,edge*(endWidth/2+.17),4.6,-129.66,gold);
+    box(endWidth+.55,.20,.22,0,4.6+edge*(endHeight/2+.125),-129.66,gold);
+    box(.06,endHeight+.30,.25,edge*(endWidth/2+.05),4.6,-129.655,antiqueGold);
+    box(endWidth+.25,.06,.25,0,4.6+edge*(endHeight/2+.02),-129.655,antiqueGold);
   }
 
   // Fourfold text resolution for close-up reading; share one atlas across all

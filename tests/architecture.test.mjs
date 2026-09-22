@@ -154,7 +154,7 @@ for (const mobile of [false, true]) {
     assert(Math.abs(marbleUV.getY(0) - 130 / 13) < .001, 'Marble medallions repeat once per architectural bay');
     assert.equal(room.children.filter(object => object.name === 'corridor-classical-arch').length, 10);
     const palaceMaps = loadedTextures.filter(({ url }) => url.includes('images/palazzo/'));
-    assert.equal(palaceMaps.length, 2, 'All palace bays share two decorative images');
+    assert.equal(palaceMaps.length, 52, '51 unique paintings and one historical ceiling');
     const vault = scene.getObjectByName('corridor-barrel-vault');
     assert(vault.material.map, 'The barrel vault has a painted fresco, not a blank plaster fill');
     const vaultUV = vault.geometry.attributes.uv;
@@ -164,11 +164,12 @@ for (const mobile of [false, true]) {
     assert.equal(vault.position.z, -13);
     assert.equal(scene.getObjectByName('corridor-plaster-vault').material.map, null);
     const paintings = room.children.filter(object => object.name === 'palazzo-painting');
-    assert.equal(paintings.length, 3);
+    assert.equal(paintings.length, 50);
     const subjects = [...paintings, scene.getObjectByName('palazzo-axial-painting')].map(p => p.userData.decorativeSubject);
-    assert.equal(new Set(subjects).size, 4, 'All four decorative subjects appear once, including the axial canvas');
-    assert.equal(room.children.filter(object => object.name === 'palazzo-stucco-panel').length,47);
+    assert.equal(new Set(subjects).size, 51, 'Each historical work appears exactly once, including the axial canvas');
+    assert.equal(room.children.filter(object => object.name === 'palazzo-stucco-panel').length,0);
     for (const painting of paintings) {
+      assert(Math.abs(painting.scale.x / painting.scale.y - painting.userData.historicalWork.width / painting.userData.historicalWork.height) < 1e-8, 'Preserve the original painting proportions');
       assert(painting.userData.decorative && !painting.userData.work && !painting.userData.walkable);
       const normal = new T.Vector3(0, 0, 1).applyQuaternion(painting.quaternion);
       assert(normal.x * painting.position.x < 0, 'Decorative paintings face the promenade');
