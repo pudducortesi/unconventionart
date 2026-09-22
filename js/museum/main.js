@@ -29,6 +29,10 @@ import { moveOnLevels, findLevelPath, safeLevelViewpoint } from "./level-navigat
 // Fetch effects concurrently with the catalogue; initialization still precedes entry.
 const effectsModule = import('../../vendor/gallery-effects.js').then(module => ({module}), error => ({error}));
 const $ = (selector) => document.querySelector(selector);
+// Deterrence for casual saving, not DRM: public previews remain renderable.
+for (const type of ['contextmenu', 'dragstart']) document.addEventListener(type, event => {
+  if (event.target instanceof Element && event.target.closest('img, canvas, model-viewer')) event.preventDefault();
+}, { capture: true });
 const root = $("#scene"),
   mobile = matchMedia("(pointer:coarse)").matches;
 const reduced = matchMedia("(prefers-reduced-motion:reduce)");
@@ -657,8 +661,7 @@ function inspect() {
   $("#artwork-title").textContent = work.title;
   $("#artwork-series").textContent =
     collectionFor(work)?.title || "UnconventionArt";
-  $("#artwork-load-status").textContent = "Caricamento della fotografia originale…";
-  $("#artwork-original").href = work.image;
+  $("#artwork-load-status").textContent = "Caricamento dell’anteprima…";
   $("#artwork-image").src = work.image;
   $("#artwork-image").alt = work.alt || work.title;
   openDialog("artwork");
@@ -667,7 +670,7 @@ $("#artwork-image").addEventListener("load", () => {
   $("#artwork-load-status").textContent = "";
 });
 $("#artwork-image").addEventListener("error", () => {
-  $("#artwork-load-status").textContent = "Immagine non disponibile. Riprova o apri il file originale.";
+  $("#artwork-load-status").textContent = "Immagine non disponibile. Chiudi e riapri l’anteprima per riprovare.";
 });
 async function focusWork(index) {
   if (!slots.length) return;

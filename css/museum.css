@@ -85,6 +85,12 @@ a {
 #museum img {
   -webkit-user-drag: none;
 }
+img, canvas, model-viewer {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
 #scene canvas {
   display: block;
   width: 100%;

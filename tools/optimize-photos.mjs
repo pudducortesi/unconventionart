@@ -17,7 +17,7 @@ export async function optimizePhotos(catalogue, { root='.', output='dist', minim
     const input=await readFile(join(root,work.image));
     const hash=createHash('sha256').update(input).digest('hex');
     const metadata=await sharp(input).metadata();
-    if((metadata.pages || 1)>1)continue;
+    if((metadata.pages || 1)>1)throw Error('Animated masters require an explicit public preview');
     const entry={id:work.id,original:work.image,originalBytes:input.length,sourceSha256:hash,variants:[]};
     for(const [field,edge] of [['thumbnail',768],['mobilePreview',1024],['preview',1536]]) {
       const pipeline=sharp(input).rotate().toColourspace('srgb').resize({width:edge,height:edge,fit:'inside',withoutEnlargement:true});
@@ -29,15 +29,17 @@ export async function optimizePhotos(catalogue, { root='.', output='dist', minim
         const decoded=await sharp(buffer).removeAlpha().raw().toBuffer();score=psnr(reference,decoded);
         if(score>=minimumPSNR)break;
       }
-      // Don't replace a smaller original with a larger derivative.
-      const accepted=buffer.length<input.length;
+      // Always encode a metadata-free derivative, even for small source files.
       const path=`images/optimized/${createHash('sha256').update(buffer).digest('hex').slice(0,20)}-${edge}.webp`;
-      if(accepted)await writeFile(join(output,path),buffer);
-      work[field]=accepted?path:work.image;
-      entry.variants.push({field,path:work[field],width:accepted?info.width:metadata.autoOrient.width,height:accepted?info.height:metadata.autoOrient.height,bytes:accepted?buffer.length:input.length,quality:accepted?quality:'original',psnr:accepted?(Number.isFinite(score)?Number(score.toFixed(3)):'lossless'):null});
+      await writeFile(join(output,path),buffer);
+      work[field]=path;
+      entry.variants.push({field,path,width:info.width,height:info.height,bytes:buffer.length,quality,psnr:Number.isFinite(score)?Number(score.toFixed(3)):'lossless'});
     }
-    work.variants=[...new Set([...(work.variants||[]),work.thumbnail,work.mobilePreview,work.preview])];
+    if(result.hero === work.image)result.hero=work.preview;
+    work.image=work.preview;
+    work.variants=[...new Set([work.thumbnail,work.mobilePreview,work.preview])];
     report.push(entry);
   }
+  if(result.hero && !result.works.some(work=>work.variants.includes(result.hero)))throw Error('Hero must use a public preview');
   return {catalogue:result,report};
 }
