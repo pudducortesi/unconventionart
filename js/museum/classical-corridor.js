@@ -1,5 +1,6 @@
 import * as T from '../../vendor/three.module.js';
 import { HALLS, FURNITURE, BUILDING } from './layout.js';
+import { CORRIDOR_VAULTS } from './corridor-vaults.js';
 import { CORRIDOR_MASTERS } from './corridor-masters.js';
 import { createPalazzoOrnaments } from './palazzo-ornaments.js';
 const heightScale = BUILDING.height / 6.6;
@@ -84,8 +85,16 @@ export function furnishCorridor({ room, own, box, renderer, onReady = () => {} }
     room.add(mesh); targets.push(mesh); return mesh;
   };
   place(own(vaultGeometry(4.82, 1.60, .025, 139.6)), ivory, -60, 'corridor-plaster-vault');
-  // One fresco, in one complete bay; no repeated or stretched imagery.
+  // Each full bay has its own composition; no image is repeated.
   place(own(vaultGeometry(4.81, 1.59, .005, 13)), fresco, -13, 'corridor-barrel-vault');
+  CORRIDOR_VAULTS.forEach((work, index) => {
+    const material = textureMaterial(work.path, {
+      roughness: .92, emissive: 0xffffff, emissiveIntensity: .24,
+    }, 0xd9c9aa);
+    const vault = place(own(vaultGeometry(4.81, 1.59, .005, 13)), material,
+      -26 - index * 13, 'corridor-barrel-vault');
+    vault.userData.historicalWork = work;
+  });
   const rib = own(vaultGeometry(4.60, 1.38, .16, .38));
   const bead = own(vaultGeometry(4.57, 1.35, .035, .065));
   for (let i = 0; i < 10; i++) {

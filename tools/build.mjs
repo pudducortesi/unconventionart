@@ -11,7 +11,7 @@ await mkdir('dist', { recursive:true });
 await prepareVendor();
 await buildARModel();
 // Publish display derivatives only. Masters stay outside the deployment.
-for (const path of ['data/experience.json','data/publishing.json','models/kavyar-01.glb','images/site/favicon-32.png','images/site/brand-original.svg','images/palazzo/colonna-ceiling.webp','images/palazzo/masters','corridor-credits.html']) {
+for (const path of ['data/experience.json','data/publishing.json','models/kavyar-01.glb','images/site/favicon-32.png','images/site/brand-original.svg','images/palazzo/colonna-ceiling.webp','images/palazzo/masters','images/palazzo/vaults','corridor-credits.html']) {
   await mkdir(`dist/${path.substring(0,path.lastIndexOf('/'))}`, {recursive:true});
   await cp(path,`dist/${path}`,{recursive:true});
 }

@@ -26,3 +26,21 @@ test('historical corridor has 51 distinct, locally published, proportionate muse
   const credits=await readFile('dist/corridor-credits.html','utf8');
   assert.match(credits,/Orlando Paride/); assert.match(credits,/creativecommons.org\/licenses\/by-sa\/4.0/);
 });
+
+test('all eight additional vault compositions are local, unique and distinct from the walls', async () => {
+  const { CORRIDOR_VAULTS } = await import('../js/museum/corridor-vaults.js');
+  assert.equal(CORRIDOR_VAULTS.length,8);
+  const ids=new Set(CORRIDOR_MASTERS.map(w=>w.id));
+  const hashes=new Set();let bytes=0;
+  for(const work of CORRIDOR_VAULTS){
+    assert(!ids.has(work.id));ids.add(work.id);
+    assert.equal(work.medium,'oil on canvas');
+    assert.equal(work.license,'CC0');
+    const data=await readFile('dist'+work.path);bytes+=data.length;
+    hashes.add(createHash('sha256').update(data).digest('hex'));
+    const size=await sharp(data).metadata();
+    assert.equal(size.width,1536);assert.equal(size.height,1536);
+  }
+  assert.equal(hashes.size,8);
+  assert(bytes<3*1024*1024);
+});
