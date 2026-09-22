@@ -38,6 +38,7 @@ for (const mobile of [false, true]) {
     assert(architecture.occluders.length > 10);
     const room = scene.getObjectByName('white-museum-200');
     assert(room);
+    const bakedTextures = new Set(), woodTextures = new Set();
     scene.updateMatrixWorld(true);
     for (const hall of HALLS) {
       const floorRay = new T.Raycaster(
@@ -48,6 +49,18 @@ for (const mobile of [false, true]) {
       assert(hit.object.name.startsWith(hall.id + '-'), 'Room finish must cover the structural slab');
       assert.equal(hit.object.material.color.getHex(), 0xffffff, 'Wood colour comes from the shared mahogany texture');
       assert(hit.object.material.map?.image.data, 'All rooms have parquet rather than a flat fill');
+      const surface = hit.object.material, geometry = hit.object.geometry;
+      assert.equal(surface.map.colorSpace, T.SRGBColorSpace);
+      assert.equal(surface.normalMap.colorSpace, T.NoColorSpace);
+      assert.equal(surface.roughnessMap.colorSpace, T.NoColorSpace);
+      assert.equal(surface.lightMap.colorSpace, T.LinearSRGBColorSpace);
+      assert.equal(surface.aoMap.colorSpace, T.NoColorSpace);
+      assert.equal(surface.lightMap.channel, 1);
+      assert.equal(surface.aoMap.channel, 1);
+      assert(geometry.attributes.uv.getX(1) > 1, 'Wood tiles at physical scale');
+      assert.equal(geometry.attributes.uv1.getX(1), 1, 'Baked light covers the room once');
+      for (const texture of [surface.map, surface.normalMap, surface.roughnessMap]) woodTextures.add(texture);
+      bakedTextures.add(surface.lightMap); bakedTextures.add(surface.aoMap);
       assert.equal(ROOM_FINISHES[hall.index].wall, 0xffffff, 'Exhibition walls are white');
       assert.equal(ROOM_FINISHES[hall.index].accent, 0xffffff, 'Entrance walls are white');
     }
@@ -71,7 +84,12 @@ for (const mobile of [false, true]) {
       for (const value of object.instanceMatrix.array) assert(Number.isFinite(value));
     });
     assert(instances > 100);
+    assert.equal(woodTextures.size, 3, 'All halls share one set of parquet maps');
+    assert.equal(bakedTextures.size, 20, 'Each room has independent light and occlusion');
+    let released = 0;
+    for (const texture of [...woodTextures, ...bakedTextures]) texture.addEventListener('dispose', () => released++);
     architecture.dispose();
+    assert.equal(released, woodTextures.size + bakedTextures.size, 'Release all new GPU textures on exit');
     assert.equal(scene.children.length, 0);
   });
 }

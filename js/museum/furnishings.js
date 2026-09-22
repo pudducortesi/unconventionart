@@ -58,7 +58,7 @@ export function furnishGallery({ room, own, box, plaster, stone, lacquer, recess
   box(10.8, 0.025, 0.045, 15, 4.69, 2.5, glow);
   box(4.15, 0.03, 0.025, 17.5, 0.19, 4.18, glow);
 
-  const chrome = own(new T.MeshStandardMaterial({ color: 0xc5c7c9, metalness: 0.65, roughness: 0.24 }));
+  const chrome = own(new T.MeshStandardMaterial({ color: 0xc5c7c9, metalness: 0.95, roughness: 0.24 }));
   const tableTop = own(new T.MeshStandardMaterial({ color: 0xededeb, roughness: 0.3 }));
   const round = own(new T.CylinderGeometry(1, 1, 1, 64));
   const cylinder = (radius, height, x, y, z, material) => {

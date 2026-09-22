@@ -1,9 +1,11 @@
 import { adaptRealismEffects, mrtAdapter } from "./compat/realism-effects.mjs";
+import { bakeGalleryLighting } from './bake-lighting.mjs';
 import { dirname, resolve } from "node:path";
 import { build } from "esbuild";
 import { mkdir, copyFile, readFile, writeFile } from "node:fs/promises";
 export async function prepareVendor(root = ".") {
   await mkdir(`${root}/vendor`, { recursive: true });
+  await bakeGalleryLighting(`${root}/vendor`);
   for (const name of ["three.module.js", "three.core.js"])
     await copyFile(
       `node_modules/three/build/${name}`,

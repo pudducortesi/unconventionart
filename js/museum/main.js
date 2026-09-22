@@ -1,6 +1,7 @@
 import { createSelection, selectionFromHash, selectionLink } from "./selection.js";
 import { createPerformancePolicy } from "./performance-policy.js";
 import { createResolutionPolicy } from "./resolution-policy.js";
+import { selectPixelRatios } from './render-quality.js';
 import { createGuidedVisit } from "./guided-visit.js";
 import { createEnvironment } from "./environment.js";
 import * as T from "../../vendor/three.module.js";
@@ -57,12 +58,16 @@ let frame = 0,
   lastStream = 0;
 let viewport = { width: innerWidth, height: innerHeight };
 const performancePolicy = createPerformancePolicy();
-let movementPixelRatio = Math.min(devicePixelRatio, mobile ? 1.1 : performancePolicy.profile.ratio);
 const resolutionPolicy = createResolutionPolicy({ wake: invalidate });
 let savedSelection, selectionOnly = false;
 let studioPromise, performanceMode = 'auto';
 try { performanceMode = localStorage.getItem('ua-performance') || 'auto'; } catch {}
 if (!['auto','fluid','detail'].includes(performanceMode)) performanceMode = 'auto';
+function pixelRatios() {
+  return selectPixelRatios({ ...viewport, pixelRatio: devicePixelRatio, mobile,
+    mode: performanceMode, profile: performancePolicy.profile,
+    maxTextureSize: renderer?.capabilities.maxTextureSize });
+}
 $('#performance-mode').value = performanceMode;
 $('#performance-mode').addEventListener('change', () => {
   performanceMode = $('#performance-mode').value;
@@ -845,11 +850,10 @@ function render(time) {
     }
   }
   // Restore detail only after a settled pause, not between consecutive swipes.
-  if (performancePolicy.sample(rawDelta, moving)) {
-    movementPixelRatio = Math.min(devicePixelRatio, performancePolicy.profile.ratio);
-  }
+  performancePolicy.sample(rawDelta, moving);
+  const ratios = pixelRatios();
   const desiredPixelRatio = resolutionPolicy.sample(
-    moving, performanceMode === "fluid" ? Math.min(devicePixelRatio, .85) : movementPixelRatio, Math.min(devicePixelRatio, performanceMode === "fluid" ? 1 : performancePolicy.profile.economical ? 1.25 : 2),
+    moving, ratios.motion, ratios.detail,
   );
   if (Math.abs(renderer.getPixelRatio() - desiredPixelRatio) > 0.01) {
     renderer.setPixelRatio(desiredPixelRatio);
@@ -906,6 +910,8 @@ function resize() {
   if (photoRender || photoBusy) leavePhotoRender();
   const bounds = root.getBoundingClientRect();
   viewport = { width: bounds.width, height: bounds.height };
+  const ratios = pixelRatios();
+  renderer.setPixelRatio(resolutionPolicy.settled ? ratios.detail : ratios.motion);
   camera.aspect = bounds.width / bounds.height;
   camera.updateProjectionMatrix();
   renderer.setSize(bounds.width, bounds.height, false);
@@ -959,7 +965,7 @@ try {
     alpha: false,
     powerPreference: "high-performance",
   });
-  renderer.setPixelRatio(movementPixelRatio);
+  renderer.setPixelRatio(pixelRatios().motion);
   renderer.outputColorSpace = T.SRGBColorSpace;
   renderer.toneMapping = T.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;

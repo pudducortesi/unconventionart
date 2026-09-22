@@ -1,51 +1,41 @@
 import { ROOM_FINISHES, addRoomWallFinishes } from './room-finishes.js';
 import * as T from '../../vendor/three.module.js';
 import { BUILDING, HALLS } from './layout.js';
+import { CEILING_SCHEMES } from './lighting-layout.js';
+import { createFloorLightmaps } from './baked-lighting.js';
+import { createParquetData } from './parquet-data.js';
 
 // Architectural finishes; each texel is data generated here, not an artwork.
-function floorFinish(own, kind, anisotropy) {
-  const size = 512, pixels = new Uint8Array(size * size * 4);
-  // A seamless 3 x 3 m module: 16 staggered 18.75 cm boards, 1.5 m long.
-  // Grain and joints live in one shared texture, without extra floor geometry.
-  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-    const row = Math.floor(x / 32), across = x % 32;
-    const along = (y + (row % 2) * 128) % 256;
-    const segment = Math.floor(((y + (row % 2) * 128) % 512) / 256);
-    const board = Math.sin(row * 37.1 + segment * 19.7) * 6;
-    const wave = Math.sin(y * Math.PI / 256 + row) * 1.4;
-    const grain = Math.sin(across * 2.3 + wave) * 2.3 + Math.sin(across * .65 + wave) * 3;
-    const pore = Math.sin(x * 41.3 + y * 17.7) * 1.2;
-    const joint = across === 0 || along === 0;
-    const bevel = across === 1 || across === 31 || along === 1 || along === 255;
-    const variation = board + grain + pore - (bevel ? 5 : 0);
-    const index = (y * size + x) * 4;
-    pixels[index] = joint ? 32 : 85 + variation;
-    pixels[index+1] = joint ? 16 : 42 + variation * .62;
-    pixels[index+2] = joint ? 12 : 28 + variation * .4;
-    pixels[index+3] = 255;
-  }
-  const map = own(new T.DataTexture(pixels, size, size, T.RGBAFormat));
-  map.colorSpace = T.SRGBColorSpace;
-  map.wrapS = map.wrapT = T.RepeatWrapping;
-  map.magFilter = T.LinearFilter;
-  map.minFilter = T.LinearMipmapLinearFilter;
-  map.generateMipmaps = true;
-  map.anisotropy = anisotropy;
-  map.needsUpdate = true;
-  return own(new T.MeshStandardMaterial({ map, color: 0xffffff,
-    bumpMap: map, bumpScale: .003, roughness: .48, metalness: 0 }));
+function floorFinish(own, anisotropy) {
+  const { size, colour, normal, roughness } = createParquetData();
+  const texture = (data, colorSpace = T.NoColorSpace) => {
+    const map = own(new T.DataTexture(data, size, size, T.RGBAFormat));
+    map.colorSpace = colorSpace;
+    map.wrapS = map.wrapT = T.RepeatWrapping;
+    map.magFilter = T.LinearFilter;
+    map.minFilter = T.LinearMipmapLinearFilter;
+    map.generateMipmaps = true;
+    map.anisotropy = anisotropy;
+    map.needsUpdate = true;
+    return map;
+  };
+  return own(new T.MeshStandardMaterial({ color: 0xffffff,
+    map: texture(colour, T.SRGBColorSpace), normalMap: texture(normal),
+    roughnessMap: texture(roughness), roughness: 1, metalness: 0 }));
 }
 
 export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, renderer }) {
   const anisotropy = Math.min(8, renderer.capabilities?.getMaxAnisotropy?.() ?? 1);
-  const finishes = Object.fromEntries(['mahogany'].map(kind => [kind, floorFinish(own, kind, anisotropy)]));
+  const finishes = { mahogany: floorFinish(own, anisotropy) };
   const floors = [];
-  const surface = (width, depth, x, z, kind, name, colour) => {
+  const surface = (width, depth, x, z, kind, name, regionId) => {
     const geometry = own(new T.PlaneGeometry(width, depth));
     const uv = geometry.attributes.uv;
+    // Light and contact shade cover the whole room; wood retains its 3 m repeat.
+    geometry.setAttribute('uv1', uv.clone());
     for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * width / 3, uv.getY(i) * depth / 3);
-    const finishMaterial = colour === undefined ? finishes[kind] : own(finishes[kind].clone());
-    if (colour !== undefined) finishMaterial.color.setHex(colour);
+    const finishMaterial = own(finishes[kind].clone());
+    Object.assign(finishMaterial, createFloorLightmaps(own, regionId));
     const mesh = new T.Mesh(geometry, finishMaterial);
     mesh.rotation.x = -Math.PI / 2;
     mesh.position.set(x, -.003, z);
@@ -54,12 +44,7 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
     mesh.userData.walkable = true;
     room.add(mesh); floors.push(mesh);
   };
-  surface(10, 140, 0, -60, 'mahogany', 'promenade-mahogany-floor');
-  const plans = [
-    ['terrazzo', 'coffers'], ['stone', 'fins'], ['resin', 'coffers'],
-    ['resin', 'rafts'], ['terrazzo', 'rafts'], ['resin', 'rafts'],
-    ['stone', 'fins'], ['stone', 'coffers'], ['terrazzo', 'rafts'], ['terrazzo', 'fins'],
-  ];
+  surface(10, 140, 0, -60, 'mahogany', 'promenade-mahogany-floor', 'promenade');
   const h = BUILDING.height;
   const lining = own(new T.MeshStandardMaterial({color:0xbcb8ae, roughness:.85}));
   const opal = own(new T.MeshStandardMaterial({color:0xf3eee2, roughness:.72, emissive:0xfff0d7, emissiveIntensity:.22}));
@@ -67,8 +52,8 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
   for (const hall of HALLS) {
     const { x, z } = hall.center;
     const palette = ROOM_FINISHES[hall.index];
-    const finish = palette.finish, ceiling = plans[hall.index][1];
-    surface(22, 26, x, z, finish, `${hall.id}-${finish}-floor`);
+    const finish = palette.finish, ceiling = CEILING_SCHEMES[hall.index];
+    surface(22, 26, x, z, finish, `${hall.id}-${finish}-floor`, hall.id);
     const wallPaint = own(plaster.clone()); wallPaint.color.setHex(palette.wall);
     const accentPaint = own(plaster.clone()); accentPaint.color.setHex(palette.accent);
     const ceilingPaint = own(plaster.clone()); ceilingPaint.color.setHex(palette.ceiling);
