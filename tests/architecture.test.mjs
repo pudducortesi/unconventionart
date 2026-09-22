@@ -143,7 +143,7 @@ for (const mobile of [false, true]) {
       return hit.point.y;
     });
     assert.equal(BUILDING.height, 13.2);
-    assert(Math.abs(roofHeights[0] - 12.9) < .01);
+    assert(Math.abs(roofHeights[0] - 12.88) < .01);
     assert(roofHeights[0] > roofHeights[1] + 1 && roofHeights[0] < BUILDING.height,
       'The vault is genuinely curved and fits below the existing roof');
     const stoneFloor = scene.getObjectByName('promenade-stone-floor');
@@ -159,13 +159,15 @@ for (const mobile of [false, true]) {
     assert(vault.material.map, 'The barrel vault has a painted fresco, not a blank plaster fill');
     const vaultUV = vault.geometry.attributes.uv;
     assert(vaultUV && [...vaultUV.array].every(Number.isFinite));
-    assert(Math.max(...vaultUV.array) > 10, 'The fresco repeats per bay instead of stretching through the whole museum');
-    for (const arch of room.children.filter(object => object.name === 'corridor-classical-arch')) {
-      const v = (arch.position.z + 60 + 139.6 / 2) / 13 + vault.material.map.offset.y;
-      assert(Math.abs(v - Math.round(v)) < 1e-5, 'Hide the fresco image seams behind transverse ribs');
-    }
+    assert(Math.max(...vaultUV.array) <= 1 && Math.min(...vaultUV.array) >= 0, 'Fresco appears exactly once in a single bay');
+    assert.equal(vault.material.map.wrapT, T.ClampToEdgeWrapping);
+    assert.equal(vault.position.z, -13);
+    assert.equal(scene.getObjectByName('corridor-plaster-vault').material.map, null);
     const paintings = room.children.filter(object => object.name === 'palazzo-painting');
-    assert.equal(paintings.length, 50);
+    assert.equal(paintings.length, 3);
+    const subjects = [...paintings, scene.getObjectByName('palazzo-axial-painting')].map(p => p.userData.decorativeSubject);
+    assert.equal(new Set(subjects).size, 4, 'All four decorative subjects appear once, including the axial canvas');
+    assert.equal(room.children.filter(object => object.name === 'palazzo-stucco-panel').length,47);
     for (const painting of paintings) {
       assert(painting.userData.decorative && !painting.userData.work && !painting.userData.walkable);
       const normal = new T.Vector3(0, 0, 1).applyQuaternion(painting.quaternion);
