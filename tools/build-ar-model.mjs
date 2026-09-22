@@ -1,7 +1,8 @@
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import sharp from 'sharp';
 // A metrically sized preview, not a statement about an edition offered for sale.
 export async function buildARModel() {
- const photo=await readFile('images/kavyar/01.jpg'), chunks=[], views=[], accessors=[]; let offset=0;
+ const photo=await sharp(await readFile('images/kavyar/01.jpg')).rotate().resize({width:1536,height:1536,fit:'inside',withoutEnlargement:true}).jpeg({quality:90}).toBuffer(), chunks=[], views=[], accessors=[]; let offset=0;
  function view(buffer,target){const pad=(4-buffer.length%4)%4;const i=views.length;views.push({buffer:0,byteOffset:offset,byteLength:buffer.length,...(target?{target}:{})});chunks.push(buffer,Buffer.alloc(pad));offset+=buffer.length+pad;return i;}
  function accessor(array,type,count,min,max){const bytes=Buffer.from(new Float32Array(array).buffer);const i=accessors.length;accessors.push({bufferView:view(bytes,34962),componentType:5126,count,type,...(min?{min,max}:{})});return i;}
  const width=.9*1365/2048,height=.9;
