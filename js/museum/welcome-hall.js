@@ -118,14 +118,12 @@ export function furnishWelcomeHall({room,own,box,openHalls}) {
       room.add(cable);targets.push(cable);
     }
   }
-  // Fine bronze portal and inset floor bands lead back to the exhibition.
+  // Inset floor bands continue to the exhibition; the portal stays open.
   for(const side of [-1,1]){
-    box(.065,5.7,.18,side*5.16,2.85,.27,bronze);
 
     box(21.2,.055,.06,side*16,.06,9.68,bronze);
     box(.018,.018,9.4,side*26.6,9.89,4.9,light);
   }
-  box(10.38,.065,.18,0,5.72,.27,bronze);
   targets.push(...welcomeDisplays({room,own,box,openHalls}));
   return targets;
 }

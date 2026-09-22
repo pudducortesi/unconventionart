@@ -154,7 +154,10 @@ for (const mobile of [false, true]) {
     assert(Math.abs(marbleUV.getY(0) - 130 / 13) < .001, 'Marble medallions repeat once per architectural bay');
     assert.equal(room.children.filter(object => object.name === 'corridor-classical-arch').length, 10);
     const palaceMaps = loadedTextures.filter(({ url }) => url.includes('images/palazzo/'));
-    assert.equal(palaceMaps.length, 52, '51 unique paintings and one historical ceiling');
+    assert.equal(palaceMaps.length, 60, '51 unique wall paintings and nine unique ceiling compositions');
+    const vaults = room.children.filter(object => object.name === 'corridor-barrel-vault');
+    assert.equal(vaults.length, 9, 'All nine full corridor bays have painted compositions');
+    assert.equal(new Set(vaults.map(v => v.material.map)).size, 9);
     const vault = scene.getObjectByName('corridor-barrel-vault');
     assert(vault.material.map, 'The barrel vault has a painted fresco, not a blank plaster fill');
     const vaultUV = vault.geometry.attributes.uv;
