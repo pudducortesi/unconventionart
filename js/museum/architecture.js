@@ -255,14 +255,14 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     daylight.color.setHex(hall ? 0xffffff : 0xffefd8);
     daylight.position.set(x - (hall ? 4 : 3.7), hall ? Math.min(ceiling - .5, 6 + level) : 8.8, z + 3);
     daylight.target.position.set(x, level, z);
-    const positions = welcome ? [[-4,5.7,8],[4,5.7,8],[10,5.7,5]] : industrial ? [[-7.5,11.7,-7],[7.5,11.7,0],[-7.5,11.7,7]] : hall ? pendantPositions(hall) : [];
+    const positions = welcome ? [[-6,9.7,8],[6,9.7,8],[10,9.7,5]] : industrial ? [[-7.5,11.7,-7],[7.5,11.7,0],[-7.5,11.7,7]] : hall ? pendantPositions(hall) : [];
     pendantLights.forEach((light, i) => {
       const point = positions[i];
       light.intensity = point ? 48 : 0;
       if (!point) return;
       const [dx, height, dz] = point;
       light.position.set(x + dx, height - .035, z + dz);
-      light.target.position.set(x + dx, welcome && i < 2 ? 3.4 : .3, welcome && i < 2 ? 9.7 : z + dz);
+      light.target.position.set(x + dx, welcome && i < 2 ? 5.2 : .3, welcome && i < 2 ? 9.7 : z + dz);
     });
     renderer.shadowMap.needsUpdate = true;
   };
