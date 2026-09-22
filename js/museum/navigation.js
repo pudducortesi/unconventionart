@@ -156,9 +156,15 @@ export function orientation(from, to) {
 }
 export function layoutWorks(works) {
   const slots = HALLS.flatMap((hall) => hall.slots);
-  return works
-    .slice(0, CAPACITY)
-    .map((work, index) => ({ ...slots[index], work }));
+  const used = new Set();
+  return works.slice(0, CAPACITY).map(work => {
+    const assigned = Number.isInteger(work.hallIndex) && Number.isInteger(work.wallSlot)
+      ? HALLS[work.hallIndex]?.slots[work.wallSlot] : null;
+    if (assigned && used.has(assigned.id)) throw Error('Due opere occupano la stessa posizione.');
+    const slot = assigned || slots.find(item => !used.has(item.id));
+    used.add(slot.id);
+    return {...slot,work};
+  });
 }
 
 // Exact rectangle intersection includes the visitor's radius. This is also

@@ -61,8 +61,8 @@ assert(
 );
 assert.deepEqual(
   (await readdir("dist")).filter((path) => path.endsWith(".html")),
-  ["index.html"],
-  "One production page",
+  ["admin.html", "index.html"],
+  "Public gallery and separate private atelier",
 );
 console.log("Gallery controller elements and single-page build checked.");
 
@@ -85,6 +85,11 @@ assert(!deployedHtml.includes(report.photo.replace('dist/','')),'Do not preload 
 for (const path of ['images/site/brand-original.svg'])
   assert((await readFile(path)).equals(await readFile(`dist/${path}`)),`Preserve original asset bytes: ${path}`);
 const optimizedCatalogue = JSON.parse(await readFile('dist/data/catalogue.json','utf8'));
+const publishing = JSON.parse(await readFile('data/publishing.json','utf8'));
+if (publishing.enabled) {
+  assert.equal(optimizedCatalogue.works.length,0);
+  for (const path of ['dist/images/optimized','dist/models']) await assert.rejects(access(path),{code:'ENOENT'});
+} else {
 assert.equal(optimizedCatalogue.works.length,data.works.length,'Preserve the public work count');
 for(const [key,value] of Object.entries(data))if(!['works','hero'].includes(key))assert.deepEqual(optimizedCatalogue[key],value,`Preserve catalogue ${key}`);
 for(const [index,work] of data.works.entries()) {
@@ -94,6 +99,8 @@ for(const [index,work] of data.works.entries()) {
   await assert.rejects(access(`dist/${work.image}`), {code:'ENOENT'}, 'Masters must not be public');
   for(const field of ['thumbnail','mobilePreview','preview'])await access(`dist/${published[field]}`);
 }
+}
+for (const work of data.works) await assert.rejects(access(`dist/${work.image}`),{code:'ENOENT'});
 const engineOwners = Object.values(meta.outputs).filter(output => output.inputs?.['vendor/three.core.js']);
 assert.equal(engineOwners.length,1,'One shared Three engine across rendering modes');
 console.log('Production imports, shared engine and exclusion of master photographs verified.');

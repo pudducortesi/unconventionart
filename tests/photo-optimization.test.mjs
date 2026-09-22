@@ -35,9 +35,16 @@ test('production exposes only previews, never master paths or bytes',async()=>{
  }
  const meta=JSON.parse(await readFile('build-meta.json','utf8'));
  assert.ok(Object.keys(meta.inputs).every(path=>!path.startsWith('research/')&&!path.includes('node_modules/sharp/')));
+ const publishing=JSON.parse(await readFile('data/publishing.json','utf8'));
+ if(publishing.enabled) {
+  assert.equal(published.works.length,0);
+  await assert.rejects(stat('dist/models'),{code:'ENOENT'});
+  await assert.rejects(stat('dist/images/optimized'),{code:'ENOENT'});
+ } else {
  const model=await readFile('dist/models/kavyar-01.glb');
  const original=await readFile(source.works[0].image);
  assert.equal(model.includes(original),false,'AR must not embed the master');
+ }
  const html=await readFile('dist/index.html','utf8');
  assert(!html.includes('artwork-original'));
  assert(!html.includes(source.works[0].image));
