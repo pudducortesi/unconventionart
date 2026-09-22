@@ -1,11 +1,14 @@
 const idPattern = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 const headers = {'Access-Control-Allow-Origin':'*','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
 const json = (value, status=200) => new Response(JSON.stringify(value), {status,headers:{...headers,'Content-Type':'application/json'}});
-export function createPublicGallery({url,serviceKey,fetchImpl=fetch}) {
+export function createPublicGallery({url,serviceKey,publicKey,fetchImpl=fetch}) {
   const apiHeaders = {apikey:serviceKey,Authorization:`Bearer ${serviceKey}`};
   return async request => {
-    if (request.method === 'OPTIONS') return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Methods':'GET, OPTIONS'}});
+    if (request.method === 'OPTIONS') return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Methods':'GET, OPTIONS','Access-Control-Allow-Headers':'apikey'}});
     if (request.method !== 'GET') return json({error:'Method not allowed'},405);
+    // This publishable application key identifies public gallery requests. It
+    // never grants administrator access; publication checks still gate images.
+    if (publicKey && (request.headers.get('apikey') || new URL(request.url).searchParams.get('apikey')) !== publicKey) return json({error:'Invalid application key'},401);
     if (!url || !serviceKey) return json({error:'Archive unavailable'},503);
     const path = new URL(request.url).pathname.split('/gallery-public/')[1] || '';
     try {
@@ -15,7 +18,8 @@ export function createPublicGallery({url,serviceKey,fetchImpl=fetch}) {
         const rows = await response.json();
         if (!Array.isArray(rows) || rows.length > 200) throw Error();
         const base = `${url}/functions/v1/gallery-public/image/`;
-        const works = rows.map(row=>({id:row.id,title:row.title,description:row.description,credit:row.credit,collection:'atelier',medium:'Fotografia digitale',hallIndex:row.hall_index,wallSlot:row.wall_slot,image:base+row.id,preview:base+row.id,mobilePreview:base+row.id,thumbnail:base+row.id}));
+        const image = id => base + id + (publicKey ? `?apikey=${encodeURIComponent(publicKey)}` : '');
+        const works = rows.map(row=>({id:row.id,title:row.title,description:row.description,credit:row.credit,collection:'atelier',medium:'Fotografia digitale',hallIndex:row.hall_index,wallSlot:row.wall_slot,image:image(row.id),preview:image(row.id),mobilePreview:image(row.id),thumbnail:image(row.id)}));
         return json({works,collections:[{id:'atelier',title:'UnconventionArt',description:'La collezione fotografica.',color:'#b99363'}],hero:works[0]?.image || null,revision:rows.map(r=>`${r.id}:${r.updated_at}`).join('|')});
       }
       const parts = path.split('/');

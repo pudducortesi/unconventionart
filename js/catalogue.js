@@ -2,8 +2,9 @@
 import { publishingConfig } from './publishing.js';
 export async function loadCatalogue({ publicOnly = false } = {}) {
   const publishing = await publishingConfig();
-  if (publishing.enabled) {
-    const response = await fetch(publishing.catalogueUrl, {cache:'no-store'});
+  if (publishing.enabled && publishing.liveCatalogue !== false) {
+    const options = {cache:'no-store',headers:{apikey:publishing.publishableKey}};
+    const response = await fetch(publishing.catalogueUrl, options);
     if (!response.ok) throw Error('La collezione è temporaneamente non disponibile. Riprova tra poco.');
     const data = await response.json();
     if (!Array.isArray(data.works) || !Array.isArray(data.collections)) throw Error('Catalogo non valido.');
@@ -13,7 +14,7 @@ export async function loadCatalogue({ publicOnly = false } = {}) {
     setInterval(async () => {
       if (document.hidden) return;
       try {
-        const next = await fetch(publishing.catalogueUrl, {cache:'no-store'});
+        const next = await fetch(publishing.catalogueUrl, options);
         if (!next.ok) return;
         const value = await next.json();
         if (typeof value.revision === 'string' && value.revision !== revision) location.reload();

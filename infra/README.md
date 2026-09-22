@@ -1,11 +1,13 @@
 # Atelier privato — attivazione
 
-Il pannello `/admin` e il backend sono implementati. `data/publishing.json` resta disabilitato finché non esiste un progetto Supabase dedicato verificato. Nessun caricamento è operativo in questo stato.
+Il progetto dedicato `unconventionart` (`ykregzrmynedwwlfavzm`, Francoforte) è stato creato nell'organizzazione pudducortesi, previa conferma del preventivo di 0/mese. Schema e funzione sono distribuiti; il controllo di sicurezza Supabase non segnala problemi. Il pannello `/admin` è collegato (`enabled: true`), ma nessun amministratore è ancora abilitato: serve l'email scelta dal proprietario.
+
+`liveCatalogue: false` mantiene la mostra esistente durante la preparazione dell'archivio. Non è un fallback automatico: il passaggio esplicito a `true` va fatto dopo aver importato la fotografia attuale e verificato pubblicazione/ritiro. Nel frattempo l'atelier permette agli amministratori solo la preparazione delle bozze.
 
 1. Confermare con il proprietario organizzazione e costo del nuovo progetto Supabase UnconventionArt; non riutilizzare progetti di altre applicazioni.
 2. Applicare `infra/gallery-schema.sql` al progetto dedicato. Eseguire i controlli Supabase di sicurezza e verificare le policy sul servizio reale.
 3. Creare/invitare l'utente amministratore tramite Supabase Auth, impostando la password fuori dalla chat. Inserire il suo UUID in `public.gallery_admins` da un accesso amministrativo. Disabilitare le iscrizioni pubbliche. L'iscrizione da sola non concede accesso al pannello.
-4. Distribuire `supabase/functions/gallery-public` con `verify_jwt=false`: è un endpoint pubblico di sola lettura che controlla sempre lo stato pubblicato. Le variabili server `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` non devono mai finire nel sito o nel repository.
+4. Distribuire `supabase/functions/gallery-public` con `verify_jwt=false`: applica il controllo della chiave publishable dell'applicazione e controlla sempre lo stato pubblicato. La chiave publishable non concede accesso amministrativo. Il segreto server `SUPABASE_SERVICE_ROLE_KEY` non deve mai finire nel sito o nel repository.
 5. Configurare URL progetto, chiave publishable (o legacy anon) ed endpoint `/functions/v1/gallery-public/catalogue`. Abilitare `publishing.json` solo dopo le verifiche. Prima del passaggio, importare nel nuovo archivio le opere attuali da conservare: il catalogo live sostituisce quello statico.
 6. Verificare sul backend reale: anonimo e utente non amministratore respinti; upload multiplo; bozza invisibile; pubblicazione nella sala scelta; ritiro e risposta 404 della relativa anteprima; originali sempre privati. La galleria aperta controlla gli aggiornamenti ogni minuto quando visibile.
 7. Eseguire `npm run check`, pubblicare sul branch `codex/immersive-portfolio` senza force push e controllare il deploy. Non unire a main.

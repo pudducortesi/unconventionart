@@ -86,7 +86,7 @@ for (const path of ['images/site/brand-original.svg'])
   assert((await readFile(path)).equals(await readFile(`dist/${path}`)),`Preserve original asset bytes: ${path}`);
 const optimizedCatalogue = JSON.parse(await readFile('dist/data/catalogue.json','utf8'));
 const publishing = JSON.parse(await readFile('data/publishing.json','utf8'));
-if (publishing.enabled) {
+if (publishing.enabled && publishing.liveCatalogue !== false) {
   assert.equal(optimizedCatalogue.works.length,0);
   for (const path of ['dist/images/optimized','dist/models']) await assert.rejects(access(path),{code:'ENOENT'});
 } else {
