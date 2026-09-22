@@ -1,4 +1,5 @@
 import { ROOM_PROFILES } from "./room-profiles.js";
+import { CORRIDOR_BENCHES } from './corridor-layout.js';
 // One continuous museum: ten exhibition halls linked by a central promenade.
 // Architecture, pathfinding and the plan all use these same dimensions.
 export const CAPACITY = 200;
@@ -169,6 +170,8 @@ for (const x of [22.3, 23.7]) FURNITURE.push(rectangle(x, 3.7, 0.5, 0.5, { kind:
 RUGS.push(rectangle(-16, 5.2, 10, 5.8));
 FURNITURE.push(rectangle(16.5, 8.4, 5.2, 0.65, { kind: 'console' }));
 FURNITURE.push(rectangle(17.5, 7, 1.2, 1.2, { kind: 'lounge', model: 'cantilever' }));
+for (const bench of CORRIDOR_BENCHES)
+  FURNITURE.push(rectangle(bench.x, bench.z, bench.width, bench.depth, bench));
 // Reserved exhibition envelopes: 3.8m along the wall, 4m clear in front.
 // These are planning constraints, not barriers for visitors.
 export const EXHIBITION_ZONES = HALLS.flatMap(hall => hall.slots.map(slot => {

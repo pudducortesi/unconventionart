@@ -26,7 +26,6 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   const lacquer = material({ color: 0xffffff, roughness: 0.28 });
   const recess = material({ color: 0xd9d9d9, roughness: 0.97 });
   const glow = own(new T.MeshBasicMaterial({ color: 0xffffff }));
-  const ceilingDiffuser = material({ color: 0xf3eee2, roughness: 0.72, emissive: 0xfff0d7, emissiveIntensity: 0.22 });
   const joint = own(new T.MeshBasicMaterial({ color: 0xeaeaea }));
   const batches = new Map();
   const boxGeometry = own(new T.BoxGeometry(1, 1, 1));
@@ -51,25 +50,6 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   }
   box(54, 0.18, 140, 0, ceiling, -60);
 
-  // Long, luminous promenade. The repeated portals establish readable scale.
-  for (const side of [-1, 1]) {
-    box(0.1, 0.14, 137.5, side * 4.35, ceiling - 0.25, -59.5);
-    box(0.035, 0.018, 136.5, side * 4.24, ceiling - 0.33, -59.5, glow);
-  }
-  for (let row = 0; row < 6; row++) {
-    const z = -row * 26;
-    box(10, 0.38, 0.34, 0, ceiling - 0.24, z);
-  }
-  for (let z = 5; z > -129; z -= 10) {
-    box(5.7, 0.04, 5.3, 0, ceiling - 0.13, z, recess);
-    box(5.32, 0.03, 4.94, 0, ceiling - 0.16, z, ceilingDiffuser);
-    for (const side of [-1, 1]) {
-      box(.1, .18, 5.4, side * 2.82, ceiling - .22, z);
-      box(5.7, .18, .1, 0, ceiling - .22, z + side * 2.65);
-    }
-    box(0.04, 0.06, 5.05, 0, ceiling - 0.19, z);
-  }
-
   for (const hall of HALLS) {
     const { x, z } = hall.center;
     // Doorway lintels stay above eye level and never obstruct the 5m opening.
@@ -90,7 +70,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   }
   const finishedFloors = createInteriorEnvelope({ room, own, box, plaster, recess, glow, renderer });
 
-  furnishCorridor({ own, box, glow });
+  const corridorSigns = furnishCorridor({ room, own, box, plaster, recess, glow });
 
   // Full-size planning mockups: 60% of wall positions, no invented photographs.
   const occupied = new Set(occupiedSlots.map(slot => slot.id));
@@ -143,7 +123,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   const features = furnishGallery({ room, own, box, plaster, stone, lacquer, recess, glow, onReady });
 
   // Include the real floor so the same raycast list supports tap-to-walk.
-  const occluders = [floor, ...finishedFloors, ...features, ...createDesignSeating(room, own)];
+  const occluders = [floor, ...finishedFloors, ...corridorSigns, ...features, ...createDesignSeating(room, own)];
   const transform = new T.Object3D();
   for (const [surface, instances] of batches) {
     const mesh = new T.InstancedMesh(boxGeometry, surface, instances.length);
@@ -198,40 +178,6 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   shadows.computeBoundingSphere();
   room.add(shadows);
 
-  // Hall signs use one small atlas and one material across the whole building.
-  const atlas = document.createElement("canvas");
-  atlas.width = 512;
-  atlas.height = 1024;
-  const context = atlas.getContext("2d");
-  context.fillStyle = "#ffffff";
-  context.fillRect(0, 0, 512, 1024);
-  for (const hall of HALLS) {
-    const top = hall.index * 100;
-    context.fillStyle = "#565656";
-    context.font = "400 47px sans-serif";
-    context.fillText(String(hall.index + 1).padStart(2, "0"), 25, top + 61);
-    context.font = "15px sans-serif";
-    context.fillStyle = "#808080";
-    context.fillText(hall.profile.name.toUpperCase(), 131, top + 43);
-    context.fillText("UNCONVENTIONART", 131, top + 68);
-  }
-  const signTexture = own(new T.CanvasTexture(atlas));
-  signTexture.colorSpace = T.SRGBColorSpace;
-  const signMaterial = own(
-    new T.MeshBasicMaterial({ map: signTexture, toneMapped: false }),
-  );
-  for (const hall of HALLS) {
-    const geometry = own(new T.PlaneGeometry(2.4, 0.47));
-    const uv = geometry.getAttribute("uv");
-    const bottom = 1 - (hall.index * 100 + 100) / 1024;
-    for (let index = 0; index < uv.count; index++)
-      uv.setY(index, bottom + (uv.getY(index) * 100) / 1024);
-    uv.needsUpdate = true;
-    const sign = new T.Mesh(geometry, signMaterial);
-    sign.position.set(hall.side * 4.815, 2.48, hall.center.z + 4.1);
-    sign.rotation.y = hall.side === -1 ? Math.PI / 2 : -Math.PI / 2;
-    room.add(sign);
-  }
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = T.PCFSoftShadowMap;
   renderer.shadowMap.autoUpdate = false;

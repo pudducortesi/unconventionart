@@ -2,7 +2,7 @@ import { ROOM_FINISHES } from '../js/museum/room-finishes.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from '../vendor/three.module.js';
-import { INITIAL, INITIAL_TARGET, HALLS } from '../js/museum/layout.js';
+import { INITIAL, INITIAL_TARGET, HALLS, FURNITURE } from '../js/museum/layout.js';
 import { createArchitecture } from '../js/museum/architecture.js';
 
 for (const mobile of [false, true]) {
@@ -70,6 +70,37 @@ for (const mobile of [false, true]) {
         assert(down.intersectObjects(architecture.occluders, false)[0]?.object.userData.walkable,
           'Corridor ribbon and coloured thresholds must preserve tap-to-walk');
       }
+    }
+    for (const hall of HALLS) {
+      for (const offset of [-2.1, 0, 2.1]) {
+        const throughDoor = new T.Raycaster(new T.Vector3(0, 1.7, hall.center.z + offset),
+          new T.Vector3(hall.side, 0, 0), 0, 5.6);
+        assert.equal(throughDoor.intersectObjects(architecture.occluders, true).length, 0,
+          'Portal surrounds and signs must not narrow the usable doorway');
+      }
+    }
+    for (const x of [-3.8, 0, 3.8]) {
+      const alongCorridor = new T.Raycaster(new T.Vector3(x, 1.7, 7), new T.Vector3(0, 0, -1), 0, 135);
+      assert.equal(alongCorridor.intersectObjects(architecture.occluders, true).length, 0,
+        'The central promenade stays clear for the full length');
+    }
+    for (const bench of FURNITURE.filter(piece => piece.kind === 'corridor-bench')) {
+      const down = new T.Raycaster(new T.Vector3(bench.x, 1.7, bench.z), new T.Vector3(0, -1, 0), 0, 2);
+      const hit = down.intersectObjects(architecture.occluders, true)[0];
+      assert(hit && !hit.object.userData.walkable, 'A bench must block floor-click navigation');
+      assert(Math.abs(hit.point.y - bench.height) < 1e-5, 'Rendered seating matches the collision/bake dimensions');
+    }
+    const signs = room.children.filter(object => object.name.startsWith('corridor-junction-'));
+    assert.equal(signs.length, 10, 'Each junction has a sign facing each approach');
+    for (const sign of signs) {
+      const normal = new T.Vector3(0, 0, 1).applyQuaternion(sign.quaternion);
+      const localRight = new T.Vector3(1, 0, 0).applyQuaternion(sign.quaternion);
+      const [left, right] = sign.userData.halls.map(index => HALLS[index]);
+      assert(left.center.x * localRight.x < right.center.x * localRight.x,
+        'Direction labels must swap when approached from the opposite end');
+      const readSign = new T.Raycaster(sign.position.clone().add(normal), normal.negate(), 0, 1.1);
+      assert.equal(readSign.intersectObjects(architecture.occluders, true)[0]?.object, sign,
+        'The sign face must be visible in front of its lintel');
     }
     const eye = new T.Vector3(INITIAL.x, INITIAL.y, INITIAL.z);
     const target = new T.Vector3(INITIAL_TARGET.x, INITIAL_TARGET.y, INITIAL_TARGET.z);

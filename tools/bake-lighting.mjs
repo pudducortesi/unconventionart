@@ -15,7 +15,7 @@ const heights = { screen: 2, reception: 1.22, directory: 1.5, lamp: 1.55,
 // actual layout. Nearby geometry only: this avoids baking adjacent rooms' shade.
 const blockers = [
   ...WALLS.map(wall => ({ ...wall, height: BUILDING.height })),
-  ...FURNITURE.map(piece => ({ ...piece, height: heights[piece.kind] ?? .8 })),
+  ...FURNITURE.map(piece => ({ ...piece, height: piece.height ?? heights[piece.kind] ?? .8 })),
 ];
 
 export function floorPoint(region, u, v) {
