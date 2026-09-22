@@ -262,19 +262,19 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   };
 }
 
-export async function createArtwork(slot, renderer, { mobile = false } = {}) {
+export async function createArtwork(slot, renderer, { mobile = false, maxTextureEdge = mobile ? 1024 : 2048, resolveSource = source => source } = {}) {
   const source =
     (mobile ? slot.work.mobilePreview || slot.work.thumbnail : slot.work.preview) || slot.work.image;
   let texture;
-  try { texture = await new T.TextureLoader().loadAsync(source); }
-  catch(error) { if(source===slot.work.image)throw error;texture=await new T.TextureLoader().loadAsync(slot.work.image); }
+  try { texture = await new T.TextureLoader().loadAsync(await resolveSource(source)); }
+  catch(error) { if(source===slot.work.image)throw error;texture=await new T.TextureLoader().loadAsync(await resolveSource(slot.work.image)); }
   texture.colorSpace = T.SRGBColorSpace;
   const aspect = texture.image.width / texture.image.height;
   // Keep the original photograph intact while bounding its GPU allocation.
   // This only resamples the decoded image used by the 3D wall texture; the
   // full-resolution source remains available in the artwork detail dialog.
   const maxEdge = Math.min(
-    mobile ? 1024 : 2048,
+    maxTextureEdge,
     renderer.capabilities.maxTextureSize || Infinity,
   );
   const longestEdge = Math.max(texture.image.width, texture.image.height);
@@ -311,13 +311,16 @@ export async function createArtwork(slot, renderer, { mobile = false } = {}) {
     group.add(object);
     return object;
   };
-  mesh(
-    new T.BoxGeometry(width + 0.2, height + 0.2, 0.1),
-    new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.48 }),
-    -0.05,
+  const composed = slot.id?.startsWith("portrait-");
+  const frame = mesh(
+    new T.BoxGeometry(width + (composed ? 0.10 : 0.2), height + (composed ? 0.10 : 0.2), 0.06),
+    new T.MeshStandardMaterial({ color: composed ? 0x252624 : 0xffffff, roughness: composed ? 0.62 : 0.48, metalness: composed ? 0.25 : 0 }),
+    -0.03,
   );
+  frame.castShadow = true;
+  frame.receiveShadow = true;
   mesh(
-    new T.PlaneGeometry(width + 0.08, height + 0.08),
+    new T.PlaneGeometry(width + (composed ? 0.045 : 0.08), height + (composed ? 0.045 : 0.08)),
     new T.MeshBasicMaterial({ color: 0xffffff }),
     0.006,
   );
@@ -349,13 +352,23 @@ export async function createArtwork(slot, renderer, { mobile = false } = {}) {
   label.position.set(width / 2 + 0.24, -height / 2 + 0.16, 0.035);
   label.userData.work = slot.work;
   label.userData.isPlaque = true;
-  // A white wall-mounted fixture; illumination comes from shared daylight.
-  const fixture = mesh(
-    new T.BoxGeometry(width * 0.65, 0.045, 0.14),
-    new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.45 }),
-    0.15,
-  );
-  fixture.position.y = height / 2 + 0.2;
+  // One discreet picture light for each six-print composition, above its
+  // upper centre print; individual large prints retain their own fixture.
+  const portraitIndex = composed ? Number(slot.id.slice(9)) % 39 : -1;
+  if (!composed || portraitIndex >= 36 || portraitIndex % 6 === 4) {
+    const fixture = mesh(
+      new T.BoxGeometry(composed ? (portraitIndex >= 36 ? width * .65 : 4.8) : width * .65, 0.035, 0.10),
+      new T.MeshStandardMaterial({ color: composed ? 0x353633 : 0xffffff, roughness: 0.55, metalness: 0.35 }),
+      0.12,
+    );
+    fixture.position.y = height / 2 + 0.2;
+    const diffuser = mesh(
+      new T.BoxGeometry(composed && portraitIndex < 36 ? 4.65 : width * .6, .008, .065),
+      new T.MeshBasicMaterial({ color: 0xfff4e4 }),
+      0.13,
+    );
+    diffuser.position.y = height / 2 + 0.179;
+  }
   const normal = new T.Vector3(
     Math.sin(slot.rotation),
     0,
@@ -382,8 +395,8 @@ export async function createArtwork(slot, renderer, { mobile = false } = {}) {
     }
     if (detailTexture) return Promise.resolve();
     if (detailRequest) return detailRequest;
-    detailRequest = new T.TextureLoader()
-      .loadAsync(slot.work.image)
+    detailRequest = Promise.resolve(resolveSource(slot.work.image))
+      .then(source => new T.TextureLoader().loadAsync(source))
       .then((full) => {
         if (disposed || !detailWanted) {
           full.dispose();

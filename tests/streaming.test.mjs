@@ -225,3 +225,33 @@ test("many ensure calls preserve the resident limit and eventually settle", asyn
   assert(h.peakActive <= 2);
   h.stream.dispose();
 });
+
+test('persistent exhibition loads all 78 photographs and retains both floors when moving away', async () => {
+  const slots = Array.from({length:78}, (_, i) => ({x:i%13*2,z:Math.floor(i/13)*2,floorY:i<39?0:6.2}));
+  const h = harness(slots, {retainAll:true});
+  h.stream.update({x:0,z:0,floorY:0});
+  await h.finishAll();
+  assert.equal(h.mounted.size,78);
+  for (const p of [{x:20,z:10,floorY:6.2},{x:100,z:-120,floorY:0},{x:0,z:0,floorY:0}]) {
+    h.stream.update(p);
+    await h.finishAll();
+    assert.equal(h.mounted.size,78);
+  }
+  assert.equal(h.calls.length,78);
+  assert.equal(h.removed.length,0);
+  assert.equal(h.peakActive,2);
+  h.stream.dispose();
+  assert.equal(h.removed.length,78);
+});
+
+test('persistent previews retry after a failure even without visitor movement', async () => {
+  const h = harness([{x:0,z:0}], {retainAll:true,retryDelay:5});
+  h.stream.update({x:0,z:0});
+  h.pending.get(0).reject();
+  await flush();
+  await new Promise(resolve => setTimeout(resolve,30));
+  assert.equal(h.calls.length,2);
+  await h.finishAll();
+  assert.equal(h.mounted.size,1);
+  h.stream.dispose();
+});

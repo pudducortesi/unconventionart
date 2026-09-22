@@ -11,13 +11,14 @@ export function createArtStream({
   mount,
   unmount,
   limit = 24,
+  retainAll = false,
   concurrency = 2,
   onError = () => {},
   radius = 45,
   retryDelay = 3000,
   now = () => Date.now(),
 }) {
-  const capacity = Math.max(1, Math.floor(limit));
+  const capacity = Math.max(1, Math.floor(retainAll ? slots.length : limit));
   const parallel = Math.max(1, Math.min(2, Math.floor(concurrency)));
   const resident = new Map();
   const loading = new Map();
@@ -29,6 +30,7 @@ export function createArtStream({
   let selected = -1;
   let lastPosition = null;
   let disposed = false;
+  const retryTimers = new Map();
   let pumping = false;
   let pumpAgain = false;
 
@@ -67,6 +69,15 @@ export function createArtStream({
     });
     report(error, index);
     settleRequest(index, null);
+    if (retainAll) {
+      clearTimeout(retryTimers.get(index));
+      const timer = setTimeout(() => {
+        retryTimers.delete(index);
+        reconcile();
+      }, retryDelay * 2 ** Math.min(attempts - 1, 5) + 10);
+      timer.unref?.();
+      retryTimers.set(index, timer);
+    }
   }
 
   function reconcile() {
@@ -76,6 +87,7 @@ export function createArtStream({
       ...(valid(selected) ? [selected] : []),
       ...holds,
       ...nearest,
+      ...(retainAll ? slots.map((_, index) => index) : []),
     ]);
     wanted = new Set([...priorities].slice(0, capacity));
     for (const index of holds) if (!wanted.has(index)) holds.delete(index);
@@ -197,6 +209,8 @@ export function createArtStream({
   function dispose() {
     if (disposed) return;
     disposed = true;
+    for (const timer of retryTimers.values()) clearTimeout(timer);
+    retryTimers.clear();
     wanted.clear();
     nearest = [];
     holds.clear();

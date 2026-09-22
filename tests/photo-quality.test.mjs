@@ -76,6 +76,7 @@ test("a late detail download is disposed when the artwork has left the scene", a
   const art = await createArtwork(slot, renderer, { mobile: true });
   const request = art.setDetail(true);
   assert.equal(art.setDetail(true), request, "share in-flight request");
+  await Promise.resolve(); // Resolve the cached source before the delayed texture request.
   art.dispose();
   const texture = new T.Texture({ width: 1365, height: 2048 });
   let released = false;

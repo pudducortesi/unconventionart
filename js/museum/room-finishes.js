@@ -1,6 +1,6 @@
 // Muted exhibition fields and distinct architectural relief for each room.
 export const ROOM_FINISHES = [
-  { name: 'Soglia', wall: 0xe8d6c5, accent: 0xb96d53, ceiling: 0xeadacb, trim: 0x96503d, floor: 0xa0774d, finish: 'mosaic', treatment: 'portals', detail: 'Intonaco avorio caldo, portali in terracotta e fasce sovrapposte.' },
+  { name: 'Soglia', wall: 0xe5e3de, accent: 0xd6d4ce, ceiling: 0xf0efeb, trim: 0x777772, floor: 0xa0774d, finish: 'mosaic', treatment: 'gallery', detail: 'Calce grigio perla, dettagli in grafite e parquet naturale. Pareti continue per le sequenze fotografiche in bianco e nero.' },
   { name: 'Atelier', wall: 0xe1dac8, accent: 0xb5a17b, ceiling: 0xe9e0c9, trim: 0x806b4e, floor: 0xa0774d, finish: 'mosaic', treatment: 'battens', detail: 'Pareti lino, listelli verticali color rovere e un fregio da atelier.' },
   { name: 'Contrasto', wall: 0xa9b5c5, accent: 0x344961, ceiling: 0xd9dee6, trim: 0x26364d, floor: 0xa0774d, finish: 'mosaic', treatment: 'grid', detail: 'Blu ardesia, cornici scure e una griglia geometrica in rilievo.' },
   { name: 'Movimento', wall: 0xc1d0c6, accent: 0x5c8078, ceiling: 0xd8e4da, trim: 0x426a64, floor: 0xa0774d, finish: 'mosaic', treatment: 'rhythm', detail: 'Verde salvia e sequenze di lamelle alternate, come un ritmo in movimento.' },
@@ -30,6 +30,13 @@ export function addRoomWallFinishes(hall, box, paint, accent, skirting, height) 
   // stay clear; the upper register is visible from both exhibition levels.
   const theme = ROOM_FINISHES[hall.index].treatment;
   const decorate = (length, panel) => {
+    if (theme === 'gallery') {
+      // Quiet exhibition fields on both levels; reveals stay clear of prints.
+      panel(0, 0.035, length, 0.018, skirting);
+      panel(0, 6.38, length, 0.025, skirting);
+      panel(0, height - 0.18, length, 0.025, skirting);
+      return;
+    }
     panel(0, .24, length, .22, accent);
     panel(0, 6.65, length, .16, skirting);
     const line = (y, thickness = .055) => panel(0, y, length, thickness, skirting);

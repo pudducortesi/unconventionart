@@ -1,3 +1,4 @@
+import { displayImageURL } from "./image-cache.js";
 import { createSelection, selectionFromHash, selectionLink } from "./selection.js";
 import { createPerformancePolicy } from "./performance-policy.js";
 import { createResolutionPolicy } from "./resolution-policy.js";
@@ -656,7 +657,8 @@ function describeWork(index) {
   }
   openDialog("work-details");
 }
-function inspect() {
+let inspectRequest = 0;
+async function inspect() {
   const work = slots[selected]?.work;
   if (!work) return;
   $("#artwork-save").setAttribute("aria-pressed", String(savedSelection.has(work.id)));
@@ -665,9 +667,16 @@ function inspect() {
   $("#artwork-series").textContent =
     collectionFor(work)?.title || "UnconventionArt";
   $("#artwork-load-status").textContent = "Caricamento dell’anteprima…";
-  $("#artwork-image").src = work.image;
+  const request = ++inspectRequest;
+  $("#artwork-image").removeAttribute("src");
   $("#artwork-image").alt = work.alt || work.title;
   openDialog("artwork");
+  try {
+    const source = await displayImageURL(work.image);
+    if (request === inspectRequest) $("#artwork-image").src = source;
+  } catch {
+    if (request === inspectRequest) $("#artwork-load-status").textContent = "Caricamento non riuscito. Chiudi e riapri per riprovare.";
+  }
 }
 $("#artwork-image").addEventListener("load", () => {
   $("#artwork-load-status").textContent = "";
@@ -1017,9 +1026,9 @@ try {
   }
   stream = createArtStream({
     slots,
-    limit: mobile ? 24 : 48,
+    retainAll: true,
     concurrency: 2,
-    load: (slot) => createArtwork(slot, renderer, { mobile }),
+    load: (slot) => createArtwork(slot, renderer, { mobile, maxTextureEdge: mobile ? 512 : 768, resolveSource: displayImageURL }),
     mount: mountArtwork,
     unmount: unmountArtwork,
     onError: () =>
