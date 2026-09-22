@@ -56,12 +56,6 @@ export function furnishWelcomeHall({room,own,box}) {
   brand.castShadow=true;brand.receiveShadow=true;
   brand.name='welcome-brand-relief';room.add(brand);targets.push(brand);
   box(53.5,.16,9.7,0,10.1,4.9,plaster);
-  // Floor is continuous across the old two wings and remains tap-to-walk.
-  const floor=new T.Mesh(own(new T.PlaneGeometry(53.5,9.85)),limestone);
-  floor.rotation.x=-Math.PI/2;floor.position.set(0,.005,4.95);
-  floor.name='welcome-limestone-floor';floor.userData.walkable=true;floor.receiveShadow=true;
-  room.add(floor);targets.push(floor);
-  for(const x of [-21,-14,-7,7,14,21])box(.012,.002,9.7,x,.008,4.95,bronze);
   // Recessed luminous ceiling slots and a grazing wall wash over the relief.
   for(const x of [-18,-9,0,9,18]){
     box(5.8,.06,1.7,x,9.99,4.6,bronze);
@@ -112,7 +106,7 @@ export function furnishWelcomeHall({room,own,box}) {
   // Fine bronze portal and inset floor bands lead back to the exhibition.
   for(const side of [-1,1]){
     box(.065,5.7,.18,side*5.16,2.85,.27,bronze);
-    box(.028,.003,8.8,side*2.7,.01,4.65,bronze);
+
     box(21.2,.055,.06,side*16,.06,9.68,bronze);
     box(.018,.018,9.4,side*26.6,9.89,4.9,light);
   }
