@@ -1048,13 +1048,27 @@ try {
         clearSelection();
       }
     },
+    onKeyStateChange: (pressed) => {
+      const active = new Set(pressed);
+      for (const key of document.querySelectorAll(".movement-keys [data-key]")) {
+        const down = active.has(key.dataset.key);
+        key.classList.toggle("active", down);
+        key.setAttribute("aria-pressed", String(down));
+      }
+    },
     onPointerLockChange: (locked) => {
       document.body.classList.toggle("pointer-locked", locked);
       $("#free-look").setAttribute("aria-pressed", String(locked));
-      $("#free-look").textContent = locked ? "Libera il cursore" : "Esplora liberamente";
+      $("#visit-mode-label").textContent = locked
+        ? "Modalità visita attiva"
+        : "Entra nella modalità visita";
+      $("#visit-mode-shortcut").textContent = locked
+        ? "ESC · Esci e libera il cursore"
+        : "Mouse libero";
       $("#movement-hint").textContent = locked
-        ? "MUOVI IL MOUSE PER GUARDARE · WASD PER CAMMINARE · CLICCA PER INTERAGIRE · ESC ESCE"
+        ? "MUOVI IL MOUSE PER GUARDARE · WASD O FRECCE PER CAMMINARE · CLICCA PER INTERAGIRE"
         : "CLICCA A TERRA PER SPOSTARTI · TRASCINA PER GUARDARE";
+      if (!locked) announce("Modalità visita terminata. Il cursore è libero; scegli Entra per riprendere.");
       invalidate();
     },
     onWheel: (event) => {

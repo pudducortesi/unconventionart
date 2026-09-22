@@ -78,7 +78,8 @@ function fixture() {
   });
   const taps = [],
     activity = [],
-    keyboard = [];
+    keyboard = [],
+    keyStates = [];
   let enabled = true;
   const control = createControls({
     canvas,
@@ -88,6 +89,7 @@ function fixture() {
     onTap: (event) => taps.push(event),
     onActivity: (event) => activity.push(event),
     onKeyboardAction: (event) => keyboard.push(event),
+    onKeyStateChange: (keys) => keyStates.push(keys),
   });
   const fire = (target, type, values = {}) => {
     const event = {
@@ -115,6 +117,7 @@ function fixture() {
     taps,
     activity,
     keyboard,
+    keyStates,
     disable() {
       enabled = false;
     },
@@ -238,7 +241,9 @@ test("keyboard movement combines with look and aliases do not release a held dir
   f.control.focus();
   f.fire(f.win, "keydown", { code: "KeyW" });
   f.fire(f.win, "keydown", { code: "ArrowUp" });
+  assert.deepEqual(f.keyStates, [["KeyW"], ["KeyW", "ArrowUp"]]);
   f.fire(f.win, "keyup", { code: "KeyW" });
+  assert.deepEqual(f.keyStates.at(-1), ["ArrowUp"]);
   f.fire(f.canvas, "pointerdown", { pointerType: "mouse", button: 0 });
   f.fire(f.canvas, "pointermove", { pointerType: "mouse", clientX: 220 });
   const input = f.control.sample(1 / 60);
@@ -246,6 +251,7 @@ test("keyboard movement combines with look and aliases do not release a held dir
   assert(input.lookX > 0);
   f.fire(f.win, "keydown", { code: "Escape" });
   assert.equal(f.control.sample(1 / 60).active, false);
+  assert.deepEqual(f.keyStates.at(-1), []);
   assert.deepEqual(f.keyboard, ["escape"]);
   f.control.dispose();
 });
@@ -281,14 +287,19 @@ test("pointer lock provides effortless mouse-look and click interaction", () => 
   const f = fixture();
   assert.equal(f.control.requestPointerLock(), true);
   assert.equal(f.doc.pointerLockElement, f.canvas);
+  f.fire(f.win, "keydown", { code: "ArrowRight" });
   f.fire(f.doc, "mousemove", { movementX: 24, movementY: -12 });
   const input = f.control.sample(1 / 60);
   assert(input.lookX > 0);
   assert(input.lookY < 0);
+  assert(input.sideways > 0);
   f.fire(f.canvas, "pointerdown", { pointerType: "mouse", button: 0 });
   assert.deepEqual(f.keyboard, ["interact"]);
-  assert.equal(f.control.exitPointerLock(), true);
+  f.fire(f.win, "keydown", { code: "Escape", key: "Escape" });
   assert.equal(f.doc.pointerLockElement, null);
+  assert.equal(f.control.sample(1 / 60).active, false);
+  assert.deepEqual(f.keyStates.at(-1), []);
+  assert.deepEqual(f.keyboard, ["interact", "escape"]);
   f.control.dispose();
 });
 
