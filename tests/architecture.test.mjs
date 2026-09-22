@@ -16,7 +16,12 @@ for (const mobile of [false, true]) {
       }) }),
     };
     t.after(() => { globalThis.document = previous; });
-    t.mock.method(T.TextureLoader.prototype, 'load', () => new T.Texture());
+    const loadedTextures = [];
+    t.mock.method(T.TextureLoader.prototype, 'load', (url) => {
+      const texture = new T.Texture();
+      loadedTextures.push({ url, texture });
+      return texture;
+    });
     const scene = new T.Scene();
     const renderer = { shadowMap: {} };
     const architecture = createArchitecture(scene, renderer, { mobile });
@@ -138,8 +143,37 @@ for (const mobile of [false, true]) {
       'The vault is genuinely curved and fits below the existing roof');
     const stoneFloor = scene.getObjectByName('promenade-stone-floor');
     assert(stoneFloor?.material.isMeshPhysicalMaterial);
-    assert(stoneFloor.material.roughness < .3 && stoneFloor.material.clearcoat > .5);
+    assert(stoneFloor.material.roughnessMap && stoneFloor.material.clearcoat > .5);
+    const marbleUV = stoneFloor.geometry.attributes.uv;
+    assert.equal(marbleUV.getX(1), 1, 'The marble composition spans the whole promenade');
+    assert(Math.abs(marbleUV.getY(0) - 140 / 13) < .001, 'Marble medallions repeat once per architectural bay');
     assert.equal(room.children.filter(object => object.name === 'corridor-classical-arch').length, 10);
+    const palaceMaps = loadedTextures.filter(({ url }) => url.includes('images/palazzo/'));
+    assert.equal(palaceMaps.length, 2, 'All palace bays share two decorative images');
+    const vault = scene.getObjectByName('corridor-barrel-vault');
+    assert(vault.material.map, 'The barrel vault has a painted fresco, not a blank plaster fill');
+    const vaultUV = vault.geometry.attributes.uv;
+    assert(vaultUV && [...vaultUV.array].every(Number.isFinite));
+    assert(Math.max(...vaultUV.array) > 10, 'The fresco repeats per bay instead of stretching through the whole museum');
+    for (const arch of room.children.filter(object => object.name === 'corridor-classical-arch')) {
+      const v = (arch.position.z + 60 + 139.6 / 2) / 13 + vault.material.map.offset.y;
+      assert(Math.abs(v - Math.round(v)) < 1e-5, 'Hide the fresco image seams behind transverse ribs');
+    }
+    const paintings = room.children.filter(object => object.name === 'palazzo-painting');
+    assert.equal(paintings.length, 50);
+    for (const painting of paintings) {
+      assert(painting.userData.decorative && !painting.userData.work && !painting.userData.walkable);
+      const normal = new T.Vector3(0, 0, 1).applyQuaternion(painting.quaternion);
+      assert(normal.x * painting.position.x < 0, 'Decorative paintings face the promenade');
+      const towardPainting = new T.Raycaster(painting.position.clone().add(normal), normal.negate(), 0, 1.01);
+      assert.equal(towardPainting.intersectObjects(architecture.occluders, true)[0]?.object, painting,
+        'The painting surface is visible, not buried in a backing panel');
+    }
+    assert.equal(scene.children.filter(object => object.isLight).length, 5, 'Palace décor does not multiply dynamic lights');
+    for (const { texture } of palaceMaps) {
+      assert.equal(texture.colorSpace, T.SRGBColorSpace);
+      assert(texture.anisotropy <= 4, 'Bound the decorative texture cost on tablets');
+    }
     const eye = new T.Vector3(INITIAL.x, INITIAL.y, INITIAL.z);
     const target = new T.Vector3(INITIAL_TARGET.x, INITIAL_TARGET.y, INITIAL_TARGET.z);
     const distance = eye.distanceTo(target);
@@ -156,9 +190,9 @@ for (const mobile of [false, true]) {
     assert.equal(woodTextures.size, 3, 'All halls share one set of parquet maps');
     assert.equal(bakedTextures.size, 20, 'Each room has independent light and occlusion');
     let released = 0;
-    for (const texture of [...woodTextures, ...bakedTextures]) texture.addEventListener('dispose', () => released++);
+    for (const texture of [...woodTextures, ...bakedTextures, ...palaceMaps.map(item => item.texture)]) texture.addEventListener('dispose', () => released++);
     architecture.dispose();
-    assert.equal(released, woodTextures.size + bakedTextures.size, 'Release all new GPU textures on exit');
+    assert.equal(released, woodTextures.size + bakedTextures.size + palaceMaps.length, 'Release all new GPU textures on exit');
     assert.equal(scene.children.length, 0);
   });
 }

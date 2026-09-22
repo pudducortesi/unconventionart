@@ -16,6 +16,8 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   room.name = "white-museum-200";
   scene.add(room);
   const resources = new Set();
+  let disposed = false;
+  const surfaceReady = () => { if (!disposed) onReady(); };
   const lights = [];
   const own = (value) => (resources.add(value), value);
   const material = (options) => own(new T.MeshStandardMaterial(options));
@@ -71,7 +73,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   }
   const finishedFloors = createInteriorEnvelope({ room, own, box, plaster, recess, glow, renderer });
 
-  const corridorSigns = furnishCorridor({ room, own, box, plaster, recess, glow });
+  const corridorSigns = furnishCorridor({ room, own, box, plaster, recess, glow, renderer, onReady: surfaceReady });
 
   // Full-size planning mockups: 60% of wall positions, no invented photographs.
   const occupied = new Set(occupiedSlots.map(slot => slot.id));
@@ -210,10 +212,16 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     const zone = `${x}/${z}/${level}`;
     if (zone === litZone) return;
     litZone = zone;
-    sky.intensity = hall ? 1.1 : .55;
-    daylight.intensity = hall ? 1.7 : 1.1;
-    daylight.color.setHex(hall ? 0xffffff : 0xffe0b8);
-    daylight.position.set(x - (hall ? 4 : 1), hall ? Math.min(ceiling - .5, 6 + level) : 4.7, z + 3);
+    sky.intensity = hall ? 1.1 : .9;
+    scene.environmentIntensity = hall ? .55 : .7;
+    if (scene.fog) {
+      scene.fog.color.setHex(hall ? 0xffffff : 0xd4c9b7);
+      scene.fog.near = hall ? 75 : 110;
+      scene.fog.far = hall ? 180 : 230;
+    }
+    daylight.intensity = hall ? 1.7 : 1.9;
+    daylight.color.setHex(hall ? 0xffffff : 0xffefd8);
+    daylight.position.set(x - (hall ? 4 : 3.7), hall ? Math.min(ceiling - .5, 6 + level) : 8.8, z + 3);
     daylight.target.position.set(x, level, z);
     const positions = hall ? pendantPositions(hall) : [];
     pendantLights.forEach((light, i) => {
@@ -238,6 +246,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     occluders,
     updateLighting,
     dispose() {
+      disposed = true;
       for (const resource of resources) resource.dispose();
       for (const light of lights) {
         light.shadow?.dispose();

@@ -32,9 +32,12 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
   const surface = (width, depth, x, z, kind, name, regionId) => {
     const geometry = own(new T.PlaneGeometry(width, depth));
     const uv = geometry.attributes.uv;
-    // Light and contact shade cover the whole room; wood retains its 3 m repeat.
+    // Light maps cover the whole floor. Parquet repeats at 3 m; the palace
+    // marble composition spans the full 10 m promenade and repeats every bay.
     geometry.setAttribute('uv1', uv.clone());
-    for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * width / 3, uv.getY(i) * depth / 3);
+    const repeatWidth = kind === 'stone' ? 10 : 3;
+    const repeatDepth = kind === 'stone' ? 13 : 3;
+    for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * width / repeatWidth, uv.getY(i) * depth / repeatDepth);
     const finishMaterial = own(finishes[kind].clone());
     Object.assign(finishMaterial, createFloorLightmaps(own, regionId));
     const mesh = new T.Mesh(geometry, finishMaterial);
