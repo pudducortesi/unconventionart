@@ -6,6 +6,8 @@ import { createGuidedVisit } from "./guided-visit.js";
 import { createEnvironment } from "./environment.js";
 import * as T from "../../vendor/three.module.js";
 import { loadCatalogue } from "../catalogue.js";
+import { createVideoScreens } from './video-screens.js';
+let videoScreens;
 import { createArchitecture, createArtwork } from "./architecture.js";
 import { createControls } from "./controls.js";
 import { createArtStream } from "./streaming.js";
@@ -799,6 +801,7 @@ function render(time) {
     return;
   }
   if (photoRender) {
+    videoScreens?.update(player,false);
     const previousError = renderer.debug.onShaderError;
     try {
       renderer.debug.onShaderError = () => { throw new Error('Shader non supportato'); };
@@ -883,6 +886,7 @@ function render(time) {
   }
   setView();
   architecture.updateLighting(player);
+  videoScreens?.update(player,entered && !modalOpen && !photoRender);
   const fastNavigation = performanceMode === "fluid" || !resolutionPolicy.settled;
   if (effects && realistic && !fastNavigation) {
     const previousError = renderer.debug.onShaderError;
@@ -963,6 +967,7 @@ addEventListener("pagehide", (event) => {
   cancelAnimationFrame(frame);
   controls?.dispose();
   stream?.dispose();
+  videoScreens?.dispose();
   architecture?.dispose();
   environment?.dispose();
   photoRender?.dispose();
@@ -1003,6 +1008,7 @@ try {
   );
   root.append(renderer.domElement);
   architecture = createArchitecture(scene, renderer, { mobile, onReady: invalidate, occupiedSlots: slots });
+  videoScreens = createVideoScreens({scene,videos:catalogue.videos||[],invalidate});
   try {
     environment = createEnvironment(scene, renderer);
   } catch (error) {

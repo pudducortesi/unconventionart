@@ -69,3 +69,16 @@ test('curated wall positions survive removals from the catalogue',()=>{
   assert.equal(before[1].id,after[0].id);assert.equal(after[0].hallIndex,8);
   assert.throws(()=>layoutWorks([works[0],works[0]]));
 });
+test('video streaming forwards byte ranges and refuses withdrawn clips',async()=>{
+ let calls=0;
+ const handler=createPublicGallery({url,serviceKey:'secret',fetchImpl:async(endpoint,options)=>{
+  if(++calls===1)return json([{id,video_path:`${id}/clip.mp4`}]);
+  assert(endpoint.includes('/gallery-videos/'));assert.equal(options.headers.Range,'bytes=0-3');
+  return new Response(new Uint8Array([1,2,3,4]),{status:206,headers:{'Content-Range':'bytes 0-3/100','Content-Length':'4'}});
+ }});
+ const response=await handler(new Request(`${url}/functions/v1/gallery-public/video/${id}`,{headers:{Range:'bytes=0-3'}}));
+ assert.equal(response.status,206);assert.equal(response.headers.get('content-range'),'bytes 0-3/100');
+ assert.equal(response.headers.get('cache-control'),'no-store');
+ const withdrawn=createPublicGallery({url,serviceKey:'secret',fetchImpl:async()=>json([])});
+ assert.equal((await withdrawn(new Request(`${url}/functions/v1/gallery-public/video/${id}`))).status,404);
+});

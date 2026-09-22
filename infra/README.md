@@ -1,5 +1,13 @@
 # Atelier privato — attivazione
 
+## Caricamenti massivi
+
+La selezione multipla non impone un limite di 80 file: il browser li invia in sequenza, con preparazione di una sola anteprima alla volta, percentuale di invio e risultato individuale. I file falliti rimangono in memoria e possono essere riprovati senza riselezionare quelli riusciti. Gli identificatori vengono riutilizzati nei tentativi per riconoscere salvataggi riusciti con risposta persa. La coda non sopravvive alla chiusura o ricarica della pagina; tenere l'atelier aperto. Prima della conferma nel selettore iOS il sito non riceve i file e non può mostrare l'avanzamento del download da iCloud.
+
+Video: applicata `infra/video-schema.sql`; bucket privato `gallery-videos`, MP4/WebM fino a 50 MB per file. Le clip pubblicate sono riprodotte in playlist, senza audio automatico, sullo schermo assegnato nelle sale 4 o 6. Solo lo schermo vicino al visitatore decodifica il filmato. La funzione pubblica verifica la pubblicazione per ogni nuova richiesta, inoltra i byte range e non memorizza il video nella cache. Il ritiro non può cancellare byte già ricevuti dal visitatore. Il passaggio `liveCatalogue` resta da completare prima della pubblicazione.
+
+Verifica sicurezza: RLS sulle nuove tabelle e bucket privati confermati. Supabase segnala inoltre la protezione contro password compromesse disabilitata: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection . Nessun permesso è stato ampliato per correggere questa segnalazione.
+
 Il progetto dedicato `unconventionart` (`ykregzrmynedwwlfavzm`, Francoforte) è stato creato nell'organizzazione pudducortesi, previa conferma del preventivo di 0/mese. Schema e funzione sono distribuiti; il controllo di sicurezza Supabase non segnala problemi. Il pannello `/admin` è collegato (`enabled: true`), ma nessun amministratore è ancora abilitato: serve l'email scelta dal proprietario.
 
 `liveCatalogue: false` mantiene la mostra esistente durante la preparazione dell'archivio. Non è un fallback automatico: il passaggio esplicito a `true` va fatto dopo aver importato la fotografia attuale e verificato pubblicazione/ritiro. Nel frattempo l'atelier permette agli amministratori solo la preparazione delle bozze.

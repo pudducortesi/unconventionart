@@ -20,6 +20,7 @@ test('Postgres RLS protects originals, drafts, membership and publication slots'
     insert into auth.users values ('10000000-0000-4000-8000-000000000001'),('10000000-0000-4000-8000-000000000002');
   `);
   await db.exec(await readFile('infra/gallery-schema.sql','utf8'));
+  await db.exec(await readFile('infra/video-schema.sql','utf8'));
   await db.exec(`insert into public.gallery_admins values ('10000000-0000-4000-8000-000000000001');`);
   const identity=async (role,id='')=>db.exec(`reset role; select set_config('request.jwt.claim.sub','${id}',false); set role ${role};`);
   await identity('anon');
@@ -27,6 +28,7 @@ test('Postgres RLS protects originals, drafts, membership and publication slots'
   assert.equal((await db.query('select * from storage.objects')).rows.length,0);
   await identity('authenticated','10000000-0000-4000-8000-000000000002');
   assert.equal((await db.query('select * from public.gallery_admins')).rows.length,0);
+  assert.equal((await db.query('select * from public.gallery_videos')).rows.length,0);
   await assert.rejects(db.query(`insert into public.gallery_admins values ('10000000-0000-4000-8000-000000000002')`));
   await assert.rejects(db.query(`insert into storage.objects(bucket_id,name) values ('gallery-originals','x.jpg')`));
   await identity('authenticated','10000000-0000-4000-8000-000000000001');
@@ -48,4 +50,12 @@ test('Postgres RLS protects originals, drafts, membership and publication slots'
   await db.query('update public.gallery_artworks set published=false');
   assert.equal((await db.query('select published from public.gallery_artworks')).rows[0].published,false);
   assert.equal((await db.query('select * from storage.objects')).rows.length,2);
+  const clip='30000000-0000-4000-8000-000000000001';
+  await db.query(`insert into public.gallery_videos(id,title,video_path,preview_path,width,height,duration) values($1,'Clip',$2,$3,1920,1080,20)`,[clip,`${clip}/clip.mp4`,`${clip}/poster.jpg`]);
+  await assert.rejects(db.query('update public.gallery_videos set published=true'));
+  await db.query(`insert into storage.objects(bucket_id,name) values('gallery-videos',$1),('gallery-previews',$2)`,[`${clip}/clip.mp4`,`${clip}/poster.jpg`]);
+  await db.query('update public.gallery_videos set published=true');
+  assert.equal((await db.query('select published from public.gallery_videos')).rows[0].published,true);
+  await db.query(`delete from storage.objects where name=$1`,[`${clip}/poster.jpg`]);
+  assert.equal((await db.query('select * from storage.objects')).rows.length,4);
 });
