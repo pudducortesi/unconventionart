@@ -75,6 +75,14 @@
       </section>
       <div class="hud" id="hud" hidden>
         <section id="photo-render-panel" class="photo-render-panel" hidden><p id="photo-render-status" role="status"></p><button id="photo-render-exit">Torna alla visita</button></section>
+        <section id="visit-choice" class="visit-choice" aria-labelledby="visit-choice-title">
+          <span class="eyebrow">SCEGLI IL TUO RITMO</span>
+          <h2 id="visit-choice-title">Come vuoi visitare?</h2>
+          <div>
+            <button id="assist-start" class="visit-choice-primary"><strong>Visita assistita</strong><span>Ti accompagniamo alla prima opera</span></button>
+            <button id="free-start"><strong>Esplora liberamente</strong><span>Muoviti e scegli il tuo percorso</span></button>
+          </div>
+        </section>
         <div id="reticle" class="reticle" aria-hidden="true"><span></span></div>
         <button id="interact" class="game-interact" aria-label="Interagisci con ciò che inquadri" disabled><kbd>E</kbd><span id="interact-label">Inquadra un’opera</span></button>
         <section id="tour-panel" class="tour-panel" aria-label="Visita guidata" hidden>
@@ -122,7 +130,9 @@
           </button>
           <button id="next-work">Opere <span>↗</span></button>
           <button id="next-room">Mappa</button>
-          <button id="tour-open" data-open="guided-tours">Visita guidata</button>
+          <button id="tour-open" data-open="guided-tours">Percorsi</button>
+          <button id="free-look" aria-pressed="false">Esplora liberamente</button>
+          <button id="stop-walk" hidden>Fermati</button>
         </div>
         <div id="work-panel" class="work-panel" hidden>
           <div>
@@ -144,7 +154,7 @@
           </button>
         </div>
         <p class="movement-hint" id="movement-hint">
-          WASD / FRECCE · TRASCINA PER GUARDARE · E INTERAGISCI · ESC FERMA
+          CLICCA A TERRA PER SPOSTARTI · TRASCINA PER GUARDARE
         </p>
         <div class="touch-controls" aria-label="Comandi touch">
           <div
@@ -154,10 +164,10 @@
             aria-label="Joystick: trascina per camminare"
           >
             <span class="joystick-track"></span><span id="joystick-knob"></span
-            ><span class="joystick-caption">MUOVITI</span>
+            ><span class="joystick-caption">TOCCA QUI PER MUOVERTI</span>
           </div>
           <div class="look-hint" aria-hidden="true">
-            <span>⊹</span>SGUARDO<br />Trascina qui
+            <span>⊹</span>TRASCINA QUI<br />PER GUARDARE
           </div>
         </div>
       </div>
@@ -209,16 +219,17 @@
       </button>
       <span class="eyebrow">VISITA LIBERA</span>
       <h2 id="help-title">Il tuo percorso.</h2>
-      <p>Inizia dall’opera davanti a te: “Scopri l’opera” ti accompagna alla distanza di osservazione. Apri il cartellino per leggere la storia o la foto intera per i dettagli. Puoi poi esplorare liberamente e scegliere un’altra sala dalla mappa.</p>
+      <p>Scegli “Visita assistita” per raggiungere automaticamente la prima fotografia, oppure “Esplora liberamente” per prendere subito i comandi. “Prossima opera” ti accompagna sempre alla distanza corretta.</p>
       <p>Le cornici bianche con bordo nero sono sagome a grandezza reale: 120 posizioni fotografiche, il 60% delle 200 disponibili. I cartellini ne indicano le dimensioni. Le opere disponibili sono elencate in “Opere”.</p>
       <dl class="instructions">
         <dt>01 / Guardati intorno</dt>
         <dd>Trascina il mouse o un dito sullo schermo.</dd>
         <dt>02 / Cammina</dt>
         <dd>
-          Da computer usa W A S D, le frecce oppure clicca a terra. Dal telefono
-          trascina il joystick in basso a sinistra; con l’altra mano puoi
-          guardarti intorno.
+          Da computer clicca a terra oppure attiva “Esplora liberamente” per
+          guardare muovendo il mouse e camminare con W A S D. Dal telefono
+          appoggia il pollice nella metà sinistra: il joystick compare sotto il
+          dito; trascina nella metà destra per guardarti intorno.
         </dd>
         <dt>03 / Incontra le opere</dt>
         <dd>
@@ -227,7 +238,7 @@
           in alto.
         </dd>
       </dl>
-      <p>Premi <strong>E</strong> per interagire con l’opera al centro del mirino. Da telefono usa il pulsante a destra. Con <strong>Visita guidata</strong> scegli un percorso: la guida va in pausa quando riprendi i comandi.</p>
+      <p>In esplorazione libera premi <strong>E</strong>, oppure clicca, per interagire con ciò che inquadri. Il pulsante <strong>Fermati</strong> interrompe immediatamente ogni spostamento assistito. Da <strong>Percorsi</strong> puoi scegliere una visita completa.</p>
       <button id="graphics-toggle" aria-pressed="true" disabled>Grafica: realistica</button>
       <button id="advanced-toggle" aria-pressed="false" disabled>Ombre: morbide</button>
       <p id="graphics-status" role="status">Preparazione degli effetti.</p>
