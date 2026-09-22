@@ -1,0 +1,2 @@
+[functions.gallery-public]
+verify_jwt = false
