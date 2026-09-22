@@ -62,15 +62,20 @@ for (const mobile of [false, true]) {
       assert(hit.object.material.map?.image.data, 'All rooms have parquet rather than a flat fill');
       const surface = hit.object.material, geometry = hit.object.geometry;
       assert.equal(surface.map.colorSpace, T.SRGBColorSpace);
-      assert.equal(surface.normalMap.colorSpace, T.NoColorSpace);
-      assert.equal(surface.roughnessMap.colorSpace, T.NoColorSpace);
+      if (hall.index === 0) {
+        assert.equal(surface.bumpMap.colorSpace, T.NoColorSpace);
+        assert.equal(hit.object.name, 'hall-1-concrete-floor');
+      } else {
+        assert.equal(surface.normalMap.colorSpace, T.NoColorSpace);
+        assert.equal(surface.roughnessMap.colorSpace, T.NoColorSpace);
+      }
       assert.equal(surface.lightMap.colorSpace, T.LinearSRGBColorSpace);
       assert.equal(surface.aoMap.colorSpace, T.NoColorSpace);
       assert.equal(surface.lightMap.channel, 1);
       assert.equal(surface.aoMap.channel, 1);
       assert(geometry.attributes.uv.getX(1) > 1, 'Wood tiles at physical scale');
       assert.equal(geometry.attributes.uv1.getX(1), 1, 'Baked light covers the room once');
-      for (const texture of [surface.map, surface.normalMap, surface.roughnessMap]) woodTextures.add(texture);
+      for (const texture of [surface.map, surface.normalMap, surface.roughnessMap, surface.bumpMap].filter(Boolean)) woodTextures.add(texture);
       bakedTextures.add(surface.lightMap); bakedTextures.add(surface.aoMap);
       assert.notEqual(ROOM_FINISHES[hall.index].wall, ROOM_FINISHES[hall.index].accent,
         'Exhibition fields and entrance accents have distinct tones');
@@ -187,7 +192,7 @@ for (const mobile of [false, true]) {
       for (const value of object.instanceMatrix.array) assert(Number.isFinite(value));
     });
     assert(instances > 100);
-    assert.equal(woodTextures.size, 3, 'All halls share one set of parquet maps');
+    assert.equal(woodTextures.size, 5, 'Nine halls share parquet maps; the industrial hall shares two concrete maps');
     assert.equal(bakedTextures.size, 20, 'Each room has independent light and occlusion');
     let released = 0;
     for (const texture of [...woodTextures, ...bakedTextures, ...palaceMaps.map(item => item.texture)]) texture.addEventListener('dispose', () => released++);

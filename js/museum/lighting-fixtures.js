@@ -34,6 +34,7 @@ export function createLightingFixtures({ room, own, box }) {
   }
   const rod = (r,height,x,y,z,material=metal) => part(cylinder,material,x,y,z,r,height,r);
   for (const hall of HALLS) {
+    if (hall.index === 0) continue;
     const {x,z} = hall.center;
     const enamel = pbr({color:hall.profile.color, roughness:.3, metalness:.22});
     // Service canopy: mounting plate, two roof fixings, individual cord grippers.

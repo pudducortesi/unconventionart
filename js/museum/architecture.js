@@ -213,18 +213,19 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     const zone = `${x}/${z}/${level}`;
     if (zone === litZone) return;
     litZone = zone;
-    sky.intensity = hall ? 1.1 : .9;
-    scene.environmentIntensity = hall ? .55 : .7;
+    const industrial = hall?.index === 0;
+    sky.intensity = industrial ? .78 : hall ? 1.1 : .9;
+    scene.environmentIntensity = industrial ? .38 : hall ? .55 : .7;
     if (scene.fog) {
       scene.fog.color.setHex(hall ? 0xffffff : 0xd4c9b7);
       scene.fog.near = hall ? 75 : 110;
       scene.fog.far = hall ? 180 : 230;
     }
-    daylight.intensity = hall ? 1.7 : 1.9;
+    daylight.intensity = industrial ? 1.15 : hall ? 1.7 : 1.9;
     daylight.color.setHex(hall ? 0xffffff : 0xffefd8);
     daylight.position.set(x - (hall ? 4 : 3.7), hall ? Math.min(ceiling - .5, 6 + level) : 8.8, z + 3);
     daylight.target.position.set(x, level, z);
-    const positions = hall ? pendantPositions(hall) : [];
+    const positions = industrial ? [[-7.5,11.7,-7],[7.5,11.7,0],[-7.5,11.7,7]] : hall ? pendantPositions(hall) : [];
     pendantLights.forEach((light, i) => {
       const point = positions[i];
       light.intensity = point ? 48 : 0;

@@ -1,7 +1,7 @@
 import { ROOM_FINISHES } from './room-finishes.js';
 // Spatial identities, independent of the photographs eventually curated here.
 export const ROOM_PROFILES = [
-  { name: 'Soglia', mood: 'Ritratti in sequenza su due livelli. Un allestimento raccolto, dedicato al bianco e nero.', color: 0x383936, rug: 0x77736b, weave: 0xa9a398, shape: 'oval', light: 'cluster', seat: 'discs' },
+  { name: 'Officina', mood: 'Ritratti in sequenza su due livelli. Un universo industriale dedicato al bianco e nero.', color: 0x383936, rug: 0x77736b, weave: 0xa9a398, shape: 'oval', light: 'cluster', seat: 'discs' },
   { name: 'Atelier', mood: 'Un tavolo condiviso per leggere e confrontare immagini.', color: 0xb58a3c, rug: 0xb9a67b, weave: 0xe4d4ab, shape: 'rectangle', light: 'linear', seat: 'sofa' },
   { name: 'Contrasto', mood: 'Geometrie nette, colori primari, composizioni frontali.', color: 0x244784, rug: 0x303740, weave: 0xa9b3c6, shape: 'rectangle', light: 'pair', seat: 'daybed' },
   { name: 'Movimento', mood: 'Uno spazio collettivo rivolto alle immagini in movimento.', color: 0x234e60, rug: 0x395762, weave: 0x698795, shape: 'rectangle', light: 'linear', seat: 'sofa' },
