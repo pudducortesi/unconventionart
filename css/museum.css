@@ -1150,3 +1150,50 @@ dialog dd {
 .collector-inquiry label:has(input[type=checkbox]),.curator-opt-in {display:block;font-size:13px;line-height:1.5}
 .collector-inquiry input[type=checkbox],.curator-opt-in input {width:22px;height:22px;vertical-align:middle;margin-right:8px}
 .curator-opt-in {margin:16px 0;max-width:650px}
+
+/* Beta exhibition: a dark, quiet photographic viewing room. */
+#artwork {
+  inset: 0; margin: 0; width: 100vw; height: 100dvh;
+  max-width: none; max-height: none; border-radius: 0;
+  background: #111312; color: #ecebe5;
+  padding: max(62px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom));
+}
+#artwork[open] { display: flex; flex-direction: column; gap: 20px; }
+#artwork::backdrop { background: #080a09; }
+.artwork-stage { position: relative; flex: 1; min-height: 0; width: 100%; }
+#artwork-image { object-fit: contain; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.artwork-watermark {
+  position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+  white-space: nowrap; pointer-events: none; font-size: 10px; letter-spacing: .22em;
+  color: #fff9; text-shadow: 0 1px 4px #000; background: #1115; padding: 5px 9px;
+}
+#artwork .dialog-close {
+  position: absolute; right: max(20px, env(safe-area-inset-right)); top: max(12px, env(safe-area-inset-top));
+  width: 44px; height: 44px; color: #f3f1e9; background: #ffffff0c;
+  border: 1px solid #ffffff26; border-radius: 50%; z-index: 2;
+}
+#artwork .artwork-caption {
+  position: static; flex-shrink: 0; width: 100%; max-width: 1400px;
+  margin: 0 auto; padding-top: 16px; border-top: 1px solid #ffffff20;
+  display: flex; gap: 16px; align-items: center;
+}
+#artwork .eyebrow { color: #c1b299; font-size: 10px; }
+#artwork .artwork-caption h2 { font-size: clamp(16px,2vw,22px); color: #eeece5; }
+#artwork .artwork-actions { display: flex; flex-direction: row; flex-wrap: wrap; gap: 4px 16px; }
+#artwork .artwork-actions button { color: #deded5; background: transparent; }
+#artwork .artwork-rights { color: #949a93; font-size: 10px; flex-basis: 100%; text-align: right; }
+#artwork-load-status { color: #c9c9be; top: 24px; padding: 0 52px; }
+.hall-button:disabled { opacity: .45; cursor: default; }
+.map-hall-closed { opacity: .22; }
+@media (max-width: 700px) {
+  #artwork { padding-left: 14px; padding-right: 14px; }
+  #artwork .artwork-caption { align-items: flex-start; flex-direction: column; gap: 8px; }
+  #artwork .artwork-actions { justify-content: flex-start; gap: 2px 14px; }
+  #artwork .artwork-rights { text-align: left; }
+  .artwork-watermark { font-size: 8px; }
+}
+@media (max-height: 550px) and (orientation: landscape) {
+  #artwork { padding-top: 14px; padding-right: 70px; gap: 8px; }
+  #artwork .artwork-caption { padding-top: 8px; }
+  #artwork .artwork-rights, #artwork .eyebrow { display: none; }
+}

@@ -40,7 +40,7 @@
         <nav aria-label="Comandi della visita">
           <button
             data-open="floorplan"
-            aria-label="Apri la pianta delle dieci sale"
+            aria-label="Apri la pianta della galleria"
           >
             Sale
           </button>
@@ -221,7 +221,7 @@
       <span class="eyebrow">SCEGLI IL TUO PERCORSO</span><h2>Lasciati accompagnare.</h2>
       <p>Ti accompagniamo tra le tappe. Fermati quanto vuoi: decidi tu quando continuare. Se prendi i comandi, la guida va in pausa.</p>
       <button id="tour-pilot" class="tour-choice"><strong>Metamorfosi — prologo</strong><span>Tre tappe · spazio, ritratto, osservazione</span></button>
-      <button id="tour-spaces" class="tour-choice"><strong>Le dieci anime</strong><span>10 sale · architettura, arredi e atmosfere</span></button>
+      <button id="tour-spaces" class="tour-choice"><strong>Gli spazi della mostra</strong><span>Un percorso nelle sale aperte</span></button>
       <button id="tour-art" class="tour-choice"><strong>Le fotografie</strong><span id="tour-art-count">Le opere attualmente esposte</span></button>
     </dialog>
     <dialog id="help" aria-labelledby="help-title">
@@ -277,7 +277,7 @@
       >
         ×
       </button>
-      <span class="eyebrow">10 SALE / 200 POSTAZIONI</span>
+      <span class="eyebrow">UNCONVENTIONART / BETA</span>
       <h2 id="floorplan-title">Un luogo da attraversare.</h2>
       <p>
         Dieci sale collegate da una promenade centrale. Scegli una sala per
@@ -317,7 +317,7 @@
         il proprio tempo.
       </p>
       <p>
-        La visita comincia qui. Attraversa le dieci sale, osserva le opere e
+        La visita comincia qui. Esplora le sale aperte, osserva le opere e
         apri i cartellini per leggerne le storie.
       </p>
       <button class="dialog-primary" data-close="about">
@@ -355,7 +355,7 @@
         aria-label="Chiudi la fotografia"
       >
         ×</button
-      ><img id="artwork-image" alt="" />
+      ><div class="artwork-stage"><img id="artwork-image" alt="" draggable="false" /><span class="artwork-watermark" aria-hidden="true">UNCONVENTIONART · PREVIEW</span></div>
       <p id="artwork-load-status" role="status" aria-live="polite"></p>
       <div class="artwork-caption">
         <div>

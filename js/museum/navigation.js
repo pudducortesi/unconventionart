@@ -17,6 +17,8 @@ const inBounds = ({ x, z }) =>
   z <= BOUNDS.maxZ;
 
 // Spatial buckets prevent every touch frame from inspecting the entire museum.
+let closedDoors = [];
+export function setClosedDoors(doors) { closedDoors = [...doors]; grid = undefined; }
 const buckets = new Map();
 for (const box of OBSTACLES) {
   for (
@@ -36,14 +38,14 @@ for (const box of OBSTACLES) {
   }
 }
 function nearbyBoxes(point) {
-  return (
+  return [...closedDoors, ...(
     buckets.get(
       `${Math.floor(point.x / BUCKET_SIZE)},${Math.floor(point.z / BUCKET_SIZE)}`,
     ) || []
-  );
+  )];
 }
 function segmentBoxes(start, end) {
-  const boxes = new Set();
+  const boxes = new Set(closedDoors);
   for (
     let x = Math.floor(Math.min(start.x, end.x) / BUCKET_SIZE);
     x <= Math.floor(Math.max(start.x, end.x) / BUCKET_SIZE);
@@ -60,7 +62,7 @@ function segmentBoxes(start, end) {
   return boxes;
 }
 export function insideObstacle(x, z, padding = CLEARANCE) {
-  const candidates = padding <= CLEARANCE ? nearbyBoxes({ x, z }) : OBSTACLES;
+  const candidates = padding <= CLEARANCE ? nearbyBoxes({ x, z }) : [...OBSTACLES, ...closedDoors];
   return candidates.some(
     (box) =>
       x > box.minX - padding &&

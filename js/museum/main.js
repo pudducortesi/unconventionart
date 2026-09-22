@@ -1,3 +1,4 @@
+import { exhibitionAccess } from "./exhibition-access.js";
 import { displayImageURL } from "./image-cache.js";
 import { createSelection, selectionFromHash, selectionLink } from "./selection.js";
 import { createPerformancePolicy } from "./performance-policy.js";
@@ -21,6 +22,7 @@ import {
   locateHall,
 } from "./layout.js";
 import {
+  setClosedDoors,
   orientation,
   shortestAngle,
   layoutWorks,
@@ -53,6 +55,8 @@ let renderer,
   stream,
   catalogue,
   slots = [];
+let access = exhibitionAccess([]);
+const openHalls = () => HALLS.filter(h => access.open.has(h.index));
 let entered = false,
   disposed = false,
   modalOpen = false,
@@ -90,7 +94,7 @@ async function openStudio(id, panel='discover') {
       catalogue, selection: savedSelection,
       inspect(id) { selected=slots.findIndex(s=>s.work.id===id);inspect(); },
       tour() { if(entered) $('#tour-pilot').click(); else { openDialog('guided-tours'); announce('La visita 3D non è disponibile su questo dispositivo. Le schede restano consultabili nello Studio.'); } },
-      halls:HALLS,
+      halls:openHalls(),
       visit(index) { if(entered) visitHall(index); else { openDialog('floorplan'); } },
       status:buildCollection,
     }));
@@ -175,7 +179,7 @@ $("#artwork-save").addEventListener("click", () => {
 });
 $("#tour-spaces").addEventListener("click", () => {
   $("#guided-tours").close();
-  if (entered) guide.start(HALLS.map(h => ({ hallIndex: h.index, title: h.profile.name, description: h.profile.mood })));
+  if (entered) guide.start(openHalls().map(h => ({ hallIndex: h.index, title: h.profile.name, description: h.profile.mood })));
 });
 $("#tour-art").addEventListener("click", () => {
   $("#guided-tours").close();
@@ -402,7 +406,7 @@ function updateHud(moving = false) {
     hallLevel = level;
     $("#room-label").textContent =
       current < 0
-        ? "PROMENADE / 10 SALE"
+        ? `PROMENADE / ${access.open.size} ${access.open.size === 1 ? "SALA APERTA" : "SALE APERTE"}`
         : `${HALLS[current].title.toUpperCase()} / ${level} / ${slots.filter((slot) => slot.hallIndex === current).length} OPERE ESPOSTE`;
     $("#change-level").hidden = current < 0;
     $("#change-level").textContent = player.floorY > .15 ? "Scendi ↓" : "Soppalco ↑";
@@ -440,7 +444,7 @@ function walkTo(destination, look = null) {
   invalidate();
 }
 function visitHall(index) {
-  if (!entered) return;
+  if (!entered || !access.open.has(index)) return;
   dismissVisitChoice();
   clearSelection();
   const hall = HALLS[index];
@@ -482,18 +486,19 @@ function buildMaps() {
     rect.setAttribute("y", p1.y);
     rect.setAttribute("width", p2.x - p1.x);
     rect.setAttribute("height", p2.y - p1.y);
-    rect.setAttribute("class", "map-hall");
+    rect.setAttribute("class", access.open.has(hall.index) ? "map-hall" : "map-hall map-hall-closed");
     $("#map-art").append(rect);
     const button = document.createElement("button");
     button.className = "hall-button";
     button.dataset.hall = hall.index;
+    button.disabled = !access.open.has(hall.index);
     const name = document.createElement("strong");
     name.textContent = hall.title;
     const count = slots.filter((slot) => slot.hallIndex === hall.index).length;
     const detail = document.createElement("span");
     detail.textContent = count
       ? `${count} ${count === 1 ? "opera esposta" : "opere esposte"}`
-      : "In allestimento · 20 posizioni";
+      : access.open.has(hall.index) ? "Videoarte · sala aperta" : "Sala chiusa · in allestimento";
     const mood = document.createElement("span");
     mood.textContent = hall.profile.mood;
     button.append(name, detail, mood);
@@ -604,7 +609,7 @@ async function inspect() {
   if (!work) return;
   $("#artwork-save").setAttribute("aria-pressed", String(savedSelection.has(work.id)));
   $("#artwork-save").textContent = savedSelection.has(work.id) ? "♥ Salvata · rimuovi" : "♡ Salva nella selezione";
-  $("#artwork-title").textContent = work.title;
+  $("#artwork-title").textContent = /^_?(?:MG|IMG|DSC)[_-]?\d/i.test(work.title || "") ? `Opera ${String(selected + 1).padStart(2, "0")} / ${slots.length}` : work.title;
   $("#artwork-series").textContent =
     collectionFor(work)?.title || "UnconventionArt";
   $("#artwork-load-status").textContent = "Caricamento dell’anteprima…";
@@ -935,6 +940,8 @@ try {
       `Il catalogo supera le ${CAPACITY} postazioni disponibili.`,
     );
   slots = layoutWorks(catalogue.works);
+  access = exhibitionAccess(slots, catalogue.videos || []);
+  setClosedDoors(access.doors);
   // Start the first visible previews while the renderer and effects initialise.
   [...slots].sort((a,b) =>
     Math.hypot(a.x-INITIAL.x,a.z-INITIAL.z,a.floorY||0) -
@@ -962,7 +969,7 @@ try {
     200,
   );
   root.append(renderer.domElement);
-  architecture = createArchitecture(scene, renderer, { mobile, onReady: invalidate, occupiedSlots: slots });
+  architecture = createArchitecture(scene, renderer, { mobile, onReady: invalidate, occupiedSlots: slots, closedDoors: access.doors });
   videoScreens = createVideoScreens({scene,videos:catalogue.videos||[],invalidate});
   try {
     environment = createEnvironment(scene, renderer);

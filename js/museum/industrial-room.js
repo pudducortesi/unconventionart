@@ -61,6 +61,38 @@ export function furnishIndustrialRoom(hall, box, own, room) {
   const bolts = own(new T.MeshStandardMaterial({color:0x777970,metalness:.8,roughness:.42}));
   const timber = own(new T.MeshStandardMaterial({color:0x504238,roughness:.88}));
   const light = own(new T.MeshStandardMaterial({color:0xe8e5dc,emissive:0xfff4df,emissiveIntensity:.45,roughness:.6}));
+  const reveal = own(new T.MeshStandardMaterial({color:0x232827,roughness:.8}));
+  const daylight = own(new T.MeshBasicMaterial({color:0xc8d8df,toneMapped:false}));
+  const oak = own(new T.MeshStandardMaterial({color:0x78614a,roughness:.72}));
+  const leather = own(new T.MeshStandardMaterial({color:0x55433a,roughness:.83}));
+  // Deep clerestory bays above the upper photograph band: opaque diffusing
+  // glass and steel mullions give daylight a physical source without a costly
+  // transparent layer or another real-time shadow map.
+  for (const dz of [-8,0,8]) {
+    box(.055,1.70,4.7,-26.77,11.95,z+dz,reveal);
+    box(.065,1.42,4.40,-26.73,11.95,z+dz,daylight);
+    for (const dy of [-.78,.78]) box(.18,.10,4.72,-26.68,11.95+dy,z+dz,steel);
+    for (const offset of [-2.3,-.77,.77,2.3]) box(.19,1.6,.055,-26.65,11.95,z+dz+offset,steel);
+    box(.32,.08,4.86,-26.60,11.08,z+dz,oak);
+  }
+  // Three inset rooflights keep the centre light and the perimeter quiet.
+  for (const dz of [-8,0,8]) {
+    box(6.6,.12,4.1,x,13.04,z+dz,reveal);
+    box(6.25,.025,3.75,x,12.97,z+dz,daylight);
+    for (const dx of [-3.25,0,3.25]) box(.09,.18,4.08,x+dx,12.93,z+dz,steel);
+    for (const edge of [-1,1]) box(6.6,.18,.09,x,12.93,z+dz+edge*2,steel);
+  }
+  // Warm linear light beneath the horseshoe mezzanine; recessed housings
+  // remain above head height and never cross the image planes.
+  for (const dx of [-8.9,8.9]) {
+    box(.08,.09,22,x+dx,5.86,z,reveal);
+    box(.025,.012,21.8,x+dx,5.807,z,light);
+  }
+  box(17.8,.09,.08,x,5.86,z-10.8,reveal);
+  box(17.6,.012,.025,x,5.807,z-10.8,light);
+  // Dark recessed skirting grounds the room without decorative wall clutter.
+  box(.035,.11,25.5,-26.78,.075,z,steel);
+  for (const end of [-1,1]) box(21.5,.11,.035,x,.075,z+end*12.78,steel);
   // Formwork seams and tie plates sit between the two photograph bands.
   for (const y of [5.45,11.5]) {
     box(.008,.012,25.4,-26.805,y,z,bolts);
@@ -123,6 +155,7 @@ export function furnishIndustrialRoom(hall, box, own, room) {
   box(.20,.16,5.33,-5.22,4.8,z,steel);
   // Two timber benches on folded steel trestles, matching navigation footprints.
   for (const dz of [-4,4]) {
+    for (const dx of [-.82,.82]) box(1.48,.085,.68,x+dx,.54,z+dz,leather);
     for (const side of [-.26,0,.26]) box(3.2,.075,.245,x,.465,z+dz+side,timber);
     for (const dx of [-1.15,1.15]) {
       box(.06,.41,.64,x+dx,.215,z+dz,steel);
