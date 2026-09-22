@@ -1,20 +1,27 @@
 import * as T from '../../vendor/three.module.js';
 import { HALLS, FURNITURE, BUILDING } from './layout.js';
-import { CORRIDOR_VAULTS } from './corridor-vaults.js';
+import { CORRIDOR_VAULTS, CORRIDOR_END_MURAL } from './corridor-vaults.js';
 import { CORRIDOR_MASTERS } from './corridor-masters.js';
 import { createPalazzoOrnaments } from './palazzo-ornaments.js';
+import { mapCover } from './fresco-mapping.js';
 const heightScale = BUILDING.height / 6.6;
 
 // The existing elliptical shell preserves the clear height/collision plan.
 // Fresco UVs cover each 13 m bay instead of stretching for the full 140 m.
 export function vaultGeometry(rx, rise, thickness, depth) {
   const positions = [], uv = [], indices = [], segments = 64;
+  const arc = [0];
+  for (let i = 1; i <= segments; i++) {
+    const a = (i - 1) / segments * Math.PI, b = i / segments * Math.PI;
+    arc.push(arc[i - 1] + Math.hypot(rx * (Math.cos(b) - Math.cos(a)),
+      rise * heightScale * (Math.sin(b) - Math.sin(a))));
+  }
   for (let i = 0; i <= segments; i++) {
     const angle = i / segments * Math.PI;
     for (const z of [-depth / 2, depth / 2]) {
       for (const offset of [0, thickness]) {
         positions.push((rx + offset) * Math.cos(angle), (4.85 + (rise + offset) * Math.sin(angle)) * heightScale, z);
-        uv.push(i / segments, (z + depth / 2) / 13);
+        uv.push(arc[i] / arc[segments], (z + depth / 2) / depth);
       }
     }
   }
@@ -31,6 +38,7 @@ export function vaultGeometry(rx, rise, thickness, depth) {
   const geometry = new T.BufferGeometry();
   geometry.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
   geometry.setAttribute('uv', new T.Float32BufferAttribute(uv, 2));
+  geometry.userData.surfaceWidth = arc[segments];
   geometry.setIndex(indices); geometry.computeVertexNormals(); geometry.computeBoundingSphere();
   return geometry;
 }
@@ -85,14 +93,21 @@ export function furnishCorridor({ room, own, box, renderer, onReady = () => {} }
     room.add(mesh); targets.push(mesh); return mesh;
   };
   place(own(vaultGeometry(4.82, 1.60, .025, 139.6)), ivory, -60, 'corridor-plaster-vault');
-  // Each full bay has its own composition; no image is repeated.
-  place(own(vaultGeometry(4.81, 1.59, .005, 13)), fresco, -13, 'corridor-barrel-vault');
+  // Continuous painted coverage from the hall threshold to the end wall.
+  // The first/last composition also covers its terminal half bay, once only.
+  const paintedVault = (material, center, depth, width, height, region) => {
+    const geometry = own(vaultGeometry(4.81, 1.59, .005, depth));
+    mapCover(geometry, width, height, geometry.userData.surfaceWidth / depth, region);
+    return place(geometry, material, center, 'corridor-barrel-vault');
+  };
+  paintedVault(fresco, -9.75, 19.5, 5100, 5519);
   CORRIDOR_VAULTS.forEach((work, index) => {
     const material = textureMaterial(work.path, {
       roughness: .92, emissive: 0xffffff, emissiveIntensity: .24,
     }, 0xd9c9aa);
-    const vault = place(own(vaultGeometry(4.81, 1.59, .005, 13)), material,
-      -26 - index * 13, 'corridor-barrel-vault');
+    const terminal = index === CORRIDOR_VAULTS.length - 1;
+    const vault = paintedVault(material, terminal ? -120.25 : -26 - index * 13,
+      terminal ? 19.5 : 13, 1536, 1536, work.imageRegion);
     vault.userData.historicalWork = work;
   });
   const rib = own(vaultGeometry(4.60, 1.38, .16, .38));
@@ -202,6 +217,26 @@ export function furnishCorridor({ room, own, box, renderer, onReady = () => {} }
   // Side chandeliers leave the axial view and all ground-level routes open.
   for (let i=0;i<5;i++) for (const side of [-1,1])
     ornaments.chandelier(side*3.40,-6.5-i*26);
+
+  // Full-height painted backdrop, clipped to the same elliptical spring line.
+  // It sits ahead of the old end-wall signage and behind the framed axial work.
+  const endShape = new T.Shape();
+  endShape.moveTo(-4.82, 0); endShape.lineTo(4.82, 0);
+  for (let i = 0; i <= 64; i++) {
+    const angle = i / 64 * Math.PI;
+    endShape.lineTo(4.82 * Math.cos(angle), (4.85 + 1.60 * Math.sin(angle)) * heightScale);
+  }
+  endShape.closePath();
+  const endGeometry = own(new T.ShapeGeometry(endShape));
+  const endUV = endGeometry.attributes.uv, endPosition = endGeometry.attributes.position;
+  for (let i = 0; i < endUV.count; i++)
+    endUV.setXY(i, (endPosition.getX(i) + 4.82) / 9.64, endPosition.getY(i) / 12.9);
+  mapCover(endGeometry, CORRIDOR_END_MURAL.width, CORRIDOR_END_MURAL.height, 9.64 / 12.9);
+  const endMural = place(endGeometry, textureMaterial(CORRIDOR_END_MURAL.path, {
+    roughness: .94, emissive: 0xffffff, emissiveIntensity: .18,
+  }, 0xd9c9aa), -129.76, 'corridor-end-mural');
+  endMural.userData.historicalWork = CORRIDOR_END_MURAL;
+  endMural.userData.decorative = true;
 
   const endWork = CORRIDOR_MASTERS[50];
   const endWidth = Math.min(4.9, 5.8 * endWork.width / endWork.height);
