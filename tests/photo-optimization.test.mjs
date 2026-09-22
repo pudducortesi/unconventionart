@@ -36,7 +36,7 @@ test('production exposes only previews, never master paths or bytes',async()=>{
  const meta=JSON.parse(await readFile('build-meta.json','utf8'));
  assert.ok(Object.keys(meta.inputs).every(path=>!path.startsWith('research/')&&!path.includes('node_modules/sharp/')));
  const publishing=JSON.parse(await readFile('data/publishing.json','utf8'));
- if(publishing.enabled) {
+ if(publishing.enabled && publishing.liveCatalogue !== false) {
   assert.equal(published.works.length,0);
   await assert.rejects(stat('dist/models'),{code:'ENOENT'});
   await assert.rejects(stat('dist/images/optimized'),{code:'ENOENT'});

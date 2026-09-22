@@ -1,6 +1,7 @@
 {
-  "enabled": false,
-  "supabaseUrl": "",
-  "publishableKey": "",
-  "catalogueUrl": ""
+  "enabled": true,
+  "liveCatalogue": false,
+  "supabaseUrl": "https://ykregzrmynedwwlfavzm.supabase.co",
+  "publishableKey": "sb_publishable_oJk-3zfcDGrPGsfixdLSAQ_3LoRtEQy",
+  "catalogueUrl": "https://ykregzrmynedwwlfavzm.supabase.co/functions/v1/gallery-public/catalogue"
 }

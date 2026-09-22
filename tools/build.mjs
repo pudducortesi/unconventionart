@@ -50,7 +50,7 @@ const admin = (await readFile('admin.html','utf8')).replace('src="js/admin.js"',
 await writeFile('dist/admin.html',admin);
 // Once the private archive is activated, old static photographs and AR models
 // must not bypass a withdrawal from the live catalogue.
-if (publishing.enabled) {
+if (publishing.enabled && publishing.liveCatalogue !== false) {
   await rm('dist/images/optimized',{recursive:true,force:true});
   await rm('dist/models',{recursive:true,force:true});
   await writeFile('dist/data/catalogue.json', JSON.stringify({works:[],collections:[]}));

@@ -5,6 +5,18 @@ import {createPublicGallery} from '../supabase/functions/gallery-public/handler.
 import {layoutWorks} from '../js/museum/navigation.js';
 const id='10000000-0000-4000-8000-000000000001', url='https://project.supabase.co';
 const json=value=>new Response(JSON.stringify(value),{headers:{'Content-Type':'application/json'}});
+test('public application key is checked before database access and added to preview URLs',async()=>{
+  let calls=0;
+  const handler=createPublicGallery({url,serviceKey:'secret',publicKey:'sb_publishable_test',fetchImpl:async()=>{calls++;return json([{id,title:'Opera',hall_index:0,wall_slot:0,updated_at:'now'}]);}});
+  const endpoint=`${url}/functions/v1/gallery-public/catalogue`;
+  assert.equal((await handler(new Request(endpoint))).status,401);
+  assert.equal((await handler(new Request(endpoint,{headers:{apikey:'wrong'}}))).status,401);
+  assert.equal(calls,0);
+  const response=await handler(new Request(endpoint,{headers:{apikey:'sb_publishable_test'}}));
+  assert.equal(response.status,200);
+  assert.equal(new URL((await response.json()).works[0].image).searchParams.get('apikey'),'sb_publishable_test');
+  assert.equal((await handler(new Request(endpoint+'?apikey=sb_publishable_test'))).status,200);
+});
 test('publishing config accepts public keys only, validates endpoint and fails closed',()=>{
   assert.equal(validatePublishingConfig({enabled:false}).enabled,false);
   const config={enabled:true,supabaseUrl:url,publishableKey:'sb_publishable_test',catalogueUrl:`${url}/functions/v1/gallery-public/catalogue`};
