@@ -98,6 +98,7 @@ export function createControls({
   onTap = () => {},
   onActivity = () => {},
   onKeyboardAction = () => {},
+  onKeyStateChange = () => {},
   onPointerLockChange = () => {},
   onWheel = () => {},
 }) {
@@ -122,6 +123,9 @@ export function createControls({
   }
   function activity(kind) {
     if (!disposed) onActivity({ kind });
+  }
+  function keyStateChanged() {
+    if (!disposed) onKeyStateChange([...keys]);
   }
   function enabled() {
     return !disposed && !doc.hidden && isEnabled();
@@ -157,7 +161,9 @@ export function createControls({
     const id = lookPointer?.id;
     lookPointer = null;
     resetStick();
+    const hadKeys = keys.size > 0;
     keys.clear();
+    if (hadKeys) keyStateChanged();
     touches.clear();
     filter.stop();
     if (id !== undefined) release(canvas, id);
@@ -314,7 +320,7 @@ export function createControls({
   });
   listen(doc, "pointerlockchange", () => {
     const locked = doc.pointerLockElement === canvas;
-    if (!locked) filter.stopLook();
+    if (!locked) stop(false);
     onPointerLockChange(locked);
     activity(locked ? "lock" : "unlock");
   });
@@ -420,6 +426,7 @@ export function createControls({
       return;
     if (event.code === "Escape" || event.key === "Escape") {
       event.preventDefault();
+      if (doc.pointerLockElement === canvas) doc.exitPointerLock?.();
       stop();
       onKeyboardAction("escape");
       return;
@@ -430,12 +437,15 @@ export function createControls({
     const action = KEY_ACTIONS.get(event.code);
     if (!action) return;
     event.preventDefault();
+    const size = keys.size;
     keys.add(event.code);
+    if (keys.size !== size) keyStateChanged();
     if (lookPointer) lookPointer.noTap = true;
     activity("move");
   });
   listen(win, "keyup", (event) => {
     if (!keys.delete(event.code)) return;
+    keyStateChanged();
     activity("move");
   });
   listen(win, "blur", stop);

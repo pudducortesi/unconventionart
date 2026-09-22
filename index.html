@@ -83,6 +83,10 @@
             <button id="free-start"><strong>Esplora liberamente</strong><span>Muoviti e scegli il tuo percorso</span></button>
           </div>
         </section>
+        <button id="free-look" class="visit-mode-toggle" aria-pressed="false">
+          <span id="visit-mode-label">Entra nella modalità visita</span>
+          <small id="visit-mode-shortcut">Mouse libero</small>
+        </button>
         <div id="reticle" class="reticle" aria-hidden="true"><span></span></div>
         <button id="interact" class="game-interact" aria-label="Interagisci con ciò che inquadri" disabled><kbd>E</kbd><span id="interact-label">Inquadra un’opera</span></button>
         <section id="tour-panel" class="tour-panel" aria-label="Visita guidata" hidden>
@@ -131,7 +135,6 @@
           <button id="next-work">Opere <span>↗</span></button>
           <button id="next-room">Mappa</button>
           <button id="tour-open" data-open="guided-tours">Percorsi</button>
-          <button id="free-look" aria-pressed="false">Esplora liberamente</button>
           <button id="stop-walk" hidden>Fermati</button>
         </div>
         <div id="work-panel" class="work-panel" hidden>
@@ -156,6 +159,18 @@
         <p class="movement-hint" id="movement-hint">
           CLICCA A TERRA PER SPOSTARTI · TRASCINA PER GUARDARE
         </p>
+        <section class="movement-keys" aria-label="Movimento con WASD o frecce">
+          <span>MUOVITI</span>
+          <div class="key-cluster" aria-label="Tasti W A S D">
+            <kbd data-key="KeyW">W</kbd>
+            <kbd data-key="KeyA">A</kbd><kbd data-key="KeyS">S</kbd><kbd data-key="KeyD">D</kbd>
+          </div>
+          <i>oppure</i>
+          <div class="key-cluster" aria-label="Frecce direzionali">
+            <kbd data-key="ArrowUp">↑</kbd>
+            <kbd data-key="ArrowLeft">←</kbd><kbd data-key="ArrowDown">↓</kbd><kbd data-key="ArrowRight">→</kbd>
+          </div>
+        </section>
         <div class="touch-controls" aria-label="Comandi touch">
           <div
             class="joystick"

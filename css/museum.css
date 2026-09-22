@@ -952,6 +952,29 @@ dialog dd {
 .visit-choice button span { font-size: 11px; color: #676a65; }
 .visit-choice .visit-choice-primary { background: #28372f; color: #fff; }
 .visit-choice .visit-choice-primary span { color: #e4ddd0; }
+.visit-mode-toggle {
+  position: absolute;
+  z-index: 4;
+  top: 94px;
+  left: 50%;
+  min-width: 230px;
+  min-height: 48px;
+  transform: translateX(-50%);
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  padding: 8px 18px;
+  border: 1px solid #24282730;
+  border-radius: 24px;
+  background: #fffffff0;
+  color: #30342f;
+  box-shadow: 0 6px 24px #0002;
+  backdrop-filter: blur(10px);
+  font-size: 11px;
+}
+.visit-mode-toggle small { color: #686d68; font-size: 8px; letter-spacing: .7px; }
+.visit-mode-toggle[aria-pressed="true"] { background: var(--game-panel); color: var(--game-ink); border-color: #fff5; }
+.visit-mode-toggle[aria-pressed="true"] small { color: var(--game-accent); }
 .reticle { position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; opacity: 0; transform: translate(-50%,-50%); border: 1px solid #363b3966; border-radius: 50%; box-shadow: 0 0 0 1px #fff8; transition: opacity .18s, transform .18s; }
 .reticle span { position: absolute; inset: 6px; background: #454b47; border-radius: 50%; }
 .pointer-locked .reticle,.reticle.ready { opacity: 1; }
@@ -965,10 +988,26 @@ dialog dd {
 .navigation-dock #entrance { display: none; }
 #next-work { background: #f7f3e9; color: #242827; }
 #tour-open { color: var(--game-accent); }
-#free-look[aria-pressed="true"] { background: #ffffff1f; color: var(--game-accent); }
 #stop-walk { background: var(--game-accent); color: #242827; }
 #next-work span { padding-left: 5px; }
 .movement-hint { bottom: 22px; }
+.movement-keys {
+  position: absolute;
+  left: 32px;
+  bottom: 68px;
+  display: flex;
+  align-items: flex-end;
+  gap: 9px;
+  color: #515651;
+  font-size: 7px;
+  letter-spacing: 1px;
+}
+.movement-keys > span { align-self: center; writing-mode: vertical-rl; transform: rotate(180deg); }
+.movement-keys i { align-self: center; font-style: normal; letter-spacing: 0; opacity: .58; }
+.key-cluster { display: grid; grid-template-columns: repeat(3, 25px); grid-template-rows: repeat(2, 25px); gap: 3px; }
+.key-cluster kbd { display: grid; place-items: center; border: 1px solid #30352f4d; border-radius: 5px; background: #ffffffe0; color: #30352f; font: 600 10px/1 Arial,sans-serif; box-shadow: 0 2px 7px #0001; transition: background .08s,color .08s,box-shadow .08s,transform .08s; }
+.key-cluster kbd:first-child { grid-column: 2; }
+.key-cluster kbd.active { background: var(--game-accent); color: #201d16; border-color: #7f6331; box-shadow: 0 0 0 3px #dbbd8245,0 0 18px #dbbd82aa; transform: translateY(1px); }
 .work-panel { bottom: 158px; border-radius: 12px; }
 .tour-panel { position: absolute; left: 32px; top: 137px; width: 340px; padding: 14px 18px 10px; color: var(--game-ink); background: var(--game-panel); border: 1px solid #ffffff40; border-radius: 14px; pointer-events: auto; box-shadow: 0 8px 24px #0002; max-height: calc(100dvh - 340px); overflow: auto; }
 .tour-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -985,6 +1024,7 @@ dialog dd {
 .tour-choice span { font-size: 12px; color: #615c53; }
 @media (pointer: coarse) {
   .map { display: none; }
+  .visit-mode-toggle,.movement-keys { display: none; }
   .joystick { position: absolute; left: 0; bottom: 0; width: 52vw; height: 72dvh; background: transparent; border: 0; box-shadow: none; contain: layout style; }
   .joystick-track { left: var(--stick-x, 66px); top: var(--stick-y, calc(100% - 104px)); right: auto; bottom: auto; width: 104px; height: 104px; opacity: 0; transform: translate(-50%,-50%); background: #f8f5ed9c; border: 1px solid #24282735; box-shadow: 0 5px 22px #0002; transition: opacity .12s; }
   #joystick-knob { left: var(--stick-x, 66px); top: var(--stick-y, calc(100% - 104px)); width: 44px; height: 44px; margin: 0; opacity: 0; transform: translate(-50%,-50%); background: #242827e8; border: 1px solid #fff9; box-shadow: 0 3px 9px #0003; transition: opacity .12s; will-change: transform; }
@@ -996,7 +1036,7 @@ dialog dd {
   .navigation-dock { left: auto; right: max(14px, env(safe-area-inset-right)); bottom: calc(env(safe-area-inset-bottom) + 14px); transform: none; width: min(178px, 44vw); display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 5px; white-space: normal; }
   .navigation-dock > button,.navigation-dock #next-room { width: 100%; min-height: 44px; padding: 0 9px; font-size: 10px; line-height: 1.2; }
   #next-work,#stop-walk { grid-column: 1 / -1; }
-  #entrance,#previous-work,#free-look { display: none; }
+  #entrance,#previous-work { display: none; }
   .game-interact { left: auto; right: max(18px, env(safe-area-inset-right)); bottom: calc(env(safe-area-inset-bottom) + 163px); transform: none; width: 142px; min-height: 50px; justify-content: center; padding: 9px; text-align: center; border-radius: 14px; }
   .game-interact kbd { display: none; }
   .visit-choice { bottom: 120px; width: min(430px, calc(100% - 28px)); padding: 19px; }
