@@ -151,7 +151,7 @@ for (const mobile of [false, true]) {
     assert(stoneFloor.material.roughnessMap && stoneFloor.material.clearcoat > .5);
     const marbleUV = stoneFloor.geometry.attributes.uv;
     assert.equal(marbleUV.getX(1), 1, 'The marble composition spans the whole promenade');
-    assert(Math.abs(marbleUV.getY(0) - 140 / 13) < .001, 'Marble medallions repeat once per architectural bay');
+    assert(Math.abs(marbleUV.getY(0) - 130 / 13) < .001, 'Marble medallions repeat once per architectural bay');
     assert.equal(room.children.filter(object => object.name === 'corridor-classical-arch').length, 10);
     const palaceMaps = loadedTextures.filter(({ url }) => url.includes('images/palazzo/'));
     assert.equal(palaceMaps.length, 2, 'All palace bays share two decorative images');

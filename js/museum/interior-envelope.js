@@ -41,8 +41,14 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
     for (let i = 0; i < uv.count; i++) {
       // All marble uses the same world origin: the foyer joins the promenade
       // without resetting the inlay pattern at the edges of its two sides.
-      const u = kind === 'stone' ? (x - width / 2 + uv.getX(i) * width + 5) / 10 : uv.getX(i) * width / repeatWidth;
-      const v = kind === 'stone' ? (10 - z - depth / 2 + uv.getY(i) * depth) / 13 : uv.getY(i) * depth / repeatDepth;
+      let u = kind === 'stone' ? (x - width / 2 + uv.getX(i) * width + 5) / 10 : uv.getX(i) * width / repeatWidth;
+      let v = kind === 'stone' ? (-z - depth / 2 + uv.getY(i) * depth) / 13 : uv.getY(i) * depth / repeatDepth;
+      if (name.startsWith('welcome-marble-floor-')) {
+        // Two complete inlay panels per side, bounded by the actual walls.
+        // Preserve the centre promenade's phase at x = ±5 and z = 0.
+        u = x === 0 ? uv.getX(i) : (x < 0 ? -2 : 1) + uv.getX(i) * 2;
+        v = uv.getY(i) - 1;
+      }
       uv.setXY(i, u, v);
     }
     const finishMaterial = own(finishes[kind].clone());
@@ -55,7 +61,8 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
     mesh.userData.walkable = true;
     room.add(mesh); floors.push(mesh);
   };
-  surface(10, 140, 0, -60, 'stone', 'promenade-stone-floor', 'promenade');
+  surface(10, 130, 0, -65, 'stone', 'promenade-stone-floor', 'promenade');
+  surface(10, 10, 0, 5, 'stone', 'welcome-marble-floor-centre', null);
   for (const side of [-1, 1]) surface(22, 10, side * 16, 5, 'stone', `welcome-marble-floor-${side}`, null);
   const h = BUILDING.height;
   const lining = own(new T.MeshStandardMaterial({color:0xbcb8ae, roughness:.85}));

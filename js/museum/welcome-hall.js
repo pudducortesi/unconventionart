@@ -4,12 +4,24 @@ import { BRAND_CONTOURS } from './brand-contours.js';
 export function createBrandRelief() {
   const path = new T.ShapePath();
   for (const points of BRAND_CONTOURS) {
-    points.forEach(([x,y],i) => path[i ? 'lineTo' : 'moveTo']((x-430)/43,(167.5-y)/43));
+    // Round only shallow turns along curves; keep the logo's true corners sharp.
+    const vectors=points.map(([x,y])=>new T.Vector2((x-430)/43,(167.5-y)/43));
+    const joins=vectors.map((p,i)=>{
+      const before=vectors[(i+vectors.length-1)%vectors.length],after=vectors[(i+1)%vectors.length];
+      const incoming=p.clone().sub(before).normalize(),outgoing=after.clone().sub(p).normalize();
+      const round=incoming.dot(outgoing)>.65;
+      return {p,start:round?p.clone().lerp(before,.42):p,end:round?p.clone().lerp(after,.42):p,round};
+    });
+    path.moveTo(joins[0].start.x,joins[0].start.y);
+    for(const {p,start,end,round} of joins){
+      path.lineTo(start.x,start.y);
+      if(round)path.currentPath.quadraticCurveTo(p.x,p.y,end.x,end.y);
+    }
     path.currentPath.closePath();
   }
   return new T.ExtrudeGeometry(path.toShapes(false), {
-    depth:.09, bevelEnabled:true, bevelThickness:.006, bevelSize:.005,
-    bevelSegments:3, steps:1, curveSegments:1,
+    depth:.09, bevelEnabled:true, bevelThickness:.004, bevelSize:.002,
+    bevelSegments:3, steps:1, curveSegments:12,
   });
 }
 
@@ -55,7 +67,9 @@ export function furnishWelcomeHall({room,own,box}) {
   brand.position.set(0,5.2,9.70);brand.rotation.y=Math.PI;
   brand.castShadow=true;brand.receiveShadow=true;
   brand.name='welcome-brand-relief';room.add(brand);targets.push(brand);
-  box(53.5,.16,9.7,0,10.1,4.9,plaster);
+  box(54,.16,10.4,0,10.1,5,plaster);
+  // Opaque infill closes the narrow slots above the retained gilded beams.
+  for(const side of [-1,1]) box(.64,.40,10.4,side*4.70,9.87,5,plaster);
   // Recessed luminous ceiling slots and a grazing wall wash over the relief.
   for(const x of [-18,-9,0,9,18]){
     box(5.8,.06,1.7,x,9.99,4.6,bronze);
