@@ -1,3 +1,4 @@
+import { portraitSetSlot } from './portrait-set.js';
 import { BOUNDS, OBSTACLES, HALLS, CAPACITY, INITIAL } from "./layout.js";
 
 // The same plan drives rendering and navigation; all coordinates are in metres.
@@ -155,10 +156,13 @@ export function orientation(from, to) {
   };
 }
 export function layoutWorks(works) {
-  const slots = HALLS.flatMap((hall) => hall.slots);
+  const composed = works.some(work => portraitSetSlot(work.id));
+  const slots = HALLS.filter(hall => !composed || hall.index !== 0).flatMap((hall) => hall.slots);
   const used = new Set();
   return works.slice(0, CAPACITY).map(work => {
-    const assigned = Number.isInteger(work.hallIndex) && Number.isInteger(work.wallSlot)
+    const curated = portraitSetSlot(work.id);
+    if (curated) return {...curated, work};
+    const assigned = (!composed || work.hallIndex !== 0) && Number.isInteger(work.hallIndex) && Number.isInteger(work.wallSlot)
       ? HALLS[work.hallIndex]?.slots[work.wallSlot] : null;
     if (assigned && used.has(assigned.id)) throw Error('Due opere occupano la stessa posizione.');
     const slot = assigned || slots.find(item => !used.has(item.id));

@@ -380,31 +380,31 @@ img, canvas, model-viewer {
 .wall-plaque {
   position: absolute;
   transform: translate(-50%, -50%);
-  min-width: 68px;
-  min-height: 44px;
-  padding: 6px 8px;
-  background: #fffffff5;
-  border: 1px solid #dedede;
-  box-shadow: 0 1px 3px #00000009;
+  width: 44px;
+  height: 44px;
+  padding: 9px;
+  border: 0;
+  background: transparent;
   color: #303030;
   pointer-events: auto;
-  text-align: left;
-}
-.wall-plaque strong {
-  display: block;
-  font-size: 8px;
-  font-weight: 500;
-  letter-spacing: 0.2px;
+  cursor: pointer;
 }
 .wall-plaque span {
-  display: block;
-  font-size: 7px;
-  margin-top: 4px;
-  color: #626262;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid #bcb8ae;
+  border-radius: 50%;
+  background: #fffffff2;
+  font: italic 19px Georgia, serif;
+  box-shadow: 0 1px 4px #00000015;
 }
-.wall-plaque:hover {
-  border-color: #777;
+.wall-plaque:hover span, .wall-plaque:focus-visible span {
+  background: #303030;
+  color: #fff;
 }
+.wall-plaque:focus-visible { outline: 2px solid #796242; outline-offset: 1px; }
 .touch-controls {
   display: none;
 }
@@ -741,9 +741,6 @@ dialog dd {
   .work-panel #leave-work {
     width: 28px;
     min-width: 28px;
-  }
-  .wall-plaque {
-    min-width: 64px;
   }
   dialog {
     width: 100%;

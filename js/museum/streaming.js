@@ -158,15 +158,15 @@ export function createArtStream({
       Number.isFinite(position.z) &&
       (force ||
         !lastPosition ||
-        Math.hypot(position.x - lastPosition.x, position.z - lastPosition.z) >=
+        Math.hypot(position.x - lastPosition.x, position.z - lastPosition.z, (position.floorY || 0) - (lastPosition.floorY || 0)) >=
           0.5)
     ) {
-      lastPosition = { x: position.x, z: position.z };
+      lastPosition = { x: position.x, z: position.z, floorY: position.floorY || 0 };
       const maxDistance = radius * radius;
       nearest = slots
         .map((slot, index) => ({
           index,
-          distance: (slot.x - position.x) ** 2 + (slot.z - position.z) ** 2,
+          distance: (slot.x - position.x) ** 2 + (slot.z - position.z) ** 2 + ((slot.floorY || 0) - (position.floorY || 0)) ** 2,
         }))
         .filter(({ distance }) => distance <= maxDistance)
         .sort((a, b) => a.distance - b.distance || a.index - b.index)
