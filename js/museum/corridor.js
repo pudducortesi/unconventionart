@@ -13,7 +13,7 @@ export function furnishCorridor({ room, own, box, plaster, recess, glow }) {
   }));
 
   for (const side of [-1, 1]) {
-    // Hairline inlays retain the continuous mahogany floor.
+    // Hairline inlays retain the continuous parquet floor.
     box(.025, .002, 139.5, side * 3.1, -.001, -60, bronze);
     box(.16, .30, 138, side * 4.35, ceiling - .31, -60, plaster);
     box(.035, .018, 138, side * 4.24, ceiling - .35, -60, glow);

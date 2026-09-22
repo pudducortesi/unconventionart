@@ -26,7 +26,7 @@ function floorFinish(own, anisotropy) {
 
 export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, renderer }) {
   const anisotropy = Math.min(8, renderer.capabilities?.getMaxAnisotropy?.() ?? 1);
-  const finishes = { mahogany: floorFinish(own, anisotropy) };
+  const finishes = { mosaic: floorFinish(own, anisotropy) };
   const floors = [];
   const surface = (width, depth, x, z, kind, name, regionId) => {
     const geometry = own(new T.PlaneGeometry(width, depth));
@@ -44,7 +44,7 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
     mesh.userData.walkable = true;
     room.add(mesh); floors.push(mesh);
   };
-  surface(10, 140, 0, -60, 'mahogany', 'promenade-mahogany-floor', 'promenade');
+  surface(10, 140, 0, -60, 'mosaic', 'promenade-mosaic-floor', 'promenade');
   const h = BUILDING.height;
   const lining = own(new T.MeshStandardMaterial({color:0xbcb8ae, roughness:.85}));
   const opal = own(new T.MeshStandardMaterial({color:0xf3eee2, roughness:.72, emissive:0xfff0d7, emissiveIntensity:.22}));

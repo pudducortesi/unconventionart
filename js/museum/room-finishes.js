@@ -1,16 +1,16 @@
 // Colours belong to architecture, not to the photographs or reference furniture.
 // Exhibition walls are muted; stronger colour marks entrances and seating areas.
 export const ROOM_FINISHES = [
-  { wall: 0xffffff, accent: 0xffffff, floor: 0x482319, ceiling: 0xe8d4c1, trim: 0xffffff, finish: 'mahogany', detail: 'Pareti bianche e parquet mogano scuro, con arredi nei colori originali.' },
-  { wall: 0xffffff, accent: 0xffffff, floor: 0x482319, ceiling: 0xe3d9bb, trim: 0xffffff, finish: 'mahogany', detail: 'Pareti bianche e parquet mogano scuro, con arredi nei colori originali.' },
-  { wall: 0xffffff, accent: 0xffffff, floor: 0x482319, ceiling: 0xd9dee6, trim: 0xffffff, finish: 'mahogany', detail: 'Pareti bianche e parquet mogano scuro, con arredi nei colori originali.' },
-  { wall: 0xffffff, accent: 0xffffff, floor: 0x482319, ceiling: 0xc6d8cf, trim: 0xffffff, finish: 'mahogany', detail: 'Pareti bianche e parquet mogano scuro, con arredi nei colori originali.' },
-  { wall: 0xffffff, accent: 0xffffff, floor: 0x482319, ceiling: 0xe8d0be, trim: 0xffffff, finish: 'mahogany', detail: 'Pareti bianche e parquet mogano scuro, con arredi nei colori originali.' },
-  { wall: 0xffffff, accent: 0xffffff, floor: 0x482319, ceiling: 0xb59cae, trim: 0xffffff, finish: 'mahogany', detail: 'Pareti bianche e parquet mogano scuro, con arredi nei colori originali.' },
-  { wall: 0xffffff, accent: 0xffffff, floor: 0x482319, ceiling: 0xd5d5bc, trim: 0xffffff, finish: 'mahogany', detail: 'Pareti bianche e parquet mogano scuro, con arredi nei colori originali.' },
-  { wall: 0xffffff, accent: 0xffffff, floor: 0x482319, ceiling: 0xd1dce0, trim: 0xffffff, finish: 'mahogany', detail: 'Pareti bianche e parquet mogano scuro, con arredi nei colori originali.' },
-  { wall: 0xffffff, accent: 0xffffff, floor: 0x482319, ceiling: 0xe6d0ce, trim: 0xffffff, finish: 'mahogany', detail: 'Pareti bianche e parquet mogano scuro, con arredi nei colori originali.' },
-  { wall: 0xffffff, accent: 0xffffff, floor: 0x482319, ceiling: 0xd0e0d8, trim: 0xffffff, finish: 'mahogany', detail: 'Pareti bianche e parquet mogano scuro, con arredi nei colori originali.' },
+  { wall: 0xffffff, accent: 0xffffff, floor: 0xa0774d, ceiling: 0xe8d4c1, trim: 0xffffff, finish: 'mosaic', detail: 'Pareti bianche e parquet a mosaico color miele, con arredi nei colori originali.' },
+  { wall: 0xffffff, accent: 0xffffff, floor: 0xa0774d, ceiling: 0xe3d9bb, trim: 0xffffff, finish: 'mosaic', detail: 'Pareti bianche e parquet a mosaico color miele, con arredi nei colori originali.' },
+  { wall: 0xffffff, accent: 0xffffff, floor: 0xa0774d, ceiling: 0xd9dee6, trim: 0xffffff, finish: 'mosaic', detail: 'Pareti bianche e parquet a mosaico color miele, con arredi nei colori originali.' },
+  { wall: 0xffffff, accent: 0xffffff, floor: 0xa0774d, ceiling: 0xc6d8cf, trim: 0xffffff, finish: 'mosaic', detail: 'Pareti bianche e parquet a mosaico color miele, con arredi nei colori originali.' },
+  { wall: 0xffffff, accent: 0xffffff, floor: 0xa0774d, ceiling: 0xe8d0be, trim: 0xffffff, finish: 'mosaic', detail: 'Pareti bianche e parquet a mosaico color miele, con arredi nei colori originali.' },
+  { wall: 0xffffff, accent: 0xffffff, floor: 0xa0774d, ceiling: 0xb59cae, trim: 0xffffff, finish: 'mosaic', detail: 'Pareti bianche e parquet a mosaico color miele, con arredi nei colori originali.' },
+  { wall: 0xffffff, accent: 0xffffff, floor: 0xa0774d, ceiling: 0xd5d5bc, trim: 0xffffff, finish: 'mosaic', detail: 'Pareti bianche e parquet a mosaico color miele, con arredi nei colori originali.' },
+  { wall: 0xffffff, accent: 0xffffff, floor: 0xa0774d, ceiling: 0xd1dce0, trim: 0xffffff, finish: 'mosaic', detail: 'Pareti bianche e parquet a mosaico color miele, con arredi nei colori originali.' },
+  { wall: 0xffffff, accent: 0xffffff, floor: 0xa0774d, ceiling: 0xe6d0ce, trim: 0xffffff, finish: 'mosaic', detail: 'Pareti bianche e parquet a mosaico color miele, con arredi nei colori originali.' },
+  { wall: 0xffffff, accent: 0xffffff, floor: 0xa0774d, ceiling: 0xd0e0d8, trim: 0xffffff, finish: 'mosaic', detail: 'Pareti bianche e parquet a mosaico color miele, con arredi nei colori originali.' },
 ];
 
 export function addRoomWallFinishes(hall, box, paint, accent, skirting) {
