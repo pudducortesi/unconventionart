@@ -38,9 +38,15 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
     geometry.setAttribute('uv1', uv.clone());
     const repeatWidth = kind === 'stone' ? 10 : 3;
     const repeatDepth = kind === 'stone' ? 13 : 3;
-    for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * width / repeatWidth, uv.getY(i) * depth / repeatDepth);
+    for (let i = 0; i < uv.count; i++) {
+      // All marble uses the same world origin: the foyer joins the promenade
+      // without resetting the inlay pattern at the edges of its two sides.
+      const u = kind === 'stone' ? (x - width / 2 + uv.getX(i) * width + 5) / 10 : uv.getX(i) * width / repeatWidth;
+      const v = kind === 'stone' ? (10 - z - depth / 2 + uv.getY(i) * depth) / 13 : uv.getY(i) * depth / repeatDepth;
+      uv.setXY(i, u, v);
+    }
     const finishMaterial = own(finishes[kind].clone());
-    Object.assign(finishMaterial, createFloorLightmaps(own, regionId));
+    if (regionId) Object.assign(finishMaterial, createFloorLightmaps(own, regionId));
     const mesh = new T.Mesh(geometry, finishMaterial);
     mesh.rotation.x = -Math.PI / 2;
     mesh.position.set(x, -.003, z);
@@ -50,6 +56,7 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
     room.add(mesh); floors.push(mesh);
   };
   surface(10, 140, 0, -60, 'stone', 'promenade-stone-floor', 'promenade');
+  for (const side of [-1, 1]) surface(22, 10, side * 16, 5, 'stone', `welcome-marble-floor-${side}`, null);
   const h = BUILDING.height;
   const lining = own(new T.MeshStandardMaterial({color:0xbcb8ae, roughness:.85}));
   const opal = own(new T.MeshStandardMaterial({color:0xf3eee2, roughness:.72, emissive:0xfff0d7, emissiveIntensity:.22}));
