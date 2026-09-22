@@ -1,3 +1,6 @@
+import { museumPlan } from "./museum-plan.js";
+import { createVisitPreloader } from "./visit-preloader.js";
+import { prepareWelcomeFilm } from "./welcome-film.js";
 import { welcomeRoute } from "./welcome-route.js";
 import { exhibitionAccess } from "./exhibition-access.js";
 import { displayImageURL } from "./image-cache.js";
@@ -10,7 +13,7 @@ import { createEnvironment } from "./environment.js";
 import * as T from "../../vendor/three.module.js";
 import { loadCatalogue } from "../catalogue.js";
 import { createVideoScreens } from './video-screens.js';
-let videoScreens;
+let videoScreens, visitPreloader, welcomeFilm;
 import { createArchitecture, createArtwork } from "./architecture.js";
 import { createControls } from "./controls.js";
 import { createArtStream } from "./streaming.js";
@@ -420,6 +423,7 @@ function updateHud(moving = false) {
   }
 }
 function walkTo(destination, look = null) {
+  visitPreloader?.approach(destination);
   dismissVisitChoice();
   controls?.stop();
   path = findLevelPath(player, destination);
@@ -478,6 +482,19 @@ $("#change-level").addEventListener("click", () => {
 function buildMaps() {
   $("#map-art").replaceChildren();
   $("#hall-list").replaceChildren();
+  $("#museum-masterplan").replaceChildren();
+  for(const floor of museumPlan(access.open)){
+    const section=document.createElement('section');
+    const title=document.createElement('h3');title.textContent=floor.title;section.append(title);
+    const rooms=document.createElement('div');rooms.className='masterplan-rooms';
+    for(const room of floor.rooms){
+      const button=document.createElement('button');
+      button.textContent=`${String(room.number).padStart(2,'0')} · ${room.title} — ${room.status}`;
+      button.disabled=room.status!=='Aperta';
+      button.addEventListener('click',()=>{$('#floorplan').close();visitHall(room.hallIndex);});rooms.append(button);
+    }
+    section.append(rooms);$('#museum-masterplan').append(section);
+  }
   const NS = "http://www.w3.org/2000/svg";
   for (const hall of HALLS) {
     const p1 = mapPoint({ x: hall.bounds.minX, z: hall.bounds.maxZ });
@@ -833,6 +850,7 @@ function render(time) {
     updateNavigationState();
     if (time - lastStream > 650) {
       stream.update(player, { selected });
+      visitPreloader?.approach(path.at(-1) || {x:player.x-Math.sin(yaw)*8,z:player.z-Math.cos(yaw)*8,floorY:player.floorY});
       lastStream = time;
     }
   }
@@ -848,6 +866,7 @@ function render(time) {
   setView();
   architecture.updateLighting(player);
   videoScreens?.update(player,entered && !modalOpen && !photoRender);
+  welcomeFilm?.update(player,entered && !modalOpen && !photoRender);
   const fastNavigation = performanceMode === "fluid" || !resolutionPolicy.settled;
   if (effects && realistic && !fastNavigation) {
     const previousError = renderer.debug.onShaderError;
@@ -928,6 +947,8 @@ addEventListener("pagehide", (event) => {
   controls?.dispose();
   stream?.dispose();
   videoScreens?.dispose();
+  visitPreloader?.dispose();
+  welcomeFilm?.dispose();
   architecture?.dispose();
   environment?.dispose();
   photoRender?.dispose();
@@ -947,6 +968,9 @@ try {
   slots = layoutWorks(catalogue.works);
   access = exhibitionAccess(slots, catalogue.videos || []);
   setClosedDoors(access.doors);
+  visitPreloader = createVisitPreloader(slots, displayImageURL);
+  visitPreloader.approach(slots[0]?.viewpoint || INITIAL);
+  welcomeFilm = prepareWelcomeFilm(invalidate);
   // Start the first visible previews while the renderer and effects initialise.
   [...slots].sort((a,b) =>
     Math.hypot(a.x-INITIAL.x,a.z-INITIAL.z,a.floorY||0) -
@@ -975,6 +999,7 @@ try {
   );
   root.append(renderer.domElement);
   architecture = createArchitecture(scene, renderer, { mobile, onReady: invalidate, occupiedSlots: slots, closedDoors: access.doors });
+  welcomeFilm.attach(scene.getObjectByName("welcome-ledwall"));
   videoScreens = createVideoScreens({scene,videos:catalogue.videos||[],invalidate});
   try {
     environment = createEnvironment(scene, renderer);

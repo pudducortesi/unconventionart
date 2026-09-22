@@ -153,7 +153,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
     }
   }
 
-  const features = furnishGallery({ room, own, box, plaster, stone, lacquer, recess, glow, onReady });
+  const features = furnishGallery({ room, own, box, plaster, stone, lacquer, recess, glow, onReady, openHalls: new Set(HALLS.filter(h => !closedDoors.some(d => d.hallIndex === h.index)).map(h => h.index)) });
   const mezzanines = createMezzanines(room, own, box);
 
   // Include the real floor so the same raycast list supports tap-to-walk.
