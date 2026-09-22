@@ -1,4 +1,4 @@
-import { createConcrete, furnishIndustrialRoom } from './industrial-room.js';
+import { createConcrete, createWornPlaster, furnishIndustrialRoom } from './industrial-room.js';
 import { ROOM_FINISHES, addRoomWallFinishes } from './room-finishes.js';
 import * as T from '../../vendor/three.module.js';
 import { BUILDING, HALLS } from './layout.js';
@@ -67,9 +67,11 @@ export function createInteriorEnvelope({ room, own, box, plaster, recess, glow, 
     // Continuous coloured soffit behind the room's coffers, fins or rafts.
     box(21.62, .025, 25.62, x, h - .035, z, ceilingPaint);
     if (hall.index === 0) {
-      wallPaint.roughness = .98; wallPaint.bumpScale = .003;
+      Object.assign(wallPaint, createWornPlaster(own));
+      wallPaint.color.setHex(0xffffff); wallPaint.roughness = .98;
+      Object.assign(ceilingPaint, {map:wallPaint.map, bumpMap:wallPaint.bumpMap, bumpScale:.012});
       ceilingPaint.roughness = .96;
-      furnishIndustrialRoom(hall, box, own);
+      furnishIndustrialRoom(hall, box, own, room);
       continue;
     }
     // Shadow gaps and concealed light establish thickness around the ceiling.
