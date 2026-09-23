@@ -1,14 +1,18 @@
 export const AVATAR_OPTIONS = {
-  model: ['classic','atelier'],
+  model: ['classic','atelier','studio'],
+  garment: ['jacket','shirt','tshirt','dress'], beard: ['none','stubble','full','moustache'],
+  eyes: ['#423729','#31546b','#3e6555','#89858c'], trousers: ['#292c33','#eee9df','#31546b','#793a57'], shoes: ['#17191d','#eee9df','#714b30'],
   glasses: ['none','round','square'], frame: ['black','tortoise','gold'],
   skin: ['#f2d3b1','#dca77d','#b87952','#875338','#503528'],
   hair: ['#211c1a','#68412c','#c69b55','#d8d5ce','#95335e'],
   outfit: ['#20242c','#eee9df','#793a57','#31546b','#3e6555','#cc754b'],
-  style: ['short','bob','long','shaved'], build: ['slim','regular','broad'],
+  style: ['short','bob','long','shaved','bald','bun','mohawk'], build: ['slim','regular','broad'],
 };
 export const DEFAULT_AVATAR = {model:'classic',glasses:'none',frame:'black',skin:'#dca77d',hair:'#211c1a',outfit:'#31546b',style:'short',build:'regular'};
+export const AVATAR_RANGES={height:[85,115,100],shoulders:[85,115,100],waist:[80,120,100],hips:[85,115,100],faceWidth:[85,115,100],jaw:[80,120,100],nose:[75,125,100],eyeSize:[80,120,100],lipSize:[75,125,100]};
+Object.assign(DEFAULT_AVATAR,{garment:'jacket',beard:'none',eyes:'#423729',trousers:'#292c33',shoes:'#17191d'},Object.fromEntries(Object.entries(AVATAR_RANGES).map(([key,v])=>[key,v[2]])));
 export function normalizeAvatar(value={}) {
-  return Object.fromEntries(Object.entries(AVATAR_OPTIONS).map(([key,options])=>[key,options.includes(value?.[key])?value[key]:DEFAULT_AVATAR[key]]));
+  return {...Object.fromEntries(Object.entries(AVATAR_OPTIONS).map(([key,options])=>[key,options.includes(value?.[key])?value[key]:DEFAULT_AVATAR[key]])),...Object.fromEntries(Object.entries(AVATAR_RANGES).map(([key,[min,max,fallback]])=>[key,typeof value?.[key]==='number'&&Number.isFinite(value[key])?Math.round(Math.max(min,Math.min(max,value[key]))):fallback]))};
 }
 export function inviteCode(value) {
   const raw=String(value||'').trim();
