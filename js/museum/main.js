@@ -108,6 +108,23 @@ async function openStudio(id, panel='discover') {
 }
 $('#studio-open').addEventListener('click', () => openStudio());
 $('#artwork-studio').addEventListener('click', () => { const id=slots[selected]?.work.id;$('#artwork').close();openStudio(id,'wall'); });
+let socialPromise, socialController;
+$('#social-open').addEventListener('click', async () => {
+  openDialog('social-space');
+  try {
+    socialPromise ||= import('./social-space.js').then(({mountSocial}) => mountSocial({
+      getScene: () => scene,
+      getPose: () => ({ x:player.x, z:player.z, y:player.floorY, yaw }),
+      getCatalogue: () => catalogue,
+      wake: invalidate,
+    }));
+    socialController = await socialPromise;
+    socialController.open();
+  } catch {
+    socialPromise = null;
+    $('#social-space').textContent = 'Gli incontri non sono disponibili in questo momento. Premi Esc o ricarica la pagina per riprovare.';
+  }
+});
 let detailArtwork = null;
 let focusRequest = 0;
 let realistic = true;
@@ -864,6 +881,7 @@ function render(time) {
     renderer.setPixelRatio(desiredPixelRatio);
   }
   setView();
+  moving = (socialController?.update(delta, time) || false) || moving;
   architecture.updateLighting(player);
   videoScreens?.update(player,entered && !modalOpen && !photoRender);
   welcomeFilm?.update(player,entered && !modalOpen && !photoRender);

@@ -1,10 +1,13 @@
+import {mountOfferEditor, mountModeration} from './store-admin.js';
 import {mediaInfo, prepareMedia, uploadWithProgress} from './media-upload.js';
 import { publishingConfig, publicationPatch } from './publishing.js';
 import { ROOM_PROFILES } from './museum/room-profiles.js';
 const $ = s => document.querySelector(s);
+let offers = [];
 let config, session = null, works = [], filter = 'all', refreshTimer, busy = false, renderVersion = 0;
 const thumbnails = new Set();
 const notice = (text, error = false) => { $('#notice').textContent = text; $('#notice').dataset.error = String(error); };
+const moderation = mountModeration({request,notice});
 async function request(path, { method = 'GET', body, raw = false } = {}) {
   const response = await fetch(config.supabaseUrl + path, {
     signal: AbortSignal.timeout(45000),
@@ -22,6 +25,7 @@ async function request(path, { method = 'GET', body, raw = false } = {}) {
 }
 function endSession() {
   renderVersion++;
+  moderation.clear(); offers=[];
   session = null; clearTimeout(refreshTimer); works = [];
   for (const url of thumbnails) URL.revokeObjectURL(url); thumbnails.clear();
   $('#works').replaceChildren(); $('#workspace').hidden = true; $('#set-password').hidden = true; $('#login').hidden = !config?.enabled;
@@ -66,7 +70,8 @@ $('#set-password').addEventListener('submit', async event => {
 function element(tag, text, className) { const node = document.createElement(tag); if (text) node.textContent = text; if (className) node.className = className; return node; }
 function field(form, text, input) { const label = element('label', text); label.append(input); form.append(label); return input; }
 async function loadWorks() {
-  const [photos,videos] = await Promise.all(['/rest/v1/gallery_artworks?select=*&order=created_at.desc','/rest/v1/gallery_videos?select=*&order=created_at.desc'].map(async path=>(await request(path)).json()));
+  const [photos,videos,loadedOffers] = await Promise.all(['/rest/v1/gallery_artworks?select=*&order=created_at.desc','/rest/v1/gallery_videos?select=*&order=created_at.desc','/rest/v1/gallery_offers?select=*'].map(async path=>(await request(path)).json()));
+  offers=loadedOffers;
   works = [...photos,...videos.map(w=>({...w,isVideo:true}))];
   await render();
 }
@@ -92,7 +97,7 @@ async function render() {
     const actions = element('div', '', 'actions'), save = element('button', 'Salva', 'secondary'), publish = element('button', work.published ? 'Ritira dalla galleria' : 'Pubblica →');
     save.type = 'submit'; publish.type = 'button'; publish.disabled = config.liveCatalogue === false;
     if (publish.disabled) publish.title = 'Pubblicazione disponibile dopo il passaggio al nuovo catalogo.';
-    actions.append(save, publish); form.append(actions); card.append(form); $('#works').append(card);
+    actions.append(save, publish); form.append(actions); card.append(form); if(!work.isVideo) mountOfferEditor(card,work,offers,{request,notice}); $('#works').append(card);
     async function update(published) {
       if (busy) return;
       busy = true; save.disabled = publish.disabled = true;

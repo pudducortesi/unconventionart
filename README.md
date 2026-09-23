@@ -60,3 +60,7 @@ Apri lo Studio dal footer: schede, guida editoriale con lettura locale facoltati
 ### Backend dedicato opzionale
 
 Il servizio Node in `server/` aggiunge richieste dei collezionisti e un curatore AI configurabile, senza dipendenze npm aggiuntive. Rimane scollegato dalla galleria finché `services.apiBaseUrl` è `null`. Installazione Hetzner, conservazione dei contatti e configurazione dei servizi: [docs/HETZNER_BACKEND.md](docs/HETZNER_BACKEND.md). Nessun pagamento o mint automatico.
+
+## Avatar, incontri e edizioni
+
+Il pulsante **Incontri** apre la prima versione sociale: avatar personalizzabile, visite private su invito, chat e offerte. Stato effettivo, limiti e attivazione: [docs/SOCIAL_PLATFORM.md](docs/SOCIAL_PLATFORM.md).
