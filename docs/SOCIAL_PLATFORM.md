@@ -62,3 +62,9 @@ Riferimenti Auth: [sessioni](https://supabase.com/docs/guides/auth/sessions), [c
 ## Verifica chat degli incontri (settembre 2026)
 
 Build e 177 test tramite `npm run check` da checkout isolato. Test dedicati: storico iniziale, messaggi propri, deduplicazione, lettura, finestra di 50 messaggi, invio simultaneo, modifica della bozza durante l’invio, errore e nuovo tentativo, risposta tardiva dopo cambio incontro. Nessuna nuova tabella o notifica esterna; lo stato di lettura è locale alla visita corrente. Il collaudo dell’interfaccia con due dispositivi reali resta da completare.
+
+## Ripresa degli incontri (settembre 2026)
+
+Dopo un aggiornamento della pagina, “Riprendi incontro” permette di rientrare nell’ultimo incontro della stessa scheda e dello stesso account. Il riferimento conserva solo invito, nome e scadenza in sessionStorage; ogni rientro richiede una nuova verifica server tramite `join`. Uscita volontaria, logout, chiusura e accesso revocato rimuovono il riferimento. Errori temporanei e incontro pieno consentono di riprovare. Nessun rientro automatico e nessuna nuova tabella.
+
+Build e 185 test tramite `npm run check` da checkout isolato. Gli otto test dedicati coprono ripristino, dati non validi, scadenza, storage bloccato, autorizzazione server, errori temporanei, risposte tardive e cambio account. Il collaudo dell’interfaccia su dispositivi reali resta da completare.
