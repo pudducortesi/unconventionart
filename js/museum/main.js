@@ -112,10 +112,19 @@ let socialPromise, socialController;
 $('#social-open').addEventListener('click', async () => {
   openDialog('social-space');
   try {
-    socialPromise ||= import('./social-space.js').then(({mountSocial}) => mountSocial({
+    socialPromise ||= import('./social-space.js').then(({mountSocial,planMeetingRoute}) => mountSocial({
       getScene: () => scene,
       getPose: () => ({ x:player.x, z:player.z, y:player.floorY, yaw }),
       getCatalogue: () => catalogue,
+      reachParticipant: participant => {
+        if (!entered || !scene) throw Error('Entra nella galleria per raggiungere una persona.');
+        const plan = planMeetingRoute(player, participant, index => access.open.has(index));
+        if (!plan) throw Error('La posizione non è raggiungibile. Attendi che la persona si sposti.');
+        if (plan.nearby) { announce(`Sei già vicino a ${participant.name}.`); return; }
+        guide.pause(); clearSelection();
+        walkTo(plan.destination, plan.look, plan.path);
+        announce(`Verso l’ultima posizione di ${participant.name}. Muoviti per interrompere il percorso.`);
+      },
       wake: invalidate,
     }));
     socialController = await socialPromise;
@@ -441,11 +450,11 @@ function updateHud(moving = false) {
       );
   }
 }
-function walkTo(destination, look = null) {
+function walkTo(destination, look = null, route = null) {
   visitPreloader?.approach(destination);
   dismissVisitChoice();
   controls?.stop();
-  path = findLevelPath(player, destination);
+  path = route ?? findLevelPath(player, destination);
   finalLook = look;
   if (!path.length) {
     finalLook = null;
