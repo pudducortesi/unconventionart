@@ -2,6 +2,7 @@ import * as T from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {clone} from 'three/examples/jsm/utils/SkeletonUtils.js';
 import {VRMLoaderPlugin} from '../avatar-runtime/three-vrm.js';
+import {attachGlasses} from './avatar-glasses.js';
 
 let template;
 function loadTemplate(){
@@ -42,6 +43,8 @@ export function instantiateAtelier(source,a){
     if(a.style==='bob')for(const side of [-1,1]){const geo=new T.SphereGeometry(1,12,8),lock=new T.Mesh(geo,mat);lock.position.set(side*.078,.085,.022);lock.scale.set(.032,.111,.083);group.add(lock);extras.push(geo);}
     root.add(group);root.updateMatrixWorld(true);head.attach(group);
   }
+  const frameColor={black:'#242329',tortoise:'#714b30',gold:'#a58143'}[a.frame]||'#242329';
+  const disposeGlasses=head?attachGlasses(T,head,a.glasses,{y:.108,z:.122,eyes:.0325,radius:.026,color:frameColor}):()=>{};
   // Relax the authored A-pose before recording animation baselines.
   for(const [name,angle]of [['LeftArm',.62],['RightArm',-.62],['LeftUpLeg',.07],['RightUpLeg',-.07]]){
     const b=model.getObjectByName(name);if(!b)continue;
@@ -63,7 +66,7 @@ export function instantiateAtelier(source,a){
     for(const mesh of expressions)for(const key of ['eyeBlinkLeft','eyeBlinkRight']){const i=mesh.morphTargetDictionary[key];if(i!==undefined)mesh.morphTargetInfluences[i]=Math.max(0,closed);}
     return stride>0;
   };
-  root.userData.dispose=()=>{if(disposed)return;disposed=true;for(const m of materials)m.dispose();for(const g of extras)g.dispose();const skeletons=new Set();root.traverse(o=>{if(o.skeleton)skeletons.add(o.skeleton);});for(const s of skeletons)s.dispose();};
+  root.userData.dispose=()=>{if(disposed)return;disposed=true;disposeGlasses();for(const m of materials)m.dispose();for(const g of extras)g.dispose();const skeletons=new Set();root.traverse(o=>{if(o.skeleton)skeletons.add(o.skeleton);});for(const s of skeletons)s.dispose();};
   root.scale.x=width;
   return root;
 }

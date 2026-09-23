@@ -1,5 +1,6 @@
 import * as T from '../../vendor/three.module.js';
 import {normalizeAvatar} from './social-model.js';
+import {attachGlasses} from './avatar-glasses.js';
 
 // Locally generated, articulated fallback. No remote model/texture requests.
 function createFallback(value,name='') {
@@ -48,6 +49,8 @@ function createFallback(value,name='') {
       }
     }
   }
+  const frameColor={black:'#242329',tortoise:'#714b30',gold:'#a58143'}[a.frame];
+  const disposeGlasses=attachGlasses(T,head,a.glasses,{y:.041,z:-.158,eyes:.05,radius:.039,color:frameColor});
   const arms=[],legs=[],elbows=[],knees=[];
   for(const side of [-1,1]){
     const arm=joint(body,side<0?'leftUpperArm':'rightUpperArm',side*.208*width,1.265,0);arm.rotation.z=side*.075;arms.push(arm);
@@ -86,7 +89,7 @@ function createFallback(value,name='') {
     }
     return stride>0;
   };
-  root.userData.dispose=()=>{if(disposed)return;disposed=true;for(const g of geometries)g.dispose();for(const m of Object.values(mats))m.dispose();root.traverse(o=>{if(o.isSprite){o.material.map?.dispose();o.material.dispose();}});};
+  root.userData.dispose=()=>{if(disposed)return;disposed=true;disposeGlasses();for(const g of geometries)g.dispose();for(const m of Object.values(mats))m.dispose();root.traverse(o=>{if(o.isSprite){o.material.map?.dispose();o.material.dispose();}});};
   return root;
 }
 export function createAvatarLayer(scene,wake){

@@ -1,11 +1,12 @@
 export const AVATAR_OPTIONS = {
   model: ['classic','atelier'],
+  glasses: ['none','round','square'], frame: ['black','tortoise','gold'],
   skin: ['#f2d3b1','#dca77d','#b87952','#875338','#503528'],
   hair: ['#211c1a','#68412c','#c69b55','#d8d5ce','#95335e'],
   outfit: ['#20242c','#eee9df','#793a57','#31546b','#3e6555','#cc754b'],
   style: ['short','bob','long','shaved'], build: ['slim','regular','broad'],
 };
-export const DEFAULT_AVATAR = {model:'classic',skin:'#dca77d',hair:'#211c1a',outfit:'#31546b',style:'short',build:'regular'};
+export const DEFAULT_AVATAR = {model:'classic',glasses:'none',frame:'black',skin:'#dca77d',hair:'#211c1a',outfit:'#31546b',style:'short',build:'regular'};
 export function normalizeAvatar(value={}) {
   return Object.fromEntries(Object.entries(AVATAR_OPTIONS).map(([key,options])=>[key,options.includes(value?.[key])?value[key]:DEFAULT_AVATAR[key]]));
 }
