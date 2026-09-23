@@ -49,6 +49,12 @@ test('Social RPC enforces authentication, room isolation, identity, blocks, rate
   await identity(null);await assert.rejects(rpc('profile'),/ua_login_required/);
   for(const [i,id]of ids.entries()){await identity(id);await rpc('save_profile',{name:'Visitor '+i,avatar:DEFAULT_AVATAR});}
   await identity(ids[0]);
+  await clearLimit(ids[0],'save_profile');
+  const upgraded=await rpc('save_profile',{name:'Visitor 0',avatar:{...DEFAULT_AVATAR,model:'atelier'}});assert.equal(upgraded.avatar.model,'atelier');
+  await clearLimit(ids[0],'save_profile');
+  await assert.rejects(rpc('save_profile',{name:'Visitor 0',avatar:{...DEFAULT_AVATAR,model:'https://evil.test/model.glb'}}),/ua_invalid_avatar/);
+  const legacy={...DEFAULT_AVATAR};delete legacy.model;
+  const compatible=await rpc('save_profile',{name:'Visitor 0',avatar:legacy});assert.equal(compatible.avatar.model,'classic');
   await assert.rejects(db.query('select * from ua_social.profiles'),/permission denied/);
   const room=await rpc('create',{name:'Private visit'});
   await identity(ids[1]);await assert.rejects(rpc('tick',{room:room.id,position:{x:0,z:0,y:0,yaw:0}}),/ua_room_denied/);

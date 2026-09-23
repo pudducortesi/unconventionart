@@ -13,7 +13,7 @@ export async function prepareVendor(root = ".") {
     );
   const room = await readFile('node_modules/three/examples/jsm/environments/RoomEnvironment.js', 'utf8');
   await writeFile(`${root}/vendor/RoomEnvironment.js`, room.replace("from 'three'", "from './three.module.js'"));
-  for (const [entry, output] of [['effects-runtime', 'gallery-effects'], ['photo-render-runtime', 'gallery-photo-render']])
+  for (const [entry, output] of [['effects-runtime', 'gallery-effects'], ['photo-render-runtime', 'gallery-photo-render'], ['avatar-runtime','avatar-runtime']])
   await build({ entryPoints: [`js/museum/${entry}.js`], outfile: `${root}/vendor/${output}.js`,
     bundle: true, format: 'esm', minify: true, target: 'es2022',
     plugins: [{ name: 'shared-three', setup(builder) {
@@ -26,6 +26,7 @@ export async function prepareVendor(root = ".") {
     }}], legalComments: 'linked' });
   for (const [pkg, file] of [['n8ao','LICENSE'], ['postprocessing','LICENSE.md'], ['three-gpu-pathtracer','LICENSE'], ['three-mesh-bvh','LICENSE'], ['realism-effects','LICENSE.md']])
     await copyFile(`node_modules/${pkg}/${file}`, `${root}/vendor/${pkg}-LICENSE.txt`);
+  await copyFile('js/avatar-runtime/three-vrm-LICENSE.txt', `${root}/vendor/three-vrm-LICENSE.txt`);
   await copyFile(
     "node_modules/three/LICENSE",
     `${root}/vendor/THREE-LICENSE.txt`,

@@ -1,0 +1,8 @@
+Atelier v1: optimized derivative of avatars/mpfb.glb from met4citizen/TalkingHead
+Source commit: eed58d198076a7e1e825f804802921c4d3804d46
+Source blob: cd2ebbe1fe8bcbf3d5b2dfbf1262a7f76814e68f
+Upstream README declares this MPFB avatar CC0 1.0 Universal.
+https://github.com/met4citizen/TalkingHead/blob/eed58d198076a7e1e825f804802921c4d3804d46/README.md
+https://creativecommons.org/publicdomain/zero/1.0/
+Changes: mesh simplification, reduced morph targets, omitted eyelashes, 1024px WebP textures.
+No other TalkingHead demo avatar is included. Runtime library licenses remain separate.

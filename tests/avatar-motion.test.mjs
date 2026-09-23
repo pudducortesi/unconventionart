@@ -25,3 +25,21 @@ test('Peer movement interpolates through shortest turn, replacement/removal rele
   layer.sync([{...p,avatar:{style:'long'}}],'self');assert.notEqual(scene.children[0],old);assert.equal(scene.children.length,1);
   layer.sync([],'self');assert.equal(scene.children.length,0);assert.equal(layer.update(.016,2000),false);layer.clear();
 });
+
+test('Peer gait finishes after arrival, then releases the gallery render loop',()=>{
+  const scene=new T.Scene(),layer=createAvatarLayer(scene,()=>{});
+  const p={id:'peer',name:'',avatar:{},x:0,y:0,z:0,yaw:0};
+  layer.sync([p],'self');const mesh=scene.children[0];
+  layer.sync([{...p,x:3,yaw:.8}],'self');
+  let active=true,frames=0,settledPoseWhileGaitActive=false;
+  while(active&&frames<300){
+    active=layer.update(.016,++frames*16);
+    if(mesh.position.x===3&&active)settledPoseWhileGaitActive=true;
+  }
+  assert.equal(settledPoseWhileGaitActive,true,'Keep rendering after arrival to finish the gait');
+  assert.equal(active,false,'A resting peer must not keep the gallery rendering');
+  assert.ok(frames<300);assert.equal(mesh.position.x,3);assert.equal(mesh.rotation.y,.8);
+  for(const name of ['leftUpperArm','rightUpperArm','leftUpperLeg','rightUpperLeg','knee'])assert.ok(Math.abs(mesh.getObjectByName(name).rotation.x)<1e-12,`${name} reaches rest`);
+  for(const time of [5000,10000,15000])assert.equal(layer.update(.016,time),false);
+  layer.clear();
+});
