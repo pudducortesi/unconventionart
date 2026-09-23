@@ -18,15 +18,16 @@ jobs:
           mkdir -p avatar-build/output
           cd avatar-build
           npm init -y
-          npm install --ignore-scripts @gltf-transform/core@4.2.1 @gltf-transform/functions@4.2.1 @gltf-transform/extensions@4.2.1 sharp@0.34.3 @pixiv/three-vrm@3.5.5 three@0.186.0
+          npm install --ignore-scripts @gltf-transform/core@4.2.1 @gltf-transform/functions@4.2.1 @gltf-transform/extensions@4.2.1 sharp@0.34.3 @pixiv/three-vrm@3.5.5 three@0.186.0 meshoptimizer@0.25.0
       - name: Fetch pinned CC0 avatar and optimize textures
         working-directory: avatar-build
         run: |
           cat > prepare.mjs <<'JS'
           import {NodeIO} from '@gltf-transform/core';
           import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
-          import {dedup,prune,resample,textureCompress} from '@gltf-transform/functions';
+          import {dedup,prune,resample,textureCompress,simplify} from '@gltf-transform/functions';
           import sharp from 'sharp';
+          import {MeshoptSimplifier} from 'meshoptimizer';
           import {createHash} from 'node:crypto';
           import {writeFile,copyFile,readFile} from 'node:fs/promises';
           const commit='eed58d198076a7e1e825f804802921c4d3804d46';
@@ -37,7 +38,16 @@ jobs:
           if(sha!=='cd2ebbe1fe8bcbf3d5b2dfbf1262a7f76814e68f')throw Error('Unexpected asset hash');
           const io=new NodeIO().registerExtensions(ALL_EXTENSIONS);
           const doc=await io.readBinary(bytes);
-          await doc.transform(dedup(),prune(),resample(),textureCompress({encoder:sharp,targetFormat:'webp',resize:[1024,1024]}));
+          const keep=new Set(['eyeBlinkLeft','eyeBlinkRight','mouthSmileLeft','mouthSmileRight','jawOpen']);
+          for(const mesh of doc.getRoot().listMeshes()){
+            const names=mesh.getExtras().targetNames||[];
+            const selected=names.map((n,i)=>keep.has(n)?i:-1).filter(i=>i>=0);
+            for(const p of mesh.listPrimitives())for(const [i,target] of [...p.listTargets()].entries())if(!selected.includes(i))p.removeTarget(target);
+            if(names.length){mesh.setExtras({...mesh.getExtras(),targetNames:selected.map(i=>names[i])});mesh.setWeights(selected.map(()=>0));}
+          }
+          for(const node of doc.getRoot().listNodes())if(node.getMesh()?.getName()==='mind_eyelashes_02')node.dispose();
+          await MeshoptSimplifier.ready;
+          await doc.transform(prune(),dedup(),simplify({simplifier:MeshoptSimplifier,ratio:0.4,error:0.005}),prune(),resample(),textureCompress({encoder:sharp,targetFormat:'webp',resize:[1024,1024]}));
           await io.write('output/mpfb-mobile.glb',doc);
           await copyFile('node_modules/@pixiv/three-vrm/lib/three-vrm.module.js','output/three-vrm.module.js');
           await copyFile('node_modules/@pixiv/three-vrm/LICENSE','output/three-vrm-LICENSE.txt');
