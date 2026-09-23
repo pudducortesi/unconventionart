@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import * as T from 'three';
 import {instantiateAtelier} from '../vendor/avatar-runtime.js';
 import {DEFAULT_AVATAR} from '../js/museum/social-model.js';
 
@@ -39,5 +40,21 @@ test('Atelier returns to its exact authored rest pose before releasing animation
   bones.forEach((bone,i)=>assert.ok(bone.quaternion.equals(rest[i])));
   assert.equal(avatar.userData.animate(.016,10000,0),false);
   avatar.userData.dispose();assert.equal(avatar.userData.animate(.016,10016,1),false);
+});
+test('Atelier eyewear sits on the independently cloned head and releases resources',async()=>{
+  const source=(await fixture()).scene;
+  const a=instantiateAtelier(source,{...DEFAULT_AVATAR,glasses:'round',frame:'gold'});
+  const b=instantiateAtelier(source,{...DEFAULT_AVATAR,glasses:'square'});
+  const head=a.getObjectByName('Head'),glasses=head.getObjectByName('avatar-glasses');
+  assert.ok(glasses);assert.equal(glasses.parent,head);
+  assert.notEqual(glasses,b.getObjectByName('avatar-glasses'));
+  assert.ok(glasses.position.z>.10&&glasses.position.z<.14);
+  const rim=glasses.children.find(o=>o.geometry?.type==='TorusGeometry');assert.ok(rim);
+  let disposed=0;rim.geometry.addEventListener('dispose',()=>disposed++);
+  const before=rim.getWorldPosition(new T.Vector3());
+  head.rotation.y=.4;a.updateMatrixWorld(true);
+  assert.ok(rim.getWorldPosition(new T.Vector3()).distanceTo(before)>0);
+  a.userData.dispose();a.userData.dispose();assert.equal(disposed,1);
+  b.userData.animate(.016,16,1);b.userData.dispose();
 });
 export {fixture};
