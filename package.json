@@ -1,0 +1,25 @@
+{
+  "name": "unconventionart",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node tools/vendor.mjs && node tools/serve.mjs",
+    "build": "node tools/build.mjs",
+    "check": "node tools/build.mjs && node tools/check.mjs && node --test tests/*.test.mjs",
+    "setup:ar": "npm ci --prefix ar-runtime --ignore-scripts"
+  },
+  "dependencies": {
+    "n8ao": "2.0.1",
+    "postprocessing": "6.39.5",
+    "realism-effects": "1.1.2",
+    "three": "0.186.0",
+    "three-gpu-pathtracer": "0.0.24",
+    "three-mesh-bvh": "0.9.10",
+    "xatlas-web": "0.1.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "esbuild": "0.25.12",
+    "sharp": "0.35.4"
+  }
+}

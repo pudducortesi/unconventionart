@@ -1,0 +1,17 @@
+node_modules/
+dist/
+images/private/
+data/local-catalogue.json
+vendor/
+
+build-meta.json
+build-report.json
+
+models/*.glb
+
+.env
+.env.*
+!*.example
+server/storage/
+
+photo-optimization-report.json

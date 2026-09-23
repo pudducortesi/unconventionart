@@ -1,0 +1,20 @@
+[submodule "research/upstream/sharp"]
+	path = research/upstream/sharp
+	url = https://github.com/lovell/sharp.git
+	shallow = true
+[submodule "research/upstream/basis_universal"]
+	path = research/upstream/basis_universal
+	url = https://github.com/BinomialLLC/basis_universal.git
+	shallow = true
+[submodule "research/upstream/meshoptimizer"]
+	path = research/upstream/meshoptimizer
+	url = https://github.com/zeux/meshoptimizer.git
+	shallow = true
+[submodule "research/upstream/glTF-Transform"]
+	path = research/upstream/glTF-Transform
+	url = https://github.com/donmccurdy/glTF-Transform.git
+	shallow = true
+[submodule "research/upstream/ssimulacra2"]
+	path = research/upstream/ssimulacra2
+	url = https://github.com/cloudinary/ssimulacra2.git
+	shallow = true

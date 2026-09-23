@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="it" id="top">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#10100f" />
+    <meta
+      name="description"
+      content="UnconventionArt. Fotografia artistica, ritratti e trasformazioni. Entra nello spazio delle immagini."
+    />
+    <title>Una serie, un mondo — UnconventionArt</title>
+    <link rel="icon" href="images/site/favicon-32.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <script type="module" src="js/main.js"></script>
+  </head>
+  <body data-page="collection">
+    <a class="skip" href="#main">Vai al contenuto</a>
+    <header class="header">
+      <a class="brand" href="index.html" aria-label="UnconventionArt, home"
+        >unconvention<span>art</span><i>®</i></a
+      >
+      <nav aria-label="Navigazione principale">
+        <a href="exhibitions.html">Opere</a><a href="about.html">Visione</a
+        ><a href="contact.html">Contatti ↗</a>
+      </nav>
+      <button class="menu-button" aria-label="Apri menu" aria-haspopup="dialog">
+        Menu <span>＋</span>
+      </button>
+    </header>
+    <dialog class="menu" id="menu">
+      <div class="menu-top">
+        <span class="eyebrow">UNCONVENTIONART / INDICE</span
+        ><button data-close-menu aria-label="Chiudi menu">Chiudi ×</button>
+      </div>
+      <nav aria-label="Menu completo">
+        <a href="index.html"><sup>00</sup>La soglia</a
+        ><a href="exhibitions.html"><sup>01</sup>Le opere</a
+        ><a href="about.html"><sup>02</sup>La visione</a
+        ><a href="contact.html"><sup>03</sup>Il dialogo</a>
+      </nav>
+      <p>Fotografia. Corpo. Trasformazione.</p>
+    </dialog>
+    <main id="main">
+      <section class="collection-head">
+        <div>
+          <a class="eyebrow" href="exhibitions.html">← TUTTE LE OPERE</a>
+          <h1 id="collection-title">Le serie.</h1>
+          <p id="collection-description"></p>
+          <span class="eyebrow" id="collection-count"></span>
+        </div>
+        <img id="collection-cover" alt="" fetchpriority="high" />
+      </section>
+      <section class="section">
+        <div id="collection-grid" class="collection-grid"></div>
+        <p id="catalogue-status" role="status"></p>
+      </section>
+      <nav class="next-collection section" aria-label="Prossima serie">
+        <span class="eyebrow">CONTINUA IL VIAGGIO</span
+        ><a id="next-collection" href="exhibitions.html">Tutte le opere ↗</a>
+      </nav>
+    </main>
+    <footer>
+      <a class="footer-invite" href="contact.html"
+        >Facciamo spazio<br />a qualcosa di <em>inatteso.</em><span>↗</span></a
+      >
+      <div class="footer-bottom">
+        <a href="index.html">UNCONVENTIONART</a><span>FOTOGRAFIA / ITALIA</span
+        ><button data-motion aria-pressed="true">Movimento: attivo</button
+        ><a href="#top">Torna su ↑</a>
+      </div>
+    </footer>
+    <div class="cursor" aria-hidden="true"><span>GUARDA</span></div>
+    <dialog id="viewer" class="viewer" aria-labelledby="viewer-title">
+      <div class="viewer-bar">
+        <span class="eyebrow" id="viewer-series"></span
+        ><button data-close-viewer aria-label="Chiudi fotografia">
+          Chiudi ×
+        </button>
+      </div>
+      <div class="viewer-stage">
+        <button class="arrow previous" aria-label="Fotografia precedente">
+          ←</button
+        ><img id="viewer-image" alt="" /><button
+          class="arrow next"
+          aria-label="Fotografia successiva"
+        >
+          →
+        </button>
+      </div>
+      <div class="viewer-info">
+        <div>
+          <h2 id="viewer-title"></h2>
+          <p id="viewer-credit"></p>
+        </div>
+        <span id="viewer-count" class="eyebrow"></span
+        ><a id="viewer-contact" href="contact.html">Parliamone ↗</a>
+      </div>
+      <div id="viewer-variants" class="variants"></div>
+      <p class="sr-only" id="viewer-live" aria-live="polite"></p>
+    </dialog>
+    <noscript
+      ><p class="noscript">
+        Puoi navigare tutte le pagine. Attiva JavaScript per esplorare il
+        catalogo fotografico interattivo.
+      </p></noscript
+    >
+  </body>
+</html>

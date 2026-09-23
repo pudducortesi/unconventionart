@@ -1,234 +1,397 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0a0a0a">
-<link rel="icon" type="image/png" sizes="32x32" href="images/site/favicon-32.png">
-<link rel="icon" type="image/png" sizes="192x192" href="images/site/favicon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="images/site/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
-<title>UnconventionArt — Fine Art Photography Duo</title>
-<meta name="description" content="UnconventionArt — fine art photography duo. Photographer and muse exploring unconventional visual narratives through staged improvisation, decay and presence.">
-<link rel="canonical" href="https://unconventionart.com/">
-
-<meta property="og:type" content="website">
-<meta property="og:title" content="UnconventionArt — Fine Art Photography Duo">
-<meta property="og:description" content="Fine art photography duo. Photographer and muse, working between presence and absence.">
-<meta property="og:url" content="https://unconventionart.com/">
-<meta property="og:image" content="images/site/og-image.png">
-<meta property="og:locale" content="en_US">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="UnconventionArt — Fine Art Photography Duo">
-<meta name="twitter:description" content="Fine art photography duo. Photographer and muse, working between presence and absence.">
-<meta name="twitter:image" content="images/site/og-image.png">
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "UnconventionArt",
-  "alternateName": "UnconventionArt Photography Duo",
-  "url": "https://unconventionart.com",
-  "logo": "https://unconventionart.com/images/site/logo.png",
-  "description": "Fine art photography duo working between staged direction and instinctive presence.",
-  "sameAs": [
-    "https://www.instagram.com/unconventionart",
-    "https://www.facebook.com/unconventionart"
-  ],
-  "address": {
-    "@type": "PostalAddress",
-    "addressCountry": "IT"
-  }
-}
-</script>
-</head>
-<body>
-
-<header class="header" id="header">
-  <div class="header__inner">
-    <a href="index.html" class="header__logo" aria-label="UnconventionArt — home">
-      <img src="images/site/logo-small.png" srcset="images/site/logo-small.png 1x, images/site/logo.png 2x" alt="UnconventionArt" class="header__logo-img">
-    </a>
-    <div class="header__right">
-      <nav aria-label="Primary">
-        <ul class="header__nav">
-        <li><a href="exhibitions.html">Works</a></li>
-        <li><a href="exhibitions.html#viewing-room">Viewing Room</a></li>
-        <li><a href="journal.html">Journal</a></li>
-        <li><a href="about.html">Biography</a></li>
-        <li><a href="contact.html">Contact</a></li>
-        </ul>
-      </nav>
-      <button class="header__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
-        <span></span><span></span><span></span>
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <title>UnconventionArt — lo spazio, lo sguardo</title>
+    <meta
+      name="description"
+      content="Una galleria contemporanea da attraversare. Entra nello spazio UnconventionArt, avvicinati alle fotografie e incontra le opere."
+    />
+    <link rel="icon" href="images/site/favicon-32.png" />
+    <link rel="stylesheet" href="css/museum.css" />
+    <script type="module" src="js/museum/main.js"></script>
+  </head>
+  <body>
+    <main id="museum" aria-label="Galleria fotografica tridimensionale">
+      <h1 class="sr-only">UnconventionArt — galleria immersiva</h1>
+      <div id="scene"></div>
+      <header class="museum-header">
+        <button
+          class="wordmark"
+          data-open="about"
+          aria-label="Informazioni su UnconventionArt"
+        >
+          <svg class="brand-image" xmlns="http://www.w3.org/2000/svg" width="860" height="335" viewBox="0 0 860 335" role="img" aria-label="WE ARE — UNCONVENTIONART">
+            <defs>
+              <filter id="brand-transparent-ink" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+                <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  .2126 .7152 .0722 0 0" />
+                <feComponentTransfer><feFuncA type="linear" slope="1.04" intercept="-.02" /></feComponentTransfer>
+              </filter>
+            </defs>
+            <image href="images/site/brand-original.svg" width="860" height="335" filter="url(#brand-transparent-ink)" />
+          </svg>
+        </button>
+        <span class="header-caption">GALLERIA CONTEMPORANEA</span>
+        <nav aria-label="Comandi della visita">
+          <button id="social-open" aria-label="Avatar, incontri e edizioni">Incontri</button>
+          <button
+            data-open="floorplan"
+            aria-label="Apri la pianta della galleria"
+          >
+            Sale
+          </button>
+          <button
+            id="collection-open"
+            data-open="collection"
+            aria-label="Apri l’indice delle opere"
+          >
+            Opere <span id="work-count">01</span>
+          </button>
+          <button
+            id="help-open"
+            class="round-button"
+            aria-label="Come muoversi nella galleria"
+          >
+            ?
+          </button>
+        </nav>
+      </header>
+      <section
+        id="invitation"
+        class="loading-screen"
+        aria-label="Caricamento"
+        aria-live="polite"
+      >
+        <div class="loading-ring" aria-hidden="true"></div>
+        <p id="loading-status">Stai entrando nella galleria.</p>
+        <button id="fallback-open" data-open="collection" hidden>
+          Guarda le opere
+        </button>
+      </section>
+      <div class="hud" id="hud" hidden>
+        <section id="photo-render-panel" class="photo-render-panel" hidden><p id="photo-render-status" role="status"></p><button id="photo-render-exit">Torna alla visita</button></section>
+        <section id="visit-choice" class="visit-choice" aria-labelledby="visit-choice-title">
+          <span class="eyebrow">SCEGLI IL TUO RITMO</span>
+          <h2 id="visit-choice-title">Benvenuto in galleria.</h2>
+          <div>
+            <button id="assist-start" class="visit-choice-primary"><strong>Inizia il percorso</strong><span>Dalla hall alla mostra, un passo alla volta</span></button>
+            <button id="free-start"><strong>Esplora liberamente</strong><span>Muoviti e scegli il tuo percorso</span></button>
+          </div>
+        </section>
+        <button id="free-look" class="visit-mode-toggle" aria-pressed="false">
+          <span id="visit-mode-label">Entra nella modalità visita</span>
+          <small id="visit-mode-shortcut">Mouse libero</small>
+        </button>
+        <div id="reticle" class="reticle" aria-hidden="true"><span></span></div>
+        <button id="interact" class="game-interact" aria-label="Interagisci con ciò che inquadri" disabled><kbd>E</kbd><span id="interact-label">Inquadra un’opera</span></button>
+        <section id="tour-panel" class="tour-panel" aria-label="Visita guidata" hidden>
+          <div class="tour-heading"><span id="tour-count"></span><button id="tour-end" aria-label="Termina la visita guidata">×</button></div>
+          <h2 id="tour-title"></h2><p id="tour-description"></p>
+          <div class="tour-actions"><button id="tour-previous" aria-label="Tappa precedente">←</button><button id="tour-pause">Pausa</button><button id="tour-next">Prossima tappa →</button></div>
+          <p id="tour-status" role="status"></p>
+        </section>
+        <div class="room-tag">
+          <span class="live-dot"></span
+          ><span id="room-label">HALL / BENVENUTO</span>
+        </div>
+        <div id="point-label" class="point-label" hidden>
+          <span id="point-title"></span><small>CLICCA PER AVVICINARTI</small>
+        </div>
+        <aside class="map" aria-label="Mappa della sala">
+          <svg
+            viewBox="0 0 140 324"
+            role="img"
+            aria-label="La tua posizione nella galleria"
+          >
+            <path class="map-outline" d="M12 12H128V312H12Z" />
+            <g id="map-art"></g>
+            <g id="map-player">
+              <path d="M0 -9L-5 4L0 1L5 4Z" />
+              <circle r="2" />
+            </g></svg
+          ><span>SEI QUI</span>
+        </aside>
+        <div class="navigation-dock">
+          <button
+            id="entrance"
+            class="round-button"
+            aria-label="Torna all’ingresso"
+            title="Torna all’ingresso"
+          >
+            ↶
+          </button>
+          <button
+            id="previous-work"
+            class="round-button"
+            aria-label="Vai all’opera precedente"
+          >
+            ←
+          </button>
+          <button id="next-work">Opere <span>↗</span></button>
+          <button id="next-room">Mappa</button>
+          <button id="tour-open" data-open="guided-tours">Percorsi</button>
+          <button id="change-level" aria-label="Sali al soppalco usando la scala" hidden>Soppalco ↑</button>
+          <button id="stop-walk" hidden>Fermati</button>
+        </div>
+        <div id="work-panel" class="work-panel" hidden>
+          <div>
+            <span class="eyebrow" id="work-series"></span>
+            <h2 id="work-title"></h2>
+            <span id="work-credit" class="sr-only"></span>
+          </div>
+          <button
+            id="describe-work"
+            aria-label="Leggi il cartellino dell’opera selezionata"
+          >
+            Cartellino ↗
+          </button>
+          <button id="inspect-work" aria-label="Guarda la fotografia intera">
+            ⤢
+          </button>
+          <button id="leave-work" aria-label="Chiudi i comandi dell’opera">
+            ×
+          </button>
+        </div>
+        <p class="movement-hint" id="movement-hint">
+          CLICCA A TERRA PER SPOSTARTI · TRASCINA PER GUARDARE
+        </p>
+        <section class="movement-keys" aria-label="Movimento con WASD o frecce">
+          <span>MUOVITI</span>
+          <div class="key-cluster" aria-label="Tasti W A S D">
+            <kbd data-key="KeyW">W</kbd>
+            <kbd data-key="KeyA">A</kbd><kbd data-key="KeyS">S</kbd><kbd data-key="KeyD">D</kbd>
+          </div>
+          <i>oppure</i>
+          <div class="key-cluster" aria-label="Frecce direzionali">
+            <kbd data-key="ArrowUp">↑</kbd>
+            <kbd data-key="ArrowLeft">←</kbd><kbd data-key="ArrowDown">↓</kbd><kbd data-key="ArrowRight">→</kbd>
+          </div>
+        </section>
+        <div class="touch-controls" aria-label="Comandi touch">
+          <div
+            class="joystick"
+            id="joystick"
+            role="group"
+            aria-label="Joystick: trascina per camminare"
+          >
+            <span class="joystick-track"></span><span id="joystick-knob"></span
+            ><span class="joystick-caption">TOCCA QUI PER MUOVERTI</span>
+          </div>
+          <div class="look-hint" aria-hidden="true">
+            <span>⊹</span>TRASCINA QUI<br />PER GUARDARE
+          </div>
+        </div>
+      </div>
+      <footer class="museum-footer">
+        <button data-open="about">Dentro lo spazio</button><button id="studio-open">Studio del collezionista ↗</button>
+      </footer>
+      <p class="sr-only" id="announcement" aria-live="polite"></p>
+    </main>
+    <dialog id="collector-studio" aria-labelledby="studio-heading">
+      <button class="dialog-close" data-close="collector-studio" aria-label="Chiudi lo Studio">×</button>
+      <div class="studio-heading"><span class="eyebrow">ONE MUSE. MANY WORLDS.</span><h2 id="studio-heading">Il tuo incontro con l’opera.</h2><p>Guarda. Approfondisci. Immagina uno spazio tutto tuo.</p></div>
+      <nav class="studio-tabs" aria-label="Sezioni dello Studio"><button data-studio-tab="discover" aria-pressed="true">L’opera</button><button data-studio-tab="guide" aria-pressed="false">La guida</button><button data-studio-tab="wall" aria-pressed="false">Nel tuo spazio</button><button data-studio-tab="vision" aria-pressed="false">Sala di visione</button><button data-studio-tab="chapters" aria-pressed="false">I capitoli</button></nav>
+      <label class="studio-picker">Fotografia <select id="studio-work"></select></label>
+      <section data-studio-panel="discover" class="studio-discover">
+        <div class="studio-image-wrap"><img data-studio-image loading="lazy" decoding="async" alt="" /><span id="studio-series" class="eyebrow"></span></div>
+        <div class="studio-copy"><span class="eyebrow">FOTOGRAFIA / COLLEZIONE</span><h3 id="studio-title"></h3><p id="studio-description"></p><p id="studio-credit" class="studio-credit"></p><div class="studio-buttons"><button id="studio-hd" class="studio-primary">Osserva in HD ↗</button><button id="studio-save" aria-pressed="false">♡ Aggiungi alla selezione</button></div><div id="studio-offer" class="studio-offer"></div><button id="studio-export">Esporta la tua selezione ↓</button></div>
+      </section>
+      <section data-studio-panel="guide" hidden>
+        <div class="studio-guide-intro"><span class="eyebrow">GUIDA EDITORIALE</span><h3>Uno sguardo più vicino.</h3><p>Risposte tratte dalle schede pubblicate. La lettura usa una voce italiana locale, quando disponibile sul dispositivo.</p></div>
+        <div class="studio-questions"><button data-question="Raccontami l’opera">Raccontami l’opera</button><button data-question="Quale serie?">La serie</button><button data-question="Come è stata realizzata?">La tecnica</button><button data-question="Chi sono gli autori?">I crediti</button></div>
+        <form id="studio-question-form"><label for="studio-question">Cosa vuoi approfondire?</label><div><input id="studio-question" maxlength="240" required placeholder="Ad esempio: come è stata realizzata?" /><button type="submit">Chiedi ↗</button></div></form>
+        <p id="studio-answer" class="studio-answer" role="status"></p><button id="studio-voice">Ascolta</button><button id="studio-route">Inizia il percorso Metamorfosi →</button>
+      </section>
+      <section data-studio-panel="wall" hidden>
+        <div id="wall-stage" class="wall-stage"><div class="wall-floor"></div><img id="wall-print" data-studio-image loading="lazy" decoding="async" alt="" /><div class="wall-bench"></div></div>
+        <p id="print-dimensions"></p><p id="wall-scale-note" class="studio-fineprint"></p>
+        <div class="wall-controls"><label>Parete<select id="wall-color"></select></label><label>Altezza della stampa<select id="print-height"><option value="60">60 cm</option><option value="90" selected>90 cm</option><option value="120">120 cm</option></select></label><label>Cornice<select id="print-frame"><option value="#222222">Nera</option><option value="#e9e4dc">Avorio</option><option value="#96734f">Legno</option><option value="transparent">Senza cornice</option></select></label></div>
+        <div class="studio-buttons"><label class="studio-upload">Usa una foto della tua stanza<input id="wall-upload" type="file" accept="image/jpeg,image/png,image/webp" /></label><button id="wall-reset">Ripristina parete</button><button id="studio-ar" disabled>Anteprima 3D / AR ↗</button></div><p class="studio-fineprint">La foto della tua stanza resta sul dispositivo e non viene caricata sul server.</p><div id="ar-container"></div>
+      </section>
+      <section data-studio-panel="vision" hidden class="vision-room"><span class="eyebrow">SALA DI VISIONE</span><div class="vision-frame"><img data-studio-image loading="lazy" decoding="async" alt="" /></div><div class="vision-controls"><button id="vision-previous" aria-label="Fotografia precedente">←</button><button id="vision-play">Avvia sequenza</button><button id="vision-next" aria-label="Fotografia successiva">→</button><button id="vision-audio" aria-pressed="false">Suono ambientale</button></div><p id="vision-count"></p><p class="studio-fineprint">Una pausa dedicata alle fotografie. Sequenza e paesaggio sonoro si attivano solo su tua richiesta.</p></section>
+      <section data-studio-panel="chapters" hidden><span class="eyebrow">DIECI ATMOSFERE</span><h3>Ogni sala, un punto di vista.</h3><div id="studio-chapters"></div><h3>Incontri con l’autore</h3><div id="studio-events"></div></section>
+      <p id="studio-note" role="status" aria-live="polite"></p>
+    </dialog>
+    <dialog id="guided-tours">
+      <button class="dialog-close" data-close="guided-tours" aria-label="Chiudi">×</button>
+      <span class="eyebrow">SCEGLI IL TUO PERCORSO</span><h2>Lasciati accompagnare.</h2>
+      <p>Ti accompagniamo tra le tappe. Fermati quanto vuoi: decidi tu quando continuare. Se prendi i comandi, la guida va in pausa.</p>
+      <button id="tour-pilot" class="tour-choice"><strong>Dall’accoglienza alla mostra</strong><span>Hall · piano terra · soppalco · ritorno</span></button>
+      <button id="tour-spaces" class="tour-choice"><strong>Gli spazi della mostra</strong><span>Un percorso nelle sale aperte</span></button>
+      <button id="tour-art" class="tour-choice"><strong>Le fotografie</strong><span id="tour-art-count">Le opere attualmente esposte</span></button>
+    </dialog>
+    <dialog id="help" aria-labelledby="help-title">
+      <button
+        class="dialog-close"
+        data-close="help"
+        aria-label="Chiudi i comandi"
+      >
+        ×
       </button>
-    </div>
-  </div>
-</header>
-
-<div class="mobile-menu" id="mobileMenu" role="dialog" aria-label="Menu">
-  <div class="mobile-menu__inner">
-    <div class="mobile-menu__group">
-      <span class="mobile-menu__group-label">Browse</span>
-      <a href="exhibitions.html" class="mobile-menu__link">Works</a>
-      <a href="exhibitions.html#viewing-room" class="mobile-menu__link">Viewing Room</a>
-      <a href="journal.html" class="mobile-menu__link">Journal</a>
-    </div>
-    <div class="mobile-menu__group">
-      <span class="mobile-menu__group-label">Studio</span>
-      <a href="about.html" class="mobile-menu__link">Biography</a>
-      <a href="contact.html" class="mobile-menu__link">Contact</a>
-    </div>
-    <div class="mobile-menu__group">
-      <span class="mobile-menu__group-label">Follow</span>
-      <a href="#" class="mobile-menu__sub">Instagram ↗</a>
-      <a href="#" class="mobile-menu__sub">Facebook ↗</a>
-    </div>
-    <div class="mobile-menu__contact">
-      studio@unconventionart.com<br>
-      Based in Italy · Available worldwide
-    </div>
-  </div>
-</div>
-
-<section class="hero">
-  <img class="hero__media" src="images/site/hero.svg" alt="" aria-hidden="true">
-  <div class="hero__overlay" aria-hidden="true"></div>
-  <div class="hero__inner">
-    <span class="hero__eyebrow eyebrow">Fine Art Photography · Issue MMXXVI</span>
-    <h1 class="hero__title">
-      <span class="line"><span class="reveal-line">A duo working</span></span>
-      <span class="line"><span class="reveal-line">between <span class="hero__title-accent">direction</span></span></span>
-      <span class="line"><span class="reveal-line">and instinct.</span></span>
-    </h1>
-    <div class="hero__bottom">
-      <p class="hero__desc">
-        UnconventionArt is the collaborative practice of photographer and muse — a slow body of work made of staged improvisation, abandoned spaces and the human form. Each image is co-authored.
+      <span class="eyebrow">VISITA LIBERA</span>
+      <h2 id="help-title">Il tuo percorso.</h2>
+      <p>Scegli “Inizia il percorso” per raggiungere automaticamente la prima fotografia, oppure “Esplora liberamente” per prendere subito i comandi. “Prossima opera” ti accompagna sempre alla distanza corretta.</p>
+      <p>Le cornici bianche con bordo nero sono sagome a grandezza reale: 120 posizioni fotografiche, il 60% delle 200 disponibili. I cartellini ne indicano le dimensioni. Le opere disponibili sono elencate in “Opere”.</p>
+      <dl class="instructions">
+        <dt>01 / Guardati intorno</dt>
+        <dd>Trascina il mouse o un dito sullo schermo.</dd>
+        <dt>02 / Cammina</dt>
+        <dd>
+          Da computer clicca a terra oppure attiva “Esplora liberamente” per
+          guardare muovendo il mouse e camminare con W A S D. Dal telefono
+          appoggia il pollice nella metà sinistra: il joystick compare sotto il
+          dito; trascina nella metà destra per guardarti intorno.
+        </dd>
+        <dt>03 / Incontra le opere</dt>
+        <dd>
+          Tocca una fotografia per aprirla in HD. Il cartellino accanto alla
+          cornice apre la descrizione. Puoi anche scegliere un’opera dall’indice
+          in alto.
+        </dd>
+        <dt>04 / Sali al soppalco</dt>
+        <dd>Ogni sala ha un soppalco in ferro a ferro di cavallo. Percorri la scala laterale con il joystick o la tastiera, oppure scegli “Soppalco ↑”. Per tornare alle opere usa “Scendi ↓”.</dd>
+      </dl>
+      <p>Il corridoio ospita riproduzioni di dipinti del Seicento e primo Settecento e nove volte decorate: una veduta affrescata di Palazzo Colonna e otto adattamenti di composizioni di Tiepolo e Ricci. Le opere storiche accompagnano il percorso e sono distinte dalla collezione fotografica. <a href="corridor-credits.html" target="_blank" rel="noopener">Autori, opere e crediti delle immagini</a>.</p>
+      <p>In esplorazione libera premi <strong>E</strong>, oppure clicca, per interagire con ciò che inquadri. Il pulsante <strong>Fermati</strong> interrompe immediatamente ogni spostamento assistito. Da <strong>Percorsi</strong> puoi scegliere una visita completa.</p>
+      <button id="graphics-toggle" aria-pressed="true" disabled>Grafica: realistica</button>
+      <button id="advanced-toggle" aria-pressed="false" disabled>Ombre: morbide</button>
+      <p id="graphics-status" role="status">Preparazione degli effetti.</p>
+      <label class="performance-choice">Profilo di visita <select id="performance-mode"><option value="auto">Automatico</option><option value="fluid">Massima fluidità</option><option value="detail">Dettaglio a riposo</option></select></label>
+      <p id="performance-status">Le prestazioni vengono misurate durante la navigazione.</p>
+      <button id="photo-render-start">Vista fotografica · alta qualità</button>
+      <p>Da fermo, la luce si affina progressivamente. Torna alla visita per muoverti.</p>
+      <button id="motion-toggle" aria-pressed="true">Movimento fluido</button>
+      <button class="dialog-primary" data-close="help">
+        Riprendi la visita ↗
+      </button>
+    </dialog>
+    <dialog id="floorplan" aria-labelledby="floorplan-title">
+      <button
+        class="dialog-close"
+        data-close="floorplan"
+        aria-label="Chiudi la pianta"
+      >
+        ×
+      </button>
+      <span class="eyebrow">UNCONVENTIONART / BETA</span>
+      <h2 id="floorplan-title">Un luogo da attraversare.</h2>
+      <p>
+        La visita parte dalla hall. Le sale aperte sono collegate dalla promenade. Scegli una sala per
+        raggiungerla, oppure continua a camminare liberamente.
       </p>
-      <a href="exhibitions.html" class="hero__cta" aria-label="View works">
-        <span class="hero__cta-text">View Works</span>
-        <span class="hero__cta-arrow">
-          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </span>
-      </a>
-    </div>
-  </div>
-  <div class="hero__scroll" aria-hidden="true">
-    <span>Scroll</span>
-    <span class="hero__scroll-line"></span>
-  </div>
-  <div class="hero__sidetag" aria-hidden="true">UnconventionArt · Italy</div>
-</section>
-
-<section class="section">
-  <div class="container">
-    <div class="featured-exh reveal">
-      <a href="exhibitions.html" class="featured-exh__media" aria-label="View Liminal Spaces exhibition">
-        <img src="images/exhibitions/featured.svg" alt="Liminal Spaces — current exhibition">
-      </a>
-      <div class="featured-exh__text">
-        <span class="eyebrow">Current Exhibition</span>
-        <h3>Liminal <em>Spaces</em></h3>
-        <p>Our latest series explores the tension between presence and absence. Shot across abandoned industrial spaces in Northern Italy, each image is a dialogue between photographer and muse — moments of transition, impermanence and quiet revelation.</p>
-        <a href="exhibitions.html" class="btn btn--white">View Exhibition</a>
+      <div id="museum-masterplan" aria-label="Progetto del museo: quattro piani e quaranta sale"></div>
+      <p>I piani 1, 2 e 3 sono previsti nel progetto; la visita beta si svolge al piano terra e sul soppalco di Officina.</p>
+      <div id="hall-list" aria-label="Sale espositive"></div>
+    </dialog>
+    <dialog id="welcome-film" aria-labelledby="welcome-film-title">
+      <button class="dialog-close" data-close="welcome-film" aria-label="Chiudi la presentazione">×</button>
+      <span class="eyebrow">UNCONVENTIONART / BENVENUTO</span>
+      <h2 id="welcome-film-title">Lo spazio, lo sguardo.</h2>
+      <video id="welcome-film-video" controls playsinline preload="auto" hidden></video>
+      <p id="welcome-film-status" role="status"></p>
+    </dialog>
+    <dialog id="collection" aria-labelledby="collection-title">
+      <button
+        class="dialog-close"
+        data-close="collection"
+        aria-label="Chiudi l’indice"
+      >
+        ×</button
+      ><span class="eyebrow">INDICE DELLA GALLERIA</span>
+      <h2 id="collection-title">Le opere.</h2>
+      <p class="collection-intro">
+        Scegli una fotografia. Ti accompagniamo nella sua sala.
+      </p>
+      <div class="selection-toolbar"><button id="selection-filter" aria-pressed="false">La mia selezione · 0</button><button id="selection-tour">Visita la selezione</button><button id="selection-share">Condividi</button></div>
+      <p id="selection-status" role="status" aria-live="polite"></p>
+      <input id="selection-link" readonly aria-label="Link alla selezione" hidden />
+      <div id="collection-list"></div>
+    </dialog>
+    <dialog id="about" aria-labelledby="about-title">
+      <button
+        class="dialog-close"
+        data-close="about"
+        aria-label="Chiudi le informazioni"
+      >
+        ×</button
+      ><span class="eyebrow">UNCONVENTIONART</span>
+      <h2 id="about-title">Un altro modo<br />di abitare lo sguardo.</h2>
+      <p>
+        Uno spazio dedicato alla fotografia artistica, al ritratto e alla
+        trasformazione. Le immagini sono presenze da incontrare, da vicino, con
+        il proprio tempo.
+      </p>
+      <p>
+        La visita comincia qui. Esplora le sale aperte, osserva le opere e
+        apri i cartellini per leggerne le storie.
+      </p>
+      <button class="dialog-primary" data-close="about">
+        Torna nello spazio ↗
+      </button>
+    </dialog>
+    <dialog id="moving-image" aria-labelledby="moving-image-title">
+      <button class="dialog-close" data-close="moving-image" aria-label="Chiudi la sala video">×</button>
+      <span class="eyebrow">MOVING IMAGE / UNCONVENTIONART</span>
+      <h2 id="moving-image-title">Il corpo, in movimento.</h2>
+      <p>Uno spazio per film d’artista, trasformazioni e storie dietro gli scatti.</p>
+      <p>La programmazione video sarà disponibile prossimamente.</p>
+      <button class="dialog-primary" data-close="moving-image">Continua la visita ↗</button>
+    </dialog>
+    <dialog id="work-details" aria-labelledby="details-title">
+      <button
+        class="dialog-close"
+        data-close="work-details"
+        aria-label="Chiudi il cartellino"
+      >
+        ×</button
+      ><span class="eyebrow" id="details-series"></span>
+      <h2 id="details-title"></h2>
+      <p id="details-credit" class="credit"></p>
+      <p id="details-description"></p>
+      <dl id="details-metadata"></dl>
+      <button class="dialog-primary" id="details-inspect">
+        Guarda la fotografia intera ↗
+      </button>
+    </dialog>
+    <dialog id="artwork" aria-labelledby="artwork-title">
+      <button
+        class="dialog-close"
+        data-close="artwork"
+        aria-label="Chiudi la fotografia"
+      >
+        ×</button
+      ><div class="artwork-stage"><img id="artwork-image" alt="" draggable="false" /><span class="artwork-watermark" aria-hidden="true">UNCONVENTIONART · PREVIEW</span></div>
+      <p id="artwork-load-status" role="status" aria-live="polite"></p>
+      <div class="artwork-caption">
+        <div>
+          <span class="eyebrow" id="artwork-series"></span>
+          <h2 id="artwork-title"></h2>
+        </div>
+        <div class="artwork-actions">
+          <button id="artwork-studio">Provala sulla parete ↗</button>
+          <button id="artwork-save" aria-pressed="false">♡ Salva nella selezione</button>
+          <span class="artwork-rights">Anteprima · download non disponibile</span>
+          <button id="artwork-details">Leggi il cartellino ↗</button>
+        </div>
       </div>
-    </div>
-  </div>
-</section>
-
-<section class="marquee" aria-hidden="true">
-  <div class="marquee__track">
-    <span class="marquee__item">We are <span class="marquee__item-em">UnconventionArt</span></span>
-    <span class="marquee__item">Fine art <span class="marquee__item-em">photography</span></span>
-    <span class="marquee__item">Direction <span class="marquee__item-em">&amp;</span> instinct</span>
-    <span class="marquee__item">Italy <span class="marquee__item-em">·</span> worldwide</span>
-    <span class="marquee__item">We are <span class="marquee__item-em">UnconventionArt</span></span>
-    <span class="marquee__item">Fine art <span class="marquee__item-em">photography</span></span>
-    <span class="marquee__item">Direction <span class="marquee__item-em">&amp;</span> instinct</span>
-    <span class="marquee__item">Italy <span class="marquee__item-em">·</span> worldwide</span>
-  </div>
-</section>
-
-<section class="section">
-  <div class="container">
-    <div class="section-head reveal">
-      <div>
-        <span class="eyebrow">Recent works</span>
-        <h2 style="margin-top:14px;">Selected <em>frames</em></h2>
-      </div>
-      <a href="exhibitions.html">View all →</a>
-    </div>
-    <div class="works-grid" id="recentWorks" aria-live="polite"></div>
-  </div>
-</section>
-
-<hr class="divider">
-
-<section class="section">
-  <div class="container">
-    <div class="section-head reveal">
-      <div>
-        <span class="eyebrow">The journal</span>
-        <h2 style="margin-top:14px;">Notes from <em>the studio</em></h2>
-      </div>
-      <a href="journal.html">All entries →</a>
-    </div>
-    <div class="news-list" id="recentNews" aria-live="polite"></div>
-  </div>
-</section>
-
-
-<footer class="footer">
-  <div class="container">
-    <div class="footer__inner">
-      <div class="footer__brand">
-        <a href="index.html" class="footer__logo">
-          <img src="images/site/logo-small.png" srcset="images/site/logo-small.png 1x, images/site/logo.png 2x" alt="UnconventionArt" class="footer__logo-img">
-        </a>
-        <p class="footer__tagline">Fine art photography duo.</p>
-        <p class="footer__tagline">Based in Italy · Available worldwide</p>
-        <p class="footer__tagline" style="margin-top:14px;">studio@unconventionart.com</p>
-      </div>
-      <div class="footer__col">
-        <h4>Navigate</h4>
-        <ul>
-          <li><a href="index.html">Home</a></li>
-          <li><a href="exhibitions.html">Works</a></li>
-          <li><a href="journal.html">Journal</a></li>
-          <li><a href="about.html">Biography</a></li>
-          <li><a href="contact.html">Contact</a></li>
-        </ul>
-      </div>
-      <div class="footer__col">
-        <h4>Follow</h4>
-        <ul>
-          <li><a href="#" target="_blank" rel="noopener">Instagram</a></li>
-          <li><a href="#" target="_blank" rel="noopener">Facebook</a></li>
-          <li><a href="#" target="_blank" rel="noopener">Kavyar</a></li>
-        </ul>
-      </div>
-      <div class="footer__col">
-        <h4>Mailing list</h4>
-        <p style="font-size:0.82rem;color:var(--ink-mute);margin-bottom:14px;line-height:1.55;">Quiet updates. New series, exhibitions, occasional reflections.</p>
-        <form class="newsletter" onsubmit="return false;">
-          <input type="email" class="newsletter__input" placeholder="Email address" aria-label="Email address">
-          <button class="newsletter__btn" type="submit">Join</button>
-        </form>
-      </div>
-    </div>
-    <div class="footer__bottom">
-      <span>© 2026 UnconventionArt</span>
-      <span>Italy</span>
-      <span>All rights reserved</span>
-    </div>
-  </div>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/gh/darkroomengineering/lenis@1.1.14/dist/lenis.min.js"></script>
-<script src="js/main.js"></script>
-</body>
+    </dialog>
+    <noscript
+      ><div class="no-script">
+        La visita interattiva richiede JavaScript.
+        <figure>
+          <img
+            src="images/kavyar/01.jpg"
+            alt="Kavyar / 01, ritratto artistico con bodypainting nero e perle bianche"
+          />
+          <figcaption>Kavyar / 01 — UnconventionArt</figcaption>
+        </figure>
+      </div></noscript
+    >
+    <dialog id="social-space" aria-label="Avatar, incontri e edizioni"><p>Preparazione del tuo spazio…</p></dialog>
+  </body>
 </html>

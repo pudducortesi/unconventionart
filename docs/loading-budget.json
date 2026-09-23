@@ -1,0 +1,15 @@
+{
+  "baseline_commit": "cef09de1bf1b1bb2d37e211fef3745febdf8ec31",
+  "scope": "Initial JavaScript including default effects, excluding optional path tracing and media",
+  "before": {
+    "initialJsBytes": 2715544,
+    "initialJsGzipBytes": 691422,
+    "initialJsFiles": 19
+  },
+  "after": {
+    "initialJsBytes": 1089766,
+    "initialJsGzipBytes": 396428,
+    "initialJsFiles": 3
+  },
+  "note": "Gzip estimates from local files, not measured network transfer or load times."
+}

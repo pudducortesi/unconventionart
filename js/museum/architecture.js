@@ -1,0 +1,442 @@
+import { furnishCorridor } from "./corridor.js";
+import { partitionInstances } from "./spatial-batches.js";
+import { pendantPositions } from "./lighting-fixtures.js";
+import { createInteriorEnvelope } from "./interior-envelope.js";
+import { createSurfaceDetail } from "./surface-detail.js";
+import * as T from "../../vendor/three.module.js";
+import { createDesignSeating } from "./design-seating.js";
+import { furnishGallery } from "./furnishings.js";
+import { createMezzanines } from "./mezzanines.js";
+import { BUILDING, HALLS, WALLS, FURNITURE, HANGING_CENTER, PHOTO_FORMATS } from "./layout.js";
+
+/** Ten connected white halls. Repeated construction is instanced by material,
+ * so the size of the building does not multiply its lighting or draw calls. */
+export function createArchitecture(scene, renderer, { mobile = false, onReady = () => {}, occupiedSlots = [], closedDoors = [] } = {}) {
+  const room = new T.Group();
+  room.name = "white-museum-200";
+  scene.add(room);
+  const resources = new Set();
+  let disposed = false;
+  const surfaceReady = () => { if (!disposed) onReady(); };
+  const lights = [];
+  const own = (value) => (resources.add(value), value);
+  const material = (options) => own(new T.MeshStandardMaterial(options));
+  const grain = createSurfaceDetail(own);
+  const plaster = material({ color: 0xffffff, roughness: 0.92, bumpMap: grain, bumpScale: 0.0012 });
+  const wallPlaster = material({ color: 0xffffff, roughness: 0.92, bumpMap: grain, bumpScale: 0.0012 });
+  const terrazzo = material({ color: 0xa0774d, roughness: 0.52, roughnessMap: grain });
+  const stone = material({ color: 0xf8f8f8, roughness: 0.65 });
+  const lacquer = material({ color: 0xffffff, roughness: 0.28 });
+  const recess = material({ color: 0xd9d9d9, roughness: 0.97 });
+  const glow = own(new T.MeshBasicMaterial({ color: 0xffffff }));
+  const joint = own(new T.MeshBasicMaterial({ color: 0xeaeaea }));
+  const batches = new Map();
+  const boxGeometry = own(new T.BoxGeometry(1, 1, 1));
+  const box = (w, h, d, x, y, z, surface = plaster) => {
+    if (!batches.has(surface)) batches.set(surface, []);
+    batches.get(surface).push({ w, h, d, x, y, z });
+  };
+  const doorMetal = material({color:0x343932, roughness:.58, metalness:.45});
+  const doorTrim = material({color:0xb6a27e, roughness:.4, metalness:.72});
+  for (const door of closedDoors) {
+    box(.30,4.58,4.98,door.x,2.29,door.z,doorMetal);
+    // Flush double leaves, fine brass reveals and paired handles.
+    box(.32,4.4,.018,door.x,2.2,door.z,doorTrim);
+    for (const side of [-1,1]) {
+      box(.34,.028,4.8,door.x,side===1?4.42:.15,door.z,doorTrim);
+      box(.40,.48,.035,door.x,1.25,door.z+side*.17,doorTrim);
+    }
+  }
+  if (closedDoors.length) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024; canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#343932'; ctx.fillRect(0,0,1024,128);
+    ctx.fillStyle = '#d6c9af'; ctx.font = '32px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('IN ALLESTIMENTO',512,76);
+    const map = own(new T.CanvasTexture(canvas)); map.colorSpace = T.SRGBColorSpace;
+    map.anisotropy = Math.min(8, renderer.capabilities?.getMaxAnisotropy?.() || 1);
+    const face = own(new T.MeshBasicMaterial({map,toneMapped:false}));
+    const geometry = own(new T.PlaneGeometry(2,.25));
+    for (const door of closedDoors) {
+      const sign = new T.Mesh(geometry,face);
+      sign.position.set(door.x-Math.sign(door.x)*.161,2.25,door.z);
+      sign.rotation.y = door.x<0 ? Math.PI/2 : -Math.PI/2;
+      sign.name = 'closed-room-sign'; room.add(sign);
+    }
+  }
+  const ceiling = BUILDING.height;
+  const floorGeometry = own(new T.BoxGeometry(54, 0.2, 140));
+  const floor = new T.Mesh(floorGeometry, terrazzo);
+  // Structural slab below finish planes avoids depth flicker at grazing angles.
+  floor.position.set(0, -0.16, -60);
+  floor.name = "walkable-floor";
+  floor.receiveShadow = true;
+  floor.userData.walkable = true;
+  room.add(floor);
+  for (const wall of WALLS) {
+    box(wall.width, ceiling, wall.depth, wall.x, ceiling / 2, wall.z, wallPlaster);
+    // A continuous shadow line gives each wall a recessed base and ceiling reveal.
+    box(wall.width + 0.006, 0.018, wall.depth + 0.006, wall.x, 0.025, wall.z, recess);
+    box(wall.width + 0.008, 0.025, wall.depth + 0.008, wall.x, ceiling - 0.09, wall.z, recess);
+  }
+  box(54, 0.18, 140, 0, ceiling, -60);
+
+  for (const hall of HALLS) {
+    const { x, z } = hall.center;
+    // Doorway lintels stay above eye level and never obstruct the 5m opening.
+    box(0.34, ceiling - 4.7, 5, hall.side * 5, (ceiling + 4.7) / 2, z);
+    for (const edge of [-1, 1]) {
+      box(0.38, 4.7, 0.055, hall.side * 5, 2.35, z + edge * 2.5, lacquer);
+      box(0.385, 4.7, 0.012, hall.side * 5, 2.35, z + edge * 2.53, recess);
+    }
+    // Architectural wall washes use emissive strips, not 200 dynamic lights.
+    for (const dz of [-11.7, 11.7]) {
+      box(18.2, 0.07, 0.065, x, ceiling - 0.65, z + dz, lacquer);
+      box(17.8, 0.018, 0.035, x, ceiling - 0.69, z + dz, glow);
+    }
+    // Floor joints and skirting: neutral, white-on-white material detail.
+    for (const dz of [-12.81, 12.81])
+      box(21.5, 0.035, 0.025, x, 0.042, z + dz, recess);
+    box(0.025, 0.035, 25.5, hall.side * 26.81, 0.042, z, recess);
+  }
+  const finishedFloors = createInteriorEnvelope({ room, own, box, plaster, recess, glow, renderer });
+
+  const corridorSigns = furnishCorridor({ room, own, box, plaster, recess, glow, renderer, onReady: surfaceReady });
+
+  // Full-size planning mockups: 60% of wall positions, no invented photographs.
+  const occupied = new Set(occupiedSlots.map(slot => slot.id));
+  const composedHalls = new Set(occupiedSlots.filter(slot => slot.id.startsWith("portrait-")).map(slot => slot.hallIndex));
+  const frameInk = material({ color: 0x161616, roughness: 0.48 });
+  const paper = own(new T.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }));
+  const labelGeometry = own(new T.PlaneGeometry(0.62, 0.25));
+  const labelMaterials = PHOTO_FORMATS.map(format => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 768; canvas.height = 310;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 768, 310);
+    ctx.fillStyle = '#161616'; ctx.font = '28px sans-serif';
+    ctx.fillText('UNCONVENTIONART / FOTOGRAFIA', 24, 58);
+    ctx.font = '48px sans-serif'; ctx.fillText(format.label, 24, 151);
+    ctx.font = '28px sans-serif'; ctx.fillText('SAGOMA DI ALLESTIMENTO', 24, 253);
+    const texture = own(new T.CanvasTexture(canvas));
+    texture.colorSpace = T.SRGBColorSpace;
+    return own(new T.MeshBasicMaterial({ map: texture, toneMapped: false }));
+  });
+  for (const slot of HALLS.flatMap(hall => hall.slots)) {
+    if (composedHalls.has(slot.hallIndex) || occupied.has(slot.id) || !slot.plannedPhoto) continue;
+    const nx = Math.sin(slot.rotation), nz = Math.cos(slot.rotation);
+    const rx = Math.cos(slot.rotation), rz = -Math.sin(slot.rotation);
+    const { width, height } = slot.format;
+    const panelBox = (w, h, d, offset, surface) => box(
+      Math.abs(rx) * w + Math.abs(nx) * d, h,
+      Math.abs(rz) * w + Math.abs(nz) * d,
+      slot.x + nx * offset, HANGING_CENTER, slot.z + nz * offset, surface);
+    panelBox(width + 0.04, height + 0.04, 0.05, 0, frameInk);
+    panelBox(width, height, 0.008, 0.03, paper);
+    const label = new T.Mesh(labelGeometry, labelMaterials[slot.formatIndex]);
+    label.position.set(slot.x + nx * 0.035,
+      HANGING_CENTER - height / 2 - 0.28, slot.z + nz * 0.035);
+    label.rotation.y = slot.rotation;
+    label.name = `planning-${slot.id}`;
+    room.add(label);
+  }
+
+  // Contemporary white furniture, sharing the exact footprint used by physics.
+  for (const piece of FURNITURE) {
+    const { x, z, width: w, depth: d } = piece;
+    if (piece.kind === "reception") {
+      box(w * 0.9, 0.12, d * 0.82, x, 0.06, z, recess);
+      box(w, 1.04, d, x, 0.64, z, lacquer);
+      box(w + 0.04, 0.06, d + 0.04, x, 1.19, z, stone);
+      box(w + 0.003, 0.014, d + 0.003, x, 0.9, z, recess);
+    }
+  }
+
+  const features = furnishGallery({ room, own, box, plaster, stone, lacquer, recess, glow, onReady, openHalls: new Set(HALLS.filter(h => !closedDoors.some(d => d.hallIndex === h.index)).map(h => h.index)) });
+  const mezzanines = createMezzanines(room, own, box);
+
+  // Include the real floor so the same raycast list supports tap-to-walk.
+  const occluders = [floor, ...finishedFloors, ...corridorSigns, ...features, ...mezzanines, ...createDesignSeating(room, own)];
+  const transform = new T.Object3D();
+  for (const [surface, instances] of batches) {
+    const mesh = new T.InstancedMesh(boxGeometry, surface, instances.length);
+    mesh.receiveShadow = true;
+    if (surface.userData.walkable) mesh.userData.walkable = true;
+    mesh.name = surface === plaster ? "white-architecture" : "museum-details";
+    instances.forEach((v, index) => {
+      transform.position.set(v.x, v.y, v.z);
+      transform.scale.set(v.w, v.h, v.d);
+      transform.updateMatrix();
+      mesh.setMatrixAt(index, transform.matrix);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    mesh.computeBoundingSphere();
+    room.add(mesh);
+    if (surface !== glow && surface !== joint) occluders.push(mesh);
+  }
+
+  // Shared soft contact texture complements the local furniture shadow map.
+  const shadowCanvas = document.createElement("canvas");
+  shadowCanvas.width = shadowCanvas.height = 96;
+  const shadowContext = shadowCanvas.getContext("2d");
+  const gradient = shadowContext.createRadialGradient(48, 48, 3, 48, 48, 48);
+  gradient.addColorStop(0, "rgba(0,0,0,.12)");
+  gradient.addColorStop(0.5, "rgba(0,0,0,.06)");
+  gradient.addColorStop(1, "rgba(0,0,0,0)");
+  shadowContext.fillStyle = gradient;
+  shadowContext.fillRect(0, 0, 96, 96);
+  const shadowTexture = own(new T.CanvasTexture(shadowCanvas));
+  const shadowMaterial = own(
+    new T.MeshBasicMaterial({
+      map: shadowTexture,
+      transparent: true,
+      depthWrite: false,
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+    }),
+  );
+  const shadowGeometry = own(new T.PlaneGeometry(1, 1));
+  const shadows = new T.InstancedMesh(
+    shadowGeometry,
+    shadowMaterial,
+    FURNITURE.length,
+  );
+  FURNITURE.forEach((v, index) => {
+    transform.position.set(v.x, 0.004, v.z);
+    transform.rotation.set(-Math.PI / 2, 0, 0);
+    transform.scale.set(v.width + 1.8, v.depth + 1.3, 1);
+    transform.updateMatrix();
+    shadows.setMatrixAt(index, transform.matrix);
+  });
+  shadows.computeBoundingSphere();
+  room.add(shadows);
+
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = T.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate = false;
+  const sky = new T.HemisphereLight(0xffffff, 0xd8d8d8, 1.1);
+  const daylight = new T.DirectionalLight(0xffffff, 1.7);
+  daylight.position.set(-12, 26, 12);
+  daylight.target.position.set(0, 0, -28);
+  daylight.castShadow = true;
+  daylight.shadow.mapSize.set(mobile ? 1024 : 2048, mobile ? 1024 : 2048);
+  Object.assign(daylight.shadow.camera, { left: -17, right: 17, top: 18, bottom: -18, near: 0.2, far: 45 });
+  daylight.shadow.camera.updateProjectionMatrix();
+  daylight.shadow.normalBias = 0.025;
+  daylight.shadow.bias = -0.0001;
+  // Reuse only three unshadowed local sources, matching the occupied room's
+  // pendant diffusers. No light is allocated per fixture across the building.
+  const pendantLights = Array.from({length: 3}, () => {
+    const light = new T.SpotLight(0xffecd5, 0, 10, Math.PI / 2.7, .85, 2);
+    light.name = 'local-pendant-light';
+    scene.add(light, light.target); lights.push(light);
+    return light;
+  });
+  let litZone = '';
+  const updateLighting = (position) => {
+    const hall = HALLS.find(h => position.x > h.bounds.minX && position.x < h.bounds.maxX && position.z > h.bounds.minZ && position.z < h.bounds.maxZ);
+    const x = hall ? hall.center.x : 0;
+    const z = hall ? hall.center.z : Math.round(position.z / 20) * 20;
+    const level = Math.round((position.floorY ?? 0) / 2) * 2;
+    const zone = `${x}/${z}/${level}/${!hall && position.z > 0}`;
+    if (zone === litZone) return;
+    litZone = zone;
+    const industrial = hall?.index === 0;
+    const welcome = !hall && position.z > 0;
+    sky.intensity = industrial ? .78 : hall ? 1.1 : .9;
+    scene.environmentIntensity = industrial ? .38 : hall ? .55 : .7;
+    if (scene.fog) {
+      scene.fog.color.setHex(hall ? 0xffffff : 0xd4c9b7);
+      scene.fog.near = hall ? 75 : 110;
+      scene.fog.far = hall ? 180 : 230;
+    }
+    daylight.intensity = industrial ? 1.15 : hall ? 1.7 : 1.9;
+    daylight.color.setHex(hall ? 0xffffff : 0xffefd8);
+    daylight.position.set(x - (hall ? 4 : 3.7), hall ? Math.min(ceiling - .5, 6 + level) : 8.8, z + 3);
+    daylight.target.position.set(x, level, z);
+    const positions = welcome ? [[-6,9.7,8],[6,9.7,8],[10,9.7,5]] : industrial ? [[-7.5,11.7,-7],[7.5,11.7,0],[-7.5,11.7,7]] : hall ? pendantPositions(hall) : [];
+    pendantLights.forEach((light, i) => {
+      const point = positions[i];
+      light.intensity = point ? 48 : 0;
+      if (!point) return;
+      const [dx, height, dz] = point;
+      light.position.set(x + dx, height - .035, z + dz);
+      light.target.position.set(x + dx, welcome && i < 2 ? 5.2 : .3, welcome && i < 2 ? 9.7 : z + dz);
+    });
+    renderer.shadowMap.needsUpdate = true;
+  };
+  scene.add(sky, daylight, daylight.target);
+  lights.push(sky, daylight);
+  // The building and its furniture are static. Cache their transforms once
+  // instead of recomputing local matrices in every lighting/postprocessing pass.
+  partitionInstances(room, occluders);
+  room.updateMatrixWorld(true);
+  room.traverse(object => { object.matrixAutoUpdate = false; });
+  return {
+    floor,
+    occluders,
+    updateLighting,
+    dispose() {
+      disposed = true;
+      for (const resource of resources) resource.dispose();
+      for (const light of lights) {
+        light.shadow?.dispose();
+        scene.remove(light);
+        if (light.target) scene.remove(light.target);
+      }
+      room.traverse((object) => {
+        if (object.isInstancedMesh) object.dispose();
+      });
+      scene.remove(room);
+    },
+  };
+}
+
+export async function createArtwork(slot, renderer, { mobile = false, maxTextureEdge = mobile ? 1024 : 2048, resolveSource = source => source } = {}) {
+  const source =
+    (mobile ? slot.work.mobilePreview || slot.work.thumbnail : slot.work.preview) || slot.work.image;
+  let texture;
+  try { texture = await new T.TextureLoader().loadAsync(await resolveSource(source)); }
+  catch(error) { if(source===slot.work.image)throw error;texture=await new T.TextureLoader().loadAsync(await resolveSource(slot.work.image)); }
+  texture.colorSpace = T.SRGBColorSpace;
+  const aspect = texture.image.width / texture.image.height;
+  // Keep the original photograph intact while bounding its GPU allocation.
+  // This only resamples the decoded image used by the 3D wall texture; the
+  // full-resolution source remains available in the artwork detail dialog.
+  const maxEdge = Math.min(
+    maxTextureEdge,
+    renderer.capabilities.maxTextureSize || Infinity,
+  );
+  const longestEdge = Math.max(texture.image.width, texture.image.height);
+  if (longestEdge > maxEdge) {
+    const canvas = document.createElement("canvas");
+    const scale = maxEdge / longestEdge;
+    canvas.width = Math.max(1, Math.round(texture.image.width * scale));
+    canvas.height = Math.max(1, Math.round(texture.image.height * scale));
+    const context = canvas.getContext("2d");
+    if (context) {
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+      context.drawImage(texture.image, 0, 0, canvas.width, canvas.height);
+      texture.image = canvas;
+      texture.needsUpdate = true;
+    }
+  }
+  texture.anisotropy = Math.min(
+    mobile ? 2 : 4,
+    renderer.capabilities.getMaxAnisotropy(),
+  );
+  const format = slot.format || { width: 2.6, height: 3.2 };
+  const height = Math.min(format.height, format.width / aspect);
+  const width = height * aspect;
+  const group = new T.Group();
+  group.position.set(slot.x, slot.y ?? HANGING_CENTER, slot.z);
+  group.rotation.y = slot.rotation;
+  const resources = new Set([texture]);
+  const mesh = (geometry, material, z = 0) => {
+    resources.add(geometry);
+    resources.add(material);
+    const object = new T.Mesh(geometry, material);
+    object.position.z = z;
+    group.add(object);
+    return object;
+  };
+  const composed = slot.id?.startsWith("portrait-");
+  const frame = mesh(
+    new T.BoxGeometry(width + (composed ? 0.10 : 0.2), height + (composed ? 0.10 : 0.2), 0.06),
+    new T.MeshStandardMaterial({ color: composed ? 0x252624 : 0xffffff, roughness: composed ? 0.62 : 0.48, metalness: composed ? 0.25 : 0 }),
+    -0.03,
+  );
+  frame.castShadow = true;
+  frame.receiveShadow = true;
+  mesh(
+    new T.PlaneGeometry(width + (composed ? 0.045 : 0.08), height + (composed ? 0.045 : 0.08)),
+    new T.MeshBasicMaterial({ color: 0xffffff }),
+    0.006,
+  );
+  const photograph = mesh(
+    new T.PlaneGeometry(width, height),
+    new T.MeshBasicMaterial({ map: texture, toneMapped: false }),
+    0.014,
+  );
+  photograph.userData.work = slot.work;
+  photograph.userData.slot = slot;
+  // One discreet picture light for each six-print composition, above its
+  // upper centre print; individual large prints retain their own fixture.
+  const portraitIndex = composed ? Number(slot.id.slice(9)) % 39 : -1;
+  if (!composed || portraitIndex >= 36 || portraitIndex % 6 === 4) {
+    const fixture = mesh(
+      new T.BoxGeometry(composed ? (portraitIndex >= 36 ? width * .65 : 4.8) : width * .65, 0.035, 0.10),
+      new T.MeshStandardMaterial({ color: composed ? 0x353633 : 0xffffff, roughness: 0.55, metalness: 0.35 }),
+      0.12,
+    );
+    fixture.position.y = height / 2 + 0.2;
+    const diffuser = mesh(
+      new T.BoxGeometry(composed && portraitIndex < 36 ? 4.65 : width * .6, .008, .065),
+      new T.MeshBasicMaterial({ color: 0xfff4e4 }),
+      0.13,
+    );
+    diffuser.position.y = height / 2 + 0.179;
+  }
+  const normal = new T.Vector3(
+    Math.sin(slot.rotation),
+    0,
+    Math.cos(slot.rotation),
+  );
+  const focus = group.position.clone().addScaledVector(normal, 4.8);
+  focus.y = 1.7;
+  let detailTexture = null,
+    detailRequest = null,
+    detailWanted = false,
+    disposed = false;
+  // Only the photograph being observed gets an additional full-detail texture.
+  // Distant works retain their small texture, preserving the mobile GPU budget.
+  function setDetail(enabled) {
+    detailWanted = enabled;
+    if (!enabled || disposed) {
+      photograph.material.map = texture;
+      if (detailTexture) {
+        resources.delete(detailTexture);
+        detailTexture.dispose();
+        detailTexture = null;
+      }
+      return Promise.resolve();
+    }
+    if (detailTexture) return Promise.resolve();
+    if (detailRequest) return detailRequest;
+    detailRequest = Promise.resolve(resolveSource(slot.work.image))
+      .then(source => new T.TextureLoader().loadAsync(source))
+      .then((full) => {
+        if (disposed || !detailWanted) {
+          full.dispose();
+          return;
+        }
+        full.colorSpace = T.SRGBColorSpace;
+        full.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+        detailTexture = full;
+        resources.add(full);
+        photograph.material.map = full;
+      })
+      .finally(() => {
+        detailRequest = null;
+      });
+    return detailRequest;
+  }
+  return {
+    group,
+    photograph,
+    width,
+    height,
+    normal,
+    slot,
+    focus,
+    target: group.position.clone(),
+    setDetail,
+    dispose() {
+      disposed = true;
+      detailWanted = false;
+      for (const resource of resources) resource.dispose();
+    },
+  };
+}

@@ -1,0 +1,25 @@
+{
+  "hero": "images/kavyar/01.jpg",
+  "collections": [
+    {
+      "id": "kavyar",
+      "title": "Kavyar",
+      "subtitle": "Il corpo, un altro linguaggio.",
+      "description": "Fotografia artistica, bodypainting e trasformazione.",
+      "color": "#b99363"
+    }
+  ],
+  "works": [
+    {
+      "id": "kavyar-01",
+      "title": "Kavyar / 01",
+      "collection": "kavyar",
+      "image": "images/kavyar/01.jpg",
+      "alt": "Ritratto artistico con bodypainting nero, perle bianche e mano sul viso.",
+      "credit": "UnconventionArt",
+      "variants": [],
+      "description": "Un ritratto costruito sul contrasto tra il bodypainting nero e i dettagli bianchi: le perle, l’anello e il gesto della mano sul viso. Lo sguardo emerge dalla superficie scura, tra presenza e trasformazione.",
+      "medium": "Fotografia digitale"
+    }
+  ]
+}

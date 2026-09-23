@@ -1,0 +1,27 @@
+[Unit]
+Description=UnconventionArt collector service
+After=network.target
+
+[Service]
+Type=simple
+User=unconventionart
+Group=unconventionart
+WorkingDirectory=/opt/unconventionart
+EnvironmentFile=/etc/unconventionart.env
+ExecStart=/usr/bin/node /opt/unconventionart/server/start.mjs
+Restart=on-failure
+RestartSec=5
+StateDirectory=unconventionart
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/unconventionart
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+MemoryMax=256M
+CPUQuota=50%
+
+[Install]
+WantedBy=multi-user.target

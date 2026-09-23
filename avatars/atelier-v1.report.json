@@ -1,0 +1,590 @@
+{
+  "sourceCommit": "eed58d198076a7e1e825f804802921c4d3804d46",
+  "sourceBlob": "cd2ebbe1fe8bcbf3d5b2dfbf1262a7f76814e68f",
+  "sourceBytes": 36815920,
+  "optimizedBytes": 1779588,
+  "optimizedSHA256": "a96efdea96d0318d6f171afe0d5b7aea251788d4c91c5545ff5d2adad52d9d23",
+  "meshes": [
+    {
+      "name": "base",
+      "primitives": [
+        {
+          "vertices": 4932,
+          "targets": 5,
+          "material": "Human.body"
+        }
+      ]
+    },
+    {
+      "name": "female_casualsuit01",
+      "primitives": [
+        {
+          "vertices": 1018,
+          "targets": 0,
+          "material": "Human.female_casualsuit01"
+        }
+      ]
+    },
+    {
+      "name": "high-poly",
+      "primitives": [
+        {
+          "vertices": 464,
+          "targets": 0,
+          "material": "Human.high-poly"
+        }
+      ]
+    },
+    {
+      "name": "mind_eyebrows_02",
+      "primitives": [
+        {
+          "vertices": 5808,
+          "targets": 4,
+          "material": "Human.mindfront_eyebrows_02"
+        }
+      ]
+    },
+    {
+      "name": "ponytail01",
+      "primitives": [
+        {
+          "vertices": 1796,
+          "targets": 0,
+          "material": "Human.ponytail01"
+        }
+      ]
+    },
+    {
+      "name": "teeth_base",
+      "primitives": [
+        {
+          "vertices": 2276,
+          "targets": 1,
+          "material": "Human.teeth_base"
+        }
+      ]
+    },
+    {
+      "name": "tongue01",
+      "primitives": [
+        {
+          "vertices": 131,
+          "targets": 1,
+          "material": "Human.tongue01"
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "LeftButtock",
+      "children": []
+    },
+    {
+      "name": "LeftToeBase",
+      "children": []
+    },
+    {
+      "name": "LeftFoot",
+      "children": [
+        "LeftToeBase"
+      ]
+    },
+    {
+      "name": "LeftLeg",
+      "children": [
+        "LeftFoot"
+      ]
+    },
+    {
+      "name": "LeftUpLeg",
+      "children": [
+        "LeftButtock",
+        "LeftLeg"
+      ]
+    },
+    {
+      "name": "RightButtock",
+      "children": []
+    },
+    {
+      "name": "RightToeBase",
+      "children": []
+    },
+    {
+      "name": "RightFoot",
+      "children": [
+        "RightToeBase"
+      ]
+    },
+    {
+      "name": "RightLeg",
+      "children": [
+        "RightFoot"
+      ]
+    },
+    {
+      "name": "RightUpLeg",
+      "children": [
+        "RightButtock",
+        "RightLeg"
+      ]
+    },
+    {
+      "name": "LeftBreast",
+      "children": []
+    },
+    {
+      "name": "RightBreast",
+      "children": []
+    },
+    {
+      "name": "LeftHandIndex3",
+      "children": []
+    },
+    {
+      "name": "LeftHandIndex2",
+      "children": [
+        "LeftHandIndex3"
+      ]
+    },
+    {
+      "name": "LeftHandIndex1",
+      "children": [
+        "LeftHandIndex2"
+      ]
+    },
+    {
+      "name": "LeftHandMiddle3",
+      "children": []
+    },
+    {
+      "name": "LeftHandMiddle2",
+      "children": [
+        "LeftHandMiddle3"
+      ]
+    },
+    {
+      "name": "LeftHandMiddle1",
+      "children": [
+        "LeftHandMiddle2"
+      ]
+    },
+    {
+      "name": "LeftHandPinky3",
+      "children": []
+    },
+    {
+      "name": "LeftHandPinky2",
+      "children": [
+        "LeftHandPinky3"
+      ]
+    },
+    {
+      "name": "LeftHandPinky1",
+      "children": [
+        "LeftHandPinky2"
+      ]
+    },
+    {
+      "name": "LeftHandRing3",
+      "children": []
+    },
+    {
+      "name": "LeftHandRing2",
+      "children": [
+        "LeftHandRing3"
+      ]
+    },
+    {
+      "name": "LeftHandRing1",
+      "children": [
+        "LeftHandRing2"
+      ]
+    },
+    {
+      "name": "LeftHandThumb3",
+      "children": []
+    },
+    {
+      "name": "LeftHandThumb2",
+      "children": [
+        "LeftHandThumb3"
+      ]
+    },
+    {
+      "name": "LeftHandThumb1",
+      "children": [
+        "LeftHandThumb2"
+      ]
+    },
+    {
+      "name": "LeftHand",
+      "children": [
+        "LeftHandIndex1",
+        "LeftHandMiddle1",
+        "LeftHandPinky1",
+        "LeftHandRing1",
+        "LeftHandThumb1"
+      ]
+    },
+    {
+      "name": "LeftForeArm",
+      "children": [
+        "LeftHand"
+      ]
+    },
+    {
+      "name": "LeftArm",
+      "children": [
+        "LeftForeArm"
+      ]
+    },
+    {
+      "name": "LeftShoulder",
+      "children": [
+        "LeftArm"
+      ]
+    },
+    {
+      "name": "Jaw",
+      "children": []
+    },
+    {
+      "name": "LeftEye",
+      "children": []
+    },
+    {
+      "name": "LeftOrbicularisBottom",
+      "children": []
+    },
+    {
+      "name": "LeftOrbicularisTop",
+      "children": []
+    },
+    {
+      "name": "RightEye",
+      "children": []
+    },
+    {
+      "name": "RightOrbicularisBottom",
+      "children": []
+    },
+    {
+      "name": "RightOrbicularisTop",
+      "children": []
+    },
+    {
+      "name": "Ponytail3",
+      "children": []
+    },
+    {
+      "name": "Ponytail2",
+      "children": [
+        "Ponytail3"
+      ]
+    },
+    {
+      "name": "Ponytail1",
+      "children": [
+        "Ponytail2"
+      ]
+    },
+    {
+      "name": "PonytailRoot",
+      "children": [
+        "Ponytail1"
+      ]
+    },
+    {
+      "name": "Head",
+      "children": [
+        "Jaw",
+        "LeftEye",
+        "LeftOrbicularisBottom",
+        "LeftOrbicularisTop",
+        "RightEye",
+        "RightOrbicularisBottom",
+        "RightOrbicularisTop",
+        "PonytailRoot"
+      ]
+    },
+    {
+      "name": "Neck",
+      "children": [
+        "Head"
+      ]
+    },
+    {
+      "name": "RightHandIndex3",
+      "children": []
+    },
+    {
+      "name": "RightHandIndex2",
+      "children": [
+        "RightHandIndex3"
+      ]
+    },
+    {
+      "name": "RightHandIndex1",
+      "children": [
+        "RightHandIndex2"
+      ]
+    },
+    {
+      "name": "RightHandMiddle3",
+      "children": []
+    },
+    {
+      "name": "RightHandMiddle2",
+      "children": [
+        "RightHandMiddle3"
+      ]
+    },
+    {
+      "name": "RightHandMiddle1",
+      "children": [
+        "RightHandMiddle2"
+      ]
+    },
+    {
+      "name": "RightHandPinky3",
+      "children": []
+    },
+    {
+      "name": "RightHandPinky2",
+      "children": [
+        "RightHandPinky3"
+      ]
+    },
+    {
+      "name": "RightHandPinky1",
+      "children": [
+        "RightHandPinky2"
+      ]
+    },
+    {
+      "name": "RightHandRing3",
+      "children": []
+    },
+    {
+      "name": "RightHandRing2",
+      "children": [
+        "RightHandRing3"
+      ]
+    },
+    {
+      "name": "RightHandRing1",
+      "children": [
+        "RightHandRing2"
+      ]
+    },
+    {
+      "name": "RightHandThumb3",
+      "children": []
+    },
+    {
+      "name": "RightHandThumb2",
+      "children": [
+        "RightHandThumb3"
+      ]
+    },
+    {
+      "name": "RightHandThumb1",
+      "children": [
+        "RightHandThumb2"
+      ]
+    },
+    {
+      "name": "RightHand",
+      "children": [
+        "RightHandIndex1",
+        "RightHandMiddle1",
+        "RightHandPinky1",
+        "RightHandRing1",
+        "RightHandThumb1"
+      ]
+    },
+    {
+      "name": "RightForeArm",
+      "children": [
+        "RightHand"
+      ]
+    },
+    {
+      "name": "RightArm",
+      "children": [
+        "RightForeArm"
+      ]
+    },
+    {
+      "name": "RightShoulder",
+      "children": [
+        "RightArm"
+      ]
+    },
+    {
+      "name": "Spine2",
+      "children": [
+        "LeftShoulder",
+        "Neck",
+        "RightShoulder"
+      ]
+    },
+    {
+      "name": "Spine1",
+      "children": [
+        "LeftBreast",
+        "RightBreast",
+        "Spine2"
+      ]
+    },
+    {
+      "name": "Spine",
+      "children": [
+        "Spine1"
+      ]
+    },
+    {
+      "name": "Hips",
+      "children": [
+        "LeftUpLeg",
+        "RightUpLeg",
+        "Spine"
+      ]
+    },
+    {
+      "name": "Human",
+      "mesh": "base",
+      "children": []
+    },
+    {
+      "name": "Human.female_casualsuit01",
+      "mesh": "female_casualsuit01",
+      "children": []
+    },
+    {
+      "name": "Human.high-poly",
+      "mesh": "high-poly",
+      "children": []
+    },
+    {
+      "name": "Human.mindfront_eyebrows_02",
+      "mesh": "mind_eyebrows_02",
+      "children": []
+    },
+    {
+      "name": "Human.ponytail01",
+      "mesh": "ponytail01",
+      "children": []
+    },
+    {
+      "name": "Human.teeth_base",
+      "mesh": "teeth_base",
+      "children": []
+    },
+    {
+      "name": "Human.tongue01",
+      "mesh": "tongue01",
+      "children": []
+    },
+    {
+      "name": "Armature",
+      "children": [
+        "Human",
+        "Human.female_casualsuit01",
+        "Human.high-poly",
+        "Human.mindfront_eyebrows_02",
+        "Human.ponytail01",
+        "Human.teeth_base",
+        "Human.tongue01",
+        "Hips"
+      ]
+    }
+  ],
+  "materials": [
+    "Human.body",
+    "Human.female_casualsuit01",
+    "Human.high-poly",
+    "Human.mindfront_eyebrows_02",
+    "Human.ponytail01",
+    "Human.teeth_base",
+    "Human.tongue01"
+  ],
+  "skins": [
+    {
+      "name": "Armature",
+      "joints": [
+        "Hips",
+        "LeftUpLeg",
+        "LeftButtock",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightButtock",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase",
+        "Spine",
+        "Spine1",
+        "LeftBreast",
+        "RightBreast",
+        "Spine2",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "LeftHandIndex1",
+        "LeftHandIndex2",
+        "LeftHandIndex3",
+        "LeftHandMiddle1",
+        "LeftHandMiddle2",
+        "LeftHandMiddle3",
+        "LeftHandPinky1",
+        "LeftHandPinky2",
+        "LeftHandPinky3",
+        "LeftHandRing1",
+        "LeftHandRing2",
+        "LeftHandRing3",
+        "LeftHandThumb1",
+        "LeftHandThumb2",
+        "LeftHandThumb3",
+        "Neck",
+        "Head",
+        "Jaw",
+        "LeftEye",
+        "LeftOrbicularisBottom",
+        "LeftOrbicularisTop",
+        "RightEye",
+        "RightOrbicularisBottom",
+        "RightOrbicularisTop",
+        "PonytailRoot",
+        "Ponytail1",
+        "Ponytail2",
+        "Ponytail3",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "RightHandIndex1",
+        "RightHandIndex2",
+        "RightHandIndex3",
+        "RightHandMiddle1",
+        "RightHandMiddle2",
+        "RightHandMiddle3",
+        "RightHandPinky1",
+        "RightHandPinky2",
+        "RightHandPinky3",
+        "RightHandRing1",
+        "RightHandRing2",
+        "RightHandRing3",
+        "RightHandThumb1",
+        "RightHandThumb2",
+        "RightHandThumb3"
+      ]
+    }
+  ],
+  "animations": []
+}
