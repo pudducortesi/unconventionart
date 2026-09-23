@@ -1,0 +1,66 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {PGlite} from '@electric-sql/pglite';
+import {normalizeAvatar,DEFAULT_AVATAR,inviteCode,safePose,offerURL} from '../js/museum/social-model.js';
+
+test('Untrusted avatar, pose, invitation and checkout data are bounded',()=>{
+  assert.deepEqual(normalizeAvatar({outfit:'url(javascript:evil)',style:'<script>'}),DEFAULT_AVATAR);
+  assert.equal(inviteCode('javascript:alert(1)'),null);
+  assert.equal(inviteCode('https://example.org/#visit=10000000-0000-4000-8000-000000000001'),'10000000-0000-4000-8000-000000000001');
+  assert.equal(safePose({x:Infinity,z:0}),null);assert.equal(safePose({x:0,z:0,y:-1}),null);
+  assert.ok(Math.abs(safePose({x:0,z:0,yaw:99999}).yaw)<=Math.PI);
+  const offer={kind:'print',amount_minor:10000,rights:'Stampa senza trasferimento del copyright',checkout_url:'https://buy.stripe.com/example'};
+  assert.ok(offerURL(offer));assert.equal(offerURL({...offer,checkout_url:'https://buy.stripe.com.evil.test/x'}),null);
+  assert.equal(offerURL({...offer,checkout_url:'javascript:alert(1)'}),null);
+  assert.equal(offerURL({...offer,kind:'nft'}),null);
+});
+
+test('Social RPC enforces authentication, room isolation, identity, blocks, rate limits and moderation',async t=>{
+  const db=new PGlite();t.after(()=>db.close());
+  await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;
+    create schema auth;create table auth.users(id uuid primary key,deleted_at timestamptz,banned_until timestamptz);
+    create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+    create function auth.jwt() returns jsonb language sql stable as $$select '{}'::jsonb$$;
+    grant usage on schema auth,public to anon,authenticated;
+    create table public.gallery_admins(user_id uuid primary key);
+    create table public.gallery_artworks(id uuid primary key,published boolean not null default false);
+    grant select on public.gallery_admins to authenticated;
+  `);
+  const ids=[1,2,3].map(n=>`10000000-0000-4000-8000-00000000000${n}`);
+  for(const id of ids)await db.query('insert into auth.users(id) values($1)',[id]);
+  await db.query('insert into public.gallery_admins values($1)',[ids[0]]);
+  await db.exec(await readFile('infra/social-schema.sql','utf8'));
+  await db.exec(await readFile('infra/store-schema.sql','utf8'));
+  const identity=async(id,role='authenticated')=>{await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[id||'']);await db.exec(`set role ${role}`);};
+  const rpc=async(action,payload={})=>(await db.query('select public.ua_social($1,$2::jsonb) as result',[action,JSON.stringify(payload)])).rows[0].result;
+  const clearLimit=async(id,action)=>{await db.exec('reset role');await db.query('delete from ua_social.limits where user_id=$1 and action=$2',[id,action]);await db.exec('set role authenticated');};
+  await identity(null,'anon');await assert.rejects(rpc('profile'),/permission denied/);
+  await identity(null);await assert.rejects(rpc('profile'),/ua_login_required/);
+  for(const [i,id]of ids.entries()){await identity(id);await rpc('save_profile',{name:'Visitor '+i,avatar:DEFAULT_AVATAR});}
+  await identity(ids[0]);
+  await assert.rejects(db.query('select * from ua_social.profiles'),/permission denied/);
+  const room=await rpc('create',{name:'Private visit'});
+  await identity(ids[1]);await assert.rejects(rpc('tick',{room:room.id,position:{x:0,z:0,y:0,yaw:0}}),/ua_room_denied/);
+  await assert.rejects(rpc('join',{invite:ids[2]}),/ua_invite_invalid/);
+  await rpc('join',{invite:room.invite});
+  let state=await rpc('tick',{room:room.id,position:{x:1,z:-2,y:0,yaw:0},user_id:ids[0]});
+  assert.equal(state.participants.length,2);assert.equal(state.participants.find(p=>p.id===ids[1]).x,1);
+  await assert.rejects(rpc('tick',{room:room.id,position:{x:1,z:2,y:0,yaw:0}}),/ua_rate_limit/);
+  await rpc('chat',{room:room.id,body:'Hello',user_id:ids[0]});
+  await identity(ids[2]);await assert.rejects(rpc('chat',{room:room.id,body:'Intrusion'}),/ua_room_denied/);
+  await assert.rejects(rpc('moderation'),/ua_forbidden/);
+  await identity(ids[0]);state=await rpc('tick',{room:room.id,position:{x:0,z:0,y:0,yaw:0}});
+  assert.equal(state.messages[0].user_id,ids[1]);
+  await rpc('report',{room:room.id,target:ids[1],reason:'Test report'});
+  assert.equal((await rpc('moderation')).length,1);
+  await rpc('block',{room:room.id,target:ids[1]});
+  await clearLimit(ids[0],'tick');state=await rpc('tick',{room:room.id,position:{x:0,z:0,y:0,yaw:0}});
+  assert.equal(state.participants.length,1);assert.equal(state.messages.length,0);
+  await identity(ids[1]);await clearLimit(ids[1],'tick');await assert.rejects(rpc('tick',{room:room.id,position:{x:0,z:0,y:0,yaw:0}}),/ua_room_denied/);
+  await identity(ids[0]);await rpc('unblock',{target:ids[1]});
+  await rpc('suspend',{target:ids[1],suspended:true});await identity(ids[1]);await assert.rejects(rpc('profile'),/ua_suspended/);
+  await identity(ids[0]);await rpc('close',{room:room.id});await clearLimit(ids[0],'tick');await assert.rejects(rpc('tick',{room:room.id,position:{x:0,z:0,y:0,yaw:0}}),/ua_room_denied/);
+  await identity(null,'anon');assert.equal((await db.query('select * from public.gallery_offers')).rows.length,0);
+  await assert.rejects(db.query("insert into public.gallery_offers(work_id,kind,amount_minor,rights,checkout_url) values(gen_random_uuid(),'print',100,'No copyright transfer','https://buy.stripe.com/x')"),/permission denied/);
+});
