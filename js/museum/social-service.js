@@ -14,7 +14,7 @@ export async function createSocialService(fetcher=fetch, storage=globalThis.sess
     if(!response.ok){
       const code=data?.message||data?.msg||data?.error_description||data?.error;
       let message=errors[code]||'Operazione non riuscita. Controlla la connessione e riprova.';
-      if(path.includes('/auth/'))message=response.status===429?'Troppi tentativi. Attendi prima di riprovare.':code?.includes('signup')?'Le registrazioni non sono ancora aperte. Usa un account già abilitato.':code?.includes('Email not confirmed')?'Conferma prima la tua email.':'Accesso non riuscito. Controlla email e password.';
+      if(path.includes('/auth/'))message=response.status===429?'Troppi tentativi. Attendi prima di riprovare.':code?.toLowerCase().includes('signup')?'Le registrazioni non sono ancora aperte. Usa un account già abilitato.':code?.includes('Email not confirmed')?'Conferma prima la tua email.':'Accesso non riuscito. Controlla email e password.';
       if(response.status===401&&auth){save(null);message='Sessione scaduta. Accedi di nuovo.';}
       const error=Error(message);error.code=code;error.status=response.status;throw error;
     }
@@ -28,6 +28,7 @@ export async function createSocialService(fetcher=fetch, storage=globalThis.sess
   }
   return {
     get user(){return session?.user||null;},
+    async settings(){return raw('/auth/v1/settings',{auth:false});},
     async login(email,password){save(await raw('/auth/v1/token?grant_type=password',{method:'POST',auth:false,body:{email,password}}));},
     async signup(email,password){const result=await raw('/auth/v1/signup',{method:'POST',auth:false,body:{email,password}});if(result?.access_token)save(result);return !!result?.access_token;},
     async logout(){try{await raw('/auth/v1/logout?scope=local',{method:'POST'});}finally{save(null);}},
