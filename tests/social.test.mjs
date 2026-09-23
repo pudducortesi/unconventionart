@@ -43,6 +43,7 @@ test('Social RPC enforces authentication, room isolation, identity, blocks, rate
   await db.exec(await readFile('infra/social-schema.sql','utf8'));
   await db.exec(await readFile('infra/store-schema.sql','utf8'));
   await db.exec(await readFile('infra/avatar-wave.sql','utf8'));
+  await db.exec(await readFile('infra/avatar-studio.sql','utf8'));
   const identity=async(id,role='authenticated')=>{await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[id||'']);await db.exec(`set role ${role}`);};
   const rpc=async(action,payload={})=>(await db.query('select public.ua_social($1,$2::jsonb) as result',[action,JSON.stringify(payload)])).rows[0].result;
   const clearLimit=async(id,action)=>{await db.exec('reset role');await db.query('delete from ua_social.limits where user_id=$1 and action=$2',[id,action]);await db.exec('set role authenticated');};
@@ -63,6 +64,10 @@ test('Social RPC enforces authentication, room isolation, identity, blocks, rate
   const compatible=await rpc('save_profile',{name:'Visitor 0',avatar:legacy});assert.equal(compatible.avatar.model,'classic');
   assert.equal(compatible.avatar.glasses,'none');assert.equal(compatible.avatar.frame,'black');
   await assert.rejects(db.query('select * from ua_social.profiles'),/permission denied/);
+  await clearLimit(ids[0],'save_profile');
+  const studio=await rpc('save_profile',{name:'Visitor 0',avatar:{...DEFAULT_AVATAR,model:'studio',garment:'dress',height:115,jaw:80,beard:'full'}});
+  assert.equal(studio.avatar.garment,'dress');assert.equal(studio.avatar.height,115);assert.equal(studio.avatar.jaw,80);
+  await assert.rejects(db.query("select ua_social.normalize_avatar('{}'::jsonb)"),/permission denied/);
   const room=await rpc('create',{name:'Private visit'});
   await identity(ids[1]);await assert.rejects(rpc('tick',{room:room.id,position:{x:0,z:0,y:0,yaw:0}}),/ua_room_denied/);
   await assert.rejects(rpc('join',{invite:ids[2]}),/ua_invite_invalid/);
@@ -72,7 +77,7 @@ test('Social RPC enforces authentication, room isolation, identity, blocks, rate
   await rpc('emote',{room:room.id,gesture:'wave',user_id:ids[0]});
   await assert.rejects(rpc('emote',{room:room.id,gesture:'wave'}),/ua_rate_limit/);
   let state=await rpc('tick',{room:room.id,position:{x:1,z:-2,y:0,yaw:0},user_id:ids[0]});
-  assert.equal(state.participants.length,2);assert.equal(state.participants.find(p=>p.id===ids[1]).x,1);assert.equal(state.participants.find(p=>p.id===ids[1]).wave,true);assert.equal(state.participants.find(p=>p.id===ids[0]).wave,false);
+  assert.equal(state.participants.find(p=>p.id===ids[0]).avatar.height,115);assert.equal(state.participants.find(p=>p.id===ids[0]).avatar.garment,'dress');assert.equal(state.participants.length,2);assert.equal(state.participants.find(p=>p.id===ids[1]).x,1);assert.equal(state.participants.find(p=>p.id===ids[1]).wave,true);assert.equal(state.participants.find(p=>p.id===ids[0]).wave,false);
   await db.exec('reset role');await db.query("update ua_social.members set emote_until=now()-interval '1 second' where user_id=$1",[ids[1]]);await db.exec('set role authenticated');
   await clearLimit(ids[1],'tick');state=await rpc('tick',{room:room.id,position:{x:1,z:-2,y:0,yaw:0}});assert.equal(state.participants.find(p=>p.id===ids[1]).wave,false);
   await assert.rejects(rpc('tick',{room:room.id,position:{x:1,z:2,y:0,yaw:0}}),/ua_rate_limit/);

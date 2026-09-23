@@ -2,6 +2,7 @@ import * as T from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {clone} from 'three/examples/jsm/utils/SkeletonUtils.js';
 import {VRMLoaderPlugin} from '../avatar-runtime/three-vrm.js';
+import {normalizeAvatar} from './social-model.js';
 import {attachGlasses} from './avatar-glasses.js';
 
 let template;
@@ -12,6 +13,7 @@ function loadTemplate(){
 }
 // Geometry/textures are shared across participants; skeletons and tinted materials are per visitor.
 export function instantiateAtelier(source,a){
+  a=normalizeAvatar(a);
   const root=new T.Group(),model=clone(source),materials=new Set(),extras=[];
   root.add(model);model.updateMatrixWorld(true);
   const bounds=new T.Box3().setFromObject(model),height=bounds.max.y-bounds.min.y;
@@ -34,12 +36,14 @@ export function instantiateAtelier(source,a){
   // The authored ponytail is available as the long style; other styles use a small fitted cap.
   if(hairMesh)hairMesh.visible=a.style==='long';
   const head=model.getObjectByName('Head');
-  if(head&&a.style!=='long'){
+  if(head&&a.style!=='long'&&a.style!=='bald'){
     const group=new T.Group(),mat=new T.MeshStandardMaterial({color:a.hair,roughness:.85});materials.add(mat);
     const pos=head.getWorldPosition(new T.Vector3());group.position.copy(pos);root.worldToLocal(group.position);
     // Character faces -Z after normalization. Head origin is at the neck.
     const cap=new T.Mesh(new T.SphereGeometry(1,20,12,0,Math.PI*2,0,a.style==='shaved'?1.15:1.6),mat);
     cap.position.set(0,.16,.007);cap.scale.set(.090,a.style==='shaved'?.111:.119,.101);group.add(cap);extras.push(cap.geometry);
+    if(a.style==='bun'){const geo=new T.SphereGeometry(.048,16,12),bun=new T.Mesh(geo,mat);bun.position.set(0,.18,.105);group.add(bun);extras.push(geo);}
+    if(a.style==='mohawk'){const geo=new T.BoxGeometry(.027,.05,.13),crest=new T.Mesh(geo,mat);crest.position.set(0,.285,.01);group.add(crest);extras.push(geo);}
     if(a.style==='bob')for(const side of [-1,1]){const geo=new T.SphereGeometry(1,12,8),lock=new T.Mesh(geo,mat);lock.position.set(side*.078,.085,.022);lock.scale.set(.032,.111,.083);group.add(lock);extras.push(geo);}
     root.add(group);root.updateMatrixWorld(true);head.attach(group);
   }
@@ -68,7 +72,7 @@ export function instantiateAtelier(source,a){
     return stride>0||waving;
   };
   root.userData.dispose=()=>{if(disposed)return;disposed=true;disposeGlasses();for(const m of materials)m.dispose();for(const g of extras)g.dispose();const skeletons=new Set();root.traverse(o=>{if(o.skeleton)skeletons.add(o.skeleton);});for(const s of skeletons)s.dispose();};
-  root.scale.x=width;
+  root.scale.x=width;root.scale.y=a.height/100;
   return root;
 }
 export async function loadAtelier(a){const gltf=await loadTemplate();return instantiateAtelier(gltf.scene,a);}
