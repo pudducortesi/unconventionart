@@ -6,6 +6,8 @@ The profile now offers **Essenziale** (procedural avatar) and **Atelier · figur
 
 Atelier includes a textured human body and outfit, hair color, skin tint, outfit tint, three body widths and four hairstyle settings. Long uses the authored ponytail; other styles use small fitted procedural hair pieces. These are not separate clothing assets or body-shape morphs. The preview provides walking/idle modes, rotation and a face close-up. The A-pose is relaxed before recording animation baselines. Walk cycles and blinks are generated locally.
 
+Both models now support optional round or rectangular eyeglass frames, with black, tortoiseshell or gold finishes. The geometry is generated locally and attached to the head, so it follows head movement in the preview and meetings. Older saved profiles default to no glasses; the private RPC accepts only the enumerated styles and colours. The migration is `infra/avatar-accessories.sql`.
+
 ## Asset acquisition and optimization
 
 The earlier binary-download blocker was resolved using a read-only GitHub Actions asset preparation job and the GitHub artifact download connector. The workflow is committed at `.github/workflows/avatar-assets.yml`. No private data or repository write credential is sent to the asset pipeline.
@@ -32,6 +34,6 @@ CharacterStudio is evaluated and pinned in `research/avatar-sources.json`, but i
 
 ## Validation
 
-`npm run check` completed successfully: build validation and 146 tests. Tests verify the exact model hash, size and triangle budget, skeleton presence, independent instances, finite animation transforms, gait settling, disposal, profile model persistence, invalid model rejection and compatibility with old profiles. Build checks confirm the deployed asset matches the reviewed bytes, licenses are included, and the avatar runtime stays outside initial loading. The existing remote `avatar_model_selection` database migration and deployed model allowlist were also verified.
+`npm run check` completed successfully: build validation and 148 tests. Tests verify the exact model hash, size and triangle budget, skeleton presence, independent instances, finite animation transforms, gait settling, eyewear attachment/disposal, profile persistence, invalid value rejection and compatibility with old profiles. Build checks confirm the deployed asset matches the reviewed bytes, licenses are included, and the avatar runtime stays outside initial loading. The `avatar_glasses_and_frames` migration is installed in the dedicated Supabase project; its deployed allowlist and function permissions were verified.
 
 Node model tests omit image decoding and therefore do not validate GPU materials or on-device frame rates. The cloud browser does not support WebGL; final visual rendering and iPhone performance remain to be checked on a real device.

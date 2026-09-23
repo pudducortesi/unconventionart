@@ -43,3 +43,20 @@ test('Peer gait finishes after arrival, then releases the gallery render loop',(
   for(const time of [5000,10000,15000])assert.equal(layer.update(.016,time),false);
   layer.clear();
 });
+
+test('Procedural glasses follow the head and dispose independently',()=>{
+  for(const style of ['round','square']){
+    const avatar=createAvatar({glasses:style,frame:'gold'}),head=avatar.getObjectByName('head');
+    const glasses=head.getObjectByName('avatar-glasses');
+    assert.ok(glasses);assert.equal(glasses.parent,head);
+    const before=glasses.getWorldPosition(new T.Vector3());
+    head.rotation.y=.5;avatar.updateMatrixWorld(true);
+    assert.ok(glasses.getWorldPosition(new T.Vector3()).distanceTo(before)>0);
+    const materials=new Set();glasses.traverse(o=>{if(o.isMesh)materials.add(o.material);});
+    assert.equal(materials.size,1);
+    const material=[...materials][0];let disposals=0;material.addEventListener('dispose',()=>disposals++);
+    avatar.userData.dispose();avatar.userData.dispose();
+    assert.equal(disposals,1);
+  }
+  assert.equal(createAvatar({glasses:'bad-url'}).getObjectByName('avatar-glasses'),undefined);
+});
