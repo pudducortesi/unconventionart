@@ -2,9 +2,11 @@ import * as T from '../../vendor/three.module.js';
 import {AVATAR_OPTIONS,DEFAULT_AVATAR,normalizeAvatar,inviteCode,safePose,offerURL} from './social-model.js';
 import {createSocialService} from './social-service.js';
 import {createSocialPoller} from './social-poller.js';
+import {participantLocation,createMeetingPresence} from './meeting-wayfinding.js';
+export {planMeetingRoute} from './meeting-wayfinding.js';
 import {createAvatar,createAvatarLayer} from './social-avatar.js';
 
-export async function mountSocial({getScene,getPose,getCatalogue,wake}) {
+export async function mountSocial({getScene,getPose,getCatalogue,wake,reachParticipant}) {
   const dialog=document.querySelector('#social-space');
   dialog.innerHTML=`<div class="social-heading"><div><span class="eyebrow">UNCONVENTIONART · SOCIAL BETA</span><h2>Il tuo posto in galleria.</h2></div><button type="button" class="social-close" aria-label="Chiudi incontri">×</button></div>
     <nav class="social-tabs" aria-label="Il tuo spazio"><button data-social-tab="avatar" aria-pressed="true">Il mio avatar</button><button data-social-tab="visits" aria-pressed="false">Incontri <span id="social-count"></span></button><button data-social-tab="editions" aria-pressed="false">Edizioni e NFT</button></nav>
@@ -15,14 +17,15 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake}) {
       <form id="social-login"><h3>Porta il tuo avatar negli incontri</h3><p>Accedi con il tuo account. La visita individuale resta libera.</p><label>Email<input id="social-email" type="email" autocomplete="email" required maxlength="254"></label><label>Password<input id="social-password" type="password" autocomplete="current-password" required></label><div class="social-actions"><button type="submit" class="social-primary">Accedi</button><button type="submit" name="signup" value="signup" disabled>Crea account</button></div><p id="social-signup-note">Per creare un account usa almeno 12 caratteri e conferma l’email ricevuta.</p></form>
     </div></section>
     <section data-social-panel="visits" hidden><div id="social-room-start"><h3>Visita la mostra insieme.</h3><p>Crea un incontro e condividi l’invito. Fino a 16 persone, avatar visibili e chat di gruppo. Gli inviti scadono dopo 24 ore.</p><div class="social-room-forms"><form id="social-create"><label>Nome dell’incontro<input id="social-room-name" required minlength="2" maxlength="60" placeholder="Una sera in galleria"></label><button class="social-primary">Crea incontro</button></form><form id="social-join"><label>Invito ricevuto<input id="social-invite" required placeholder="Incolla il link o il codice" autocomplete="off" maxlength="500"></label><button>Partecipa</button></form></div></div>
-      <div id="social-room-active" hidden><div class="social-room-title"><div><span class="eyebrow">INCONTRO PRIVATO</span><h3 id="social-room-title"></h3><p id="social-connection" role="status"></p></div><button id="social-copy">Copia invito</button></div><input id="social-share-link" readonly aria-label="Link di invito" hidden><div class="social-room-layout"><div><h4>Presenti</h4><ul id="social-people"></ul></div><div><div id="social-messages" role="log" aria-label="Messaggi dell’incontro" aria-live="polite"></div><form id="social-chat"><label class="sr-only" for="social-message">Messaggio</label><input id="social-message" placeholder="Scrivi al gruppo…" maxlength="500" required autocomplete="off"><button>Invia</button></form></div></div><p class="social-caption">I messaggi sono visibili ai partecipanti. Nessun microfono viene attivato.</p><div class="social-actions"><button id="social-wave" type="button">Saluta 👋</button><button id="social-return" class="social-primary">Torna nella galleria</button><button id="social-leave">Lascia incontro</button><button id="social-end" hidden>Termina per tutti</button></div></div>
+      <div id="social-room-active" hidden><div class="social-room-title"><div><span class="eyebrow">INCONTRO PRIVATO</span><h3 id="social-room-title"></h3><p id="social-connection" role="status"></p></div><button id="social-copy">Copia invito</button></div><input id="social-share-link" readonly aria-label="Link di invito" hidden><div class="social-room-layout"><div><h4>Presenti</h4><ul id="social-people"></ul></div><div><div id="social-messages" role="log" aria-label="Messaggi dell’incontro" aria-live="polite"></div><form id="social-chat"><label class="sr-only" for="social-message">Messaggio</label><input id="social-message" placeholder="Scrivi al gruppo…" maxlength="500" required autocomplete="off"><button>Invia</button></form></div></div><p class="social-caption">Raggiungi porta all’ultima posizione ricevuta; le distanze sono in linea d’aria. I messaggi sono visibili ai partecipanti. Nessun microfono viene attivato.</p><div class="social-actions"><button id="social-wave" type="button">Saluta 👋</button><button id="social-return" class="social-primary">Torna nella galleria</button><button id="social-leave">Lascia incontro</button><button id="social-end" hidden>Termina per tutti</button></div></div>
       <details id="social-blocked"><summary>Persone bloccate</summary><ul id="social-blocks"></ul></details>
       <form id="social-report" hidden><h4>Segnala un comportamento</h4><label>Descrivi cosa è successo<textarea id="social-report-reason" required minlength="3" maxlength="500"></textarea></label><div class="social-actions"><button>Invia segnalazione</button><button type="button" id="social-report-cancel">Annulla</button></div></form>
     </section>
     <section data-social-panel="editions" hidden><h3>Opere da collezionare.</h3><p>Stampe, edizioni digitali e NFT. Ogni offerta riporta prezzo e diritti inclusi; il pagamento si completa sulla pagina del venditore.</p><button id="social-store-refresh">Aggiorna disponibilità</button><div id="social-editions"></div><p class="social-caption">Il possesso di un NFT non attribuisce automaticamente i diritti d’autore. Consulta i termini della singola opera.</p></section>`;
   const $=s=>dialog.querySelector(s),note=(text,error=false)=>{$('#social-notice').textContent=text;$('#social-notice').dataset.error=String(error);};
   const element=(tag,text)=>{const e=document.createElement(tag);if(text)e.textContent=text;return e;};
-  let avatar={...DEFAULT_AVATAR},profile=null,room=null,service,layer=null,reportTarget=null,rosterKey='',messagesKey='',previewRenderer,previewScene,previewCamera,previewMesh,previewWalking=false,previewWaveUntil=0,previewWaveTimer=0,previewFrame=0,previewTime=0;
+  let avatar={...DEFAULT_AVATAR},profile=null,room=null,service,layer=null,reportTarget=null,messagesKey='',previewRenderer,previewScene,previewCamera,previewMesh,previewWalking=false,previewWaveUntil=0,previewWaveTimer=0,previewFrame=0,previewTime=0;
+  const presence=createMeetingPresence(),people=new Map();
   try{avatar=normalizeAvatar(JSON.parse(localStorage.getItem('ua-avatar-draft')||'null'));}catch{}
   let serviceError;
   try{service=await createSocialService();}catch(error){serviceError=error.message;note(error.message,true);}
@@ -70,18 +73,38 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake}) {
   async function loadProfile(){if(!service?.user){refreshIdentity();return;}const data=await service.rpc('profile');profile=data.profile;if(profile){$('#social-name').value=profile.name;applyAvatar(profile.avatar);}$('#social-blocks').replaceChildren();for(const blocked of data.blocks){const li=element('li',blocked.name+' '),button=element('button','Sblocca');button.onclick=()=>run(button,async()=>{await service.rpc('unblock',{target:blocked.id});li.remove();note('Blocco rimosso.');});li.append(button);$('#social-blocks').append(li);}refreshIdentity();}
   $('#social-profile').addEventListener('submit',e=>{e.preventDefault();run(e.submitter,async()=>{if(!service?.user)throw Error('Accedi per salvare l’avatar nel tuo account. Le scelte restano su questo dispositivo.');profile=await service.rpc('save_profile',{name:$('#social-name').value.trim(),avatar});refreshIdentity();note('Avatar salvato. Ora puoi partecipare agli incontri.');});});
   $('#social-login').addEventListener('submit',e=>{e.preventDefault();run(e.submitter,async()=>{if(!service)throw Error(serviceError);const email=$('#social-email').value.trim(),password=$('#social-password').value;if(e.submitter?.value==='signup'){if(password.length<12)throw Error('Usa una password di almeno 12 caratteri.');const logged=await service.signup(email,password);$('#social-password').value='';if(!logged){note('Controlla la tua email per confermare l’account, poi torna qui e accedi.');return;}}else{await service.login(email,password);$('#social-password').value='';}await loadProfile();note(profile?'Bentornato. Il tuo avatar è pronto.':'Accesso effettuato. Scegli il nome e salva il tuo avatar.');});});
-  function resetRoom(){poller.stop();room=null;layer?.clear();$('#social-room-start').hidden=false;$('#social-room-active').hidden=true;$('#social-count').textContent='';document.querySelector('#social-open').textContent='Incontri';rosterKey=messagesKey='';$('#social-people').replaceChildren();$('#social-messages').replaceChildren();$('#social-report').hidden=true;}
+  function resetRoom(){poller.stop();room=null;clearPresence();$('#social-room-start').hidden=false;$('#social-room-active').hidden=true;$('#social-count').textContent='';document.querySelector('#social-open').textContent='Incontri';messagesKey='';$('#social-people').replaceChildren();$('#social-messages').replaceChildren();$('#social-report').hidden=true;}
   $('#social-logout').onclick=()=>run($('#social-logout'),async()=>{if(room)try{await service.rpc('leave',{room:room.id});}catch{}resetRoom();try{await service.logout();}finally{profile=null;refreshIdentity();}note('Hai lasciato l’account.');});
   function renderState(data){
     const participants=data.participants.filter(p=>safePose(p));
     if(!layer&&getScene())layer=createAvatarLayer(getScene(),wake);
     layer?.sync(participants,service.user?.id);
     $('#social-count').textContent=String(participants.length);document.querySelector('#social-open').textContent=`Incontri · ${participants.length}`;
-    const nextRoster=JSON.stringify(participants.map(p=>[p.id,p.name,p.wave===true]));
-    if(nextRoster!==rosterKey){rosterKey=nextRoster;$('#social-people').replaceChildren();for(const p of participants){const li=element('li'),name=element('strong',p.name+(p.id===service.user.id?' · tu':'')+(p.wave===true?' · saluta 👋':''));li.append(name);if(p.id!==service.user.id){const block=element('button','Blocca'),report=element('button','Segnala');block.onclick=()=>run(block,async()=>{await service.rpc('block',{room:room.id,target:p.id});await loadProfile();note('Persona bloccata: avatar e messaggi sono nascosti a entrambi.');});report.onclick=()=>{reportTarget=p.id;$('#social-report').hidden=false;$('#social-report-reason').focus();};li.append(block,report);}$('#social-people').append(li);}}
+    presence.sync(participants,service.user?.id);
+    const ids=new Set(participants.map(p=>p.id)),origin=getPose();
+    for(const [id,row] of people)if(!ids.has(id)){row.li.remove();people.delete(id);}
+    for(const p of participants){
+      let row=people.get(p.id);
+      if(!row){
+        const li=element('li'),name=element('strong'),location=element('span');location.className='social-person-location';li.append(name,location);
+        row={li,name,location};people.set(p.id,row);
+        if(p.id!==service.user.id){
+          const reach=element('button','Raggiungi'),block=element('button','Blocca'),report=element('button','Segnala');
+          reach.type=block.type=report.type='button';
+          reach.onclick=()=>run(reach,async()=>{const current=presence.get(p.id);if(!room||!current)throw Error('Presenza non aggiornata. Attendi il prossimo aggiornamento.');if(!reachParticipant)throw Error('Entra nella galleria per raggiungere una persona.');reachParticipant(current);dialog.close();});
+          block.onclick=()=>run(block,async()=>{await service.rpc('block',{room:room.id,target:p.id});presence.remove(p.id);row.li.remove();people.delete(p.id);await loadProfile();note('Persona bloccata: avatar e messaggi sono nascosti a entrambi.');});
+          report.onclick=()=>{reportTarget=p.id;$('#social-report').hidden=false;$('#social-report-reason').focus();};
+          li.append(reach,block,report);row.reach=reach;
+        }
+        $('#social-people').append(li);
+      }
+      row.name.textContent=p.name+(p.id===service.user.id?' · tu':'')+(p.wave===true?' · saluta 👋':'');
+      row.location.textContent=participantLocation(p,p.id===service.user.id?null:origin);
+      if(row.reach)row.reach.setAttribute('aria-label',`Raggiungi ${p.name}`);
+    }
     const nextMessages=JSON.stringify(data.messages.map(m=>m.id));if(nextMessages!==messagesKey){messagesKey=nextMessages;const log=$('#social-messages'),nearBottom=log.scrollHeight-log.scrollTop-log.clientHeight<80;log.replaceChildren();for(const m of data.messages){const p=element('p'),strong=element('strong',m.name+' '),span=element('span',m.body);p.append(strong,span);log.append(p);}if(nearBottom)log.scrollTop=log.scrollHeight;}
   }
-  function clearPresence(){layer?.clear();rosterKey='';$('#social-people').replaceChildren();$('#social-count').textContent='';document.querySelector('#social-open').textContent='Incontri';}
+  function clearPresence(){layer?.clear();presence.clear();people.clear();$('#social-people').replaceChildren();$('#social-count').textContent='';document.querySelector('#social-open').textContent='Incontri';}
   const poller=createSocialPoller({
     async request(){const pose=safePose(getPose());if(!pose)throw Error('La galleria sta ancora caricando.');return service.rpc('tick',{room:room.id,position:pose});},
     onData(data){renderState(data);$('#social-connection').textContent=`Collegato · ${data.participants.length} presenti`;},
@@ -126,5 +149,5 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake}) {
     }).catch(()=>{$('#social-signup-note').textContent='Registrazioni temporaneamente non verificabili. Riprova più tardi.';});
   }
   if(service?.user)await run(null,loadProfile);
-  return {open(){tab(incoming&&!room?'visits':'avatar');if(incoming&&!room)note('Hai un invito. Accedi, salva il tuo avatar e premi Partecipa.');},update(dt,time){return layer?.update(dt,time)||false;}};
+  return {open(){tab(room||incoming?'visits':'avatar');if(incoming&&!room)note('Hai un invito. Accedi, salva il tuo avatar e premi Partecipa.');},update(dt,time){return layer?.update(dt,time)||false;}};
 }
