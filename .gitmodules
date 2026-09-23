@@ -18,3 +18,19 @@
 	path = research/upstream/ssimulacra2
 	url = https://github.com/cloudinary/ssimulacra2.git
 	shallow = true
+[submodule "research/upstream/three-vrm"]
+	path = research/upstream/three-vrm
+	url = https://github.com/pixiv/three-vrm.git
+	shallow = true
+[submodule "research/upstream/CharacterStudio"]
+	path = research/upstream/CharacterStudio
+	url = https://github.com/M3-org/CharacterStudio.git
+	shallow = true
+[submodule "research/upstream/mpfb2"]
+	path = research/upstream/mpfb2
+	url = https://github.com/makehumancommunity/mpfb2.git
+	shallow = true
+[submodule "research/upstream/TalkingHead"]
+	path = research/upstream/TalkingHead
+	url = https://github.com/met4citizen/TalkingHead.git
+	shallow = true
