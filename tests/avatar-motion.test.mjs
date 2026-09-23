@@ -68,3 +68,14 @@ test('Peer wave raises the arm only during the gesture and releases frames after
   layer.sync([{...p,wave:false}],'self');assert.equal(layer.update(.016,1016),false);assert.equal(arm.rotation.z,.075);
   layer.clear();
 });
+
+test('A lost presence response cannot keep a peer waving or rendering indefinitely',()=>{
+  let clock=0;const scene=new T.Scene(),layer=createAvatarLayer(scene,()=>{},()=>clock);
+  const peer={id:'peer',name:'',avatar:{},x:0,y:0,z:0,yaw:0,wave:true};
+  layer.sync([peer],'self');assert.equal(layer.update(.016,clock),true);
+  clock=2000;layer.sync([peer],'self');assert.equal(layer.update(.016,clock),true);
+  clock=3100;assert.equal(layer.update(.016,clock),false);
+  assert.equal(scene.children[0].getObjectByName('rightUpperArm').rotation.z,.075);
+  layer.sync([{...peer,wave:false}],'self');clock=5000;layer.sync([peer],'self');
+  assert.equal(layer.update(.016,clock),true);layer.clear();
+});

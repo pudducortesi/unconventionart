@@ -1,6 +1,7 @@
 import * as T from '../../vendor/three.module.js';
 import {AVATAR_OPTIONS,DEFAULT_AVATAR,normalizeAvatar,inviteCode,safePose,offerURL} from './social-model.js';
 import {createSocialService} from './social-service.js';
+import {createSocialPoller} from './social-poller.js';
 import {createAvatar,createAvatarLayer} from './social-avatar.js';
 
 export async function mountSocial({getScene,getPose,getCatalogue,wake}) {
@@ -21,7 +22,7 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake}) {
     <section data-social-panel="editions" hidden><h3>Opere da collezionare.</h3><p>Stampe, edizioni digitali e NFT. Ogni offerta riporta prezzo e diritti inclusi; il pagamento si completa sulla pagina del venditore.</p><button id="social-store-refresh">Aggiorna disponibilità</button><div id="social-editions"></div><p class="social-caption">Il possesso di un NFT non attribuisce automaticamente i diritti d’autore. Consulta i termini della singola opera.</p></section>`;
   const $=s=>dialog.querySelector(s),note=(text,error=false)=>{$('#social-notice').textContent=text;$('#social-notice').dataset.error=String(error);};
   const element=(tag,text)=>{const e=document.createElement(tag);if(text)e.textContent=text;return e;};
-  let avatar={...DEFAULT_AVATAR},profile=null,room=null,service,layer=null,timer,version=0,failures=0,reportTarget=null,rosterKey='',messagesKey='',previewRenderer,previewScene,previewCamera,previewMesh,previewWalking=false,previewWaveUntil=0,previewWaveTimer=0,previewFrame=0,previewTime=0;
+  let avatar={...DEFAULT_AVATAR},profile=null,room=null,service,layer=null,reportTarget=null,rosterKey='',messagesKey='',previewRenderer,previewScene,previewCamera,previewMesh,previewWalking=false,previewWaveUntil=0,previewWaveTimer=0,previewFrame=0,previewTime=0;
   try{avatar=normalizeAvatar(JSON.parse(localStorage.getItem('ua-avatar-draft')||'null'));}catch{}
   let serviceError;
   try{service=await createSocialService();}catch(error){serviceError=error.message;note(error.message,true);}
@@ -69,7 +70,7 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake}) {
   async function loadProfile(){if(!service?.user){refreshIdentity();return;}const data=await service.rpc('profile');profile=data.profile;if(profile){$('#social-name').value=profile.name;applyAvatar(profile.avatar);}$('#social-blocks').replaceChildren();for(const blocked of data.blocks){const li=element('li',blocked.name+' '),button=element('button','Sblocca');button.onclick=()=>run(button,async()=>{await service.rpc('unblock',{target:blocked.id});li.remove();note('Blocco rimosso.');});li.append(button);$('#social-blocks').append(li);}refreshIdentity();}
   $('#social-profile').addEventListener('submit',e=>{e.preventDefault();run(e.submitter,async()=>{if(!service?.user)throw Error('Accedi per salvare l’avatar nel tuo account. Le scelte restano su questo dispositivo.');profile=await service.rpc('save_profile',{name:$('#social-name').value.trim(),avatar});refreshIdentity();note('Avatar salvato. Ora puoi partecipare agli incontri.');});});
   $('#social-login').addEventListener('submit',e=>{e.preventDefault();run(e.submitter,async()=>{if(!service)throw Error(serviceError);const email=$('#social-email').value.trim(),password=$('#social-password').value;if(e.submitter?.value==='signup'){if(password.length<12)throw Error('Usa una password di almeno 12 caratteri.');const logged=await service.signup(email,password);$('#social-password').value='';if(!logged){note('Controlla la tua email per confermare l’account, poi torna qui e accedi.');return;}}else{await service.login(email,password);$('#social-password').value='';}await loadProfile();note(profile?'Bentornato. Il tuo avatar è pronto.':'Accesso effettuato. Scegli il nome e salva il tuo avatar.');});});
-  function resetRoom(){version++;clearTimeout(timer);room=null;layer?.clear();$('#social-room-start').hidden=false;$('#social-room-active').hidden=true;$('#social-count').textContent='';document.querySelector('#social-open').textContent='Incontri';rosterKey=messagesKey='';$('#social-people').replaceChildren();$('#social-messages').replaceChildren();$('#social-report').hidden=true;}
+  function resetRoom(){poller.stop();room=null;layer?.clear();$('#social-room-start').hidden=false;$('#social-room-active').hidden=true;$('#social-count').textContent='';document.querySelector('#social-open').textContent='Incontri';rosterKey=messagesKey='';$('#social-people').replaceChildren();$('#social-messages').replaceChildren();$('#social-report').hidden=true;}
   $('#social-logout').onclick=()=>run($('#social-logout'),async()=>{if(room)try{await service.rpc('leave',{room:room.id});}catch{}resetRoom();try{await service.logout();}finally{profile=null;refreshIdentity();}note('Hai lasciato l’account.');});
   function renderState(data){
     const participants=data.participants.filter(p=>safePose(p));
@@ -80,14 +81,15 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake}) {
     if(nextRoster!==rosterKey){rosterKey=nextRoster;$('#social-people').replaceChildren();for(const p of participants){const li=element('li'),name=element('strong',p.name+(p.id===service.user.id?' · tu':'')+(p.wave===true?' · saluta 👋':''));li.append(name);if(p.id!==service.user.id){const block=element('button','Blocca'),report=element('button','Segnala');block.onclick=()=>run(block,async()=>{await service.rpc('block',{room:room.id,target:p.id});await loadProfile();note('Persona bloccata: avatar e messaggi sono nascosti a entrambi.');});report.onclick=()=>{reportTarget=p.id;$('#social-report').hidden=false;$('#social-report-reason').focus();};li.append(block,report);}$('#social-people').append(li);}}
     const nextMessages=JSON.stringify(data.messages.map(m=>m.id));if(nextMessages!==messagesKey){messagesKey=nextMessages;const log=$('#social-messages'),nearBottom=log.scrollHeight-log.scrollTop-log.clientHeight<80;log.replaceChildren();for(const m of data.messages){const p=element('p'),strong=element('strong',m.name+' '),span=element('span',m.body);p.append(strong,span);log.append(p);}if(nearBottom)log.scrollTop=log.scrollHeight;}
   }
-  async function poll(token){
-    if(token!==version||!room)return;
-    if(document.hidden){timer=setTimeout(()=>poll(token),1500);return;}
-    try{const pose=safePose(getPose());if(!pose)throw Error('La galleria sta ancora caricando.');const data=await service.rpc('tick',{room:room.id,position:pose});if(token!==version)return;failures=0;renderState(data);$('#social-connection').textContent=`Collegato · ${data.participants.length} presenti`;}
-    catch(error){if(token!==version)return;failures++;layer?.clear();$('#social-connection').textContent='Connessione interrotta · nuovo tentativo…';if(['ua_room_denied','ua_suspended','ua_room_full'].includes(error.code)||!service?.user){resetRoom();note(error.message,true);refreshIdentity();return;}}
-    if(token===version)timer=setTimeout(()=>poll(token),Math.min(10000,1000*Math.max(1,failures)));
-  }
-  async function activate(next){if(room&&room.id!==next.id)try{await service.rpc('leave',{room:room.id});}catch{}resetRoom();room=next;$('#social-room-start').hidden=true;$('#social-room-active').hidden=false;$('#social-room-title').textContent=room.name;$('#social-end').hidden=!room.owner;$('#social-share-link').hidden=true;note('Incontro aperto. Torna nella galleria per muoverti insieme agli altri.');poll(version);}
+  function clearPresence(){layer?.clear();rosterKey='';$('#social-people').replaceChildren();$('#social-count').textContent='';document.querySelector('#social-open').textContent='Incontri';}
+  const poller=createSocialPoller({
+    async request(){const pose=safePose(getPose());if(!pose)throw Error('La galleria sta ancora caricando.');return service.rpc('tick',{room:room.id,position:pose});},
+    onData(data){renderState(data);$('#social-connection').textContent=`Collegato · ${data.participants.length} presenti`;},
+    onError(error){clearPresence();$('#social-connection').textContent='Connessione interrotta · nuovo tentativo…';if(['ua_room_denied','ua_suspended','ua_room_full'].includes(error.code)||!service?.user){resetRoom();note(error.message,true);refreshIdentity();}},
+  });
+  function pauseRoom(message){poller.stop();clearPresence();if(room)$('#social-connection').textContent=message;}
+  function resumeRoom(){if(!room||document.hidden)return;if(navigator.onLine===false){pauseRoom('Sei offline · l’incontro riprende quando torna la connessione.');return;}$('#social-connection').textContent='Collegamento in corso…';poller.start();}
+  async function activate(next){if(room&&room.id!==next.id)try{await service.rpc('leave',{room:room.id});}catch{}resetRoom();room=next;$('#social-room-start').hidden=true;$('#social-room-active').hidden=false;$('#social-room-title').textContent=room.name;$('#social-end').hidden=!room.owner;$('#social-share-link').hidden=true;note('Incontro aperto. Torna nella galleria per muoverti insieme agli altri.');resumeRoom();}
   $('#social-create').addEventListener('submit',e=>{e.preventDefault();run(e.submitter,async()=>{requireAccount();await activate(await service.rpc('create',{name:$('#social-room-name').value.trim()}));});});
   $('#social-join').addEventListener('submit',e=>{e.preventDefault();run(e.submitter,async()=>{requireAccount();const invite=inviteCode($('#social-invite').value);if(!invite)throw Error('Inserisci un invito valido.');await activate(await service.rpc('join',{invite}));});});
   $('#social-copy').onclick=()=>run($('#social-copy'),async()=>{const url=new URL(location.href);url.search='';url.hash='visit='+room.invite;$('#social-share-link').value=url.href;try{await navigator.clipboard.writeText(url.href);note('Invito copiato. Condividilo con chi vuoi incontrare.');}catch{$('#social-share-link').hidden=false;$('#social-share-link').select();note('Copia il link mostrato.');}});
@@ -109,9 +111,11 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake}) {
   for(const button of dialog.querySelectorAll('[data-social-tab]'))button.onclick=()=>tab(button.dataset.socialTab);
   $('.social-close').onclick=$('#social-return').onclick=()=>dialog.close();
   window.addEventListener('resize',()=>{if(dialog.open)drawPreview();});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){layer?.clear();return;}animatePreview();if(room){clearTimeout(timer);version++;poll(version);}});
-  window.addEventListener('pagehide',()=>{version++;clearTimeout(timer);layer?.clear();});
-  window.addEventListener('pageshow',event=>{if(event.persisted&&room){clearTimeout(timer);version++;poll(version);}});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){pauseRoom('Incontro in pausa · torna qui per ricollegarti.');return;}animatePreview();resumeRoom();});
+  window.addEventListener('pagehide',()=>pauseRoom('Incontro in pausa · torna qui per ricollegarti.'));
+  window.addEventListener('pageshow',event=>{if(event.persisted)resumeRoom();});
+  window.addEventListener('offline',()=>pauseRoom('Sei offline · l’incontro riprende quando torna la connessione.'));
+  window.addEventListener('online',resumeRoom);
   const incoming=inviteCode(location.hash.startsWith('#visit=')?location.hash.slice(7):'');if(incoming)$('#social-invite').value=incoming;
   refreshIdentity();
   if(service) {

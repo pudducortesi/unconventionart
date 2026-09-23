@@ -94,14 +94,16 @@ function createFallback(value,name='') {
   root.userData.dispose=()=>{if(disposed)return;disposed=true;disposeGlasses();for(const g of geometries)g.dispose();for(const m of Object.values(mats))m.dispose();root.traverse(o=>{if(o.isSprite){o.material.map?.dispose();o.material.dispose();}});};
   return root;
 }
-export function createAvatarLayer(scene,wake){
+export function createAvatarLayer(scene,wake,now=()=>performance.now()){
   const peers=new Map();
   return {
     sync(participants,self){
       const ids=new Set();
       for(const p of participants){if(p.id===self)continue;ids.add(p.id);let peer=peers.get(p.id);const signature=JSON.stringify([p.name,p.avatar]);
         if(peer?.signature!==signature){if(peer){scene.remove(peer.mesh);peer.mesh.userData.dispose();}const mesh=createAvatar(p.avatar,p.name,wake);mesh.position.set(p.x,p.y,p.z);mesh.rotation.y=p.yaw;scene.add(mesh);peer={mesh,signature};peers.set(p.id,peer);}
-        peer.target=new T.Vector3(p.x,p.y,p.z);peer.yaw=p.yaw;peer.wave=p.wave===true;
+        peer.target=new T.Vector3(p.x,p.y,p.z);peer.yaw=p.yaw;
+        if(p.wave===true&&!peer.wave)peer.waveUntil=now()+3000;
+        peer.wave=p.wave===true;
       }
       for(const [id,p] of peers)if(!ids.has(id)){scene.remove(p.mesh);p.mesh.userData.dispose();peers.delete(id);}wake();
     },
@@ -110,7 +112,7 @@ export function createAvatarLayer(scene,wake){
       const walking=distance>.01,turning=Math.abs(angle)>.01;
       if(walking)p.mesh.position.lerp(p.target,1-Math.exp(-dt*9));else p.mesh.position.copy(p.target);
       if(turning)p.mesh.rotation.y+=angle*(1-Math.exp(-dt*10));else p.mesh.rotation.y=p.yaw;
-      const settling=p.mesh.userData.animate(dt,time,walking?Math.min(1,distance*8):0,p.wave);
+      const settling=p.mesh.userData.animate(dt,time,walking?Math.min(1,distance*8):0,p.wave&&now()<p.waveUntil);
       moving=walking||turning||settling||moving;
     }return moving;},
     clear(){for(const p of peers.values()){scene.remove(p.mesh);p.mesh.userData.dispose();}peers.clear();wake();},

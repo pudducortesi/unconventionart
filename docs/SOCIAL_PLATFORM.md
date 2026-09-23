@@ -9,6 +9,7 @@
 - Incontri privati con inviti casuali UUID, scadenza dopo 24 ore, massimo 16 presenti, fino a tre incontri attivi per organizzatore. L'utente deve scegliere esplicitamente di partecipare.
 - Presenze e posizione aggiornate con RPC ogni secondo, interpolate nel renderer. Nessuna presenza simulata. Alla perdita della connessione gli avatar remoti scompaiono e viene mostrato lo stato del collegamento; dopo 30 secondi senza aggiornamento il server non considera il partecipante presente.
 - Saluto attivato dal partecipante, visibile agli altri avatar e nell'elenco dei presenti. Dura tre secondi, scade sul server e viene limitato a un invio ogni quattro secondi. Si può provare nell'anteprima dell'avatar senza entrare in un incontro; anche con movimento ridotto la posa torna automaticamente a riposo.
+- Ripresa degli incontri dopo cambio scheda o ritorno della rete. Una sola richiesta di presenza può essere in corso; le risposte precedenti alla pausa vengono ignorate e l’elenco dei presenti viene svuotato durante l’interruzione. Gli errori temporanei di rinnovo non cancellano l’accesso; una sessione revocata richiede invece un nuovo login. Uscite e nuovi accessi non possono essere annullati da risposte tardive.
 - Chat di gruppo, blocco reciproco della visibilità e segnalazioni. Blocco dell'organizzatore impedisce di rientrare tramite lo stesso invito. Moderazione dall'atelier, con sospensione e riabilitazione dei profili.
 - Offerte amministrabili per stampa, edizione digitale e NFT; bozza, pubblicazione e ritiro. Visibilità pubblica subordinata a opera pubblicata, offerta pubblicata, prezzo, condizioni e link valido. NFT: rete, contratto e token devono corrispondere al link OpenSea. Nessuna offerta o prezzo di esempio pubblicato.
 
@@ -45,3 +46,9 @@ Le coordinate conservano solo l'ultimo stato, senza cronologia. I messaggi sono 
 5. Ordini verificati tramite webhook e consegna; collezione NFT pilota con contratto e diritti approvati.
 
 Non serve acquistare un mini PC per questo rilascio.
+
+## Verifica riconnessione (settembre 2026)
+
+`npm run check`: build e 163 test superati. Test con risposte HTTP e richieste ritardate controllate: perdita rete e timeout durante il rinnovo, HTTP 429/503, token revocato, rinnovo condiviso tra richieste, uscita mentre il rinnovo è in corso, risposte di un vecchio account, pausa/ripresa rapida, backoff e ritorno alla frequenza normale. Il saluto ha anche un limite locale di tre secondi per fermare l’animazione quando la risposta successiva tarda.
+
+Riferimenti Auth: [sessioni](https://supabase.com/docs/guides/auth/sessions), [codici di errore](https://supabase.com/docs/guides/auth/debugging/error-codes). Non sono cambiate le impostazioni Auth o lo schema dati. Le verifiche simulate non sostituiscono il collaudo con due dispositivi e rete mobile reale.
