@@ -60,3 +60,11 @@ test('Procedural glasses follow the head and dispose independently',()=>{
   }
   assert.equal(createAvatar({glasses:'bad-url'}).getObjectByName('avatar-glasses'),undefined);
 });
+
+test('Peer wave raises the arm only during the gesture and releases frames after it ends',()=>{
+  const scene=new T.Scene(),layer=createAvatarLayer(scene,()=>{}),p={id:'peer',name:'',avatar:{},x:0,y:0,z:0,yaw:0};
+  layer.sync([{...p,wave:true}],'self');const arm=scene.children[0].getObjectByName('rightUpperArm');
+  assert.equal(layer.update(.016,1000),true);assert.ok(arm.rotation.z>2);
+  layer.sync([{...p,wave:false}],'self');assert.equal(layer.update(.016,1016),false);assert.equal(arm.rotation.z,.075);
+  layer.clear();
+});
