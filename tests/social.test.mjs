@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {PGlite} from '@electric-sql/pglite';
+import {createAvatar} from '../js/museum/social-avatar.js';
 import {normalizeAvatar,DEFAULT_AVATAR,inviteCode,safePose,offerURL} from '../js/museum/social-model.js';
 
 test('Untrusted avatar, pose, invitation and checkout data are bounded',()=>{
@@ -14,6 +15,15 @@ test('Untrusted avatar, pose, invitation and checkout data are bounded',()=>{
   assert.ok(offerURL(offer));assert.equal(offerURL({...offer,checkout_url:'https://buy.stripe.com.evil.test/x'}),null);
   assert.equal(offerURL({...offer,checkout_url:'javascript:alert(1)'}),null);
   assert.equal(offerURL({...offer,kind:'nft'}),null);
+});
+
+test('All avatar builds and hair styles construct finite 3D meshes and dispose',()=>{
+  for(const style of ['short','bob','long','shaved'])for(const build of ['slim','regular','broad']){
+    const avatar=createAvatar({...DEFAULT_AVATAR,style,build});
+    avatar.updateMatrixWorld(true);
+    let meshes=0;avatar.traverse(object=>{if(object.isMesh){meshes++;for(const v of object.geometry.attributes.position.array)assert.ok(Number.isFinite(v));}});
+    assert.ok(meshes>=10);avatar.userData.dispose();
+  }
 });
 
 test('Social RPC enforces authentication, room isolation, identity, blocks, rate limits and moderation',async t=>{
@@ -61,6 +71,12 @@ test('Social RPC enforces authentication, room isolation, identity, blocks, rate
   await identity(ids[0]);await rpc('unblock',{target:ids[1]});
   await rpc('suspend',{target:ids[1],suspended:true});await identity(ids[1]);await assert.rejects(rpc('profile'),/ua_suspended/);
   await identity(ids[0]);await rpc('close',{room:room.id});await clearLimit(ids[0],'tick');await assert.rejects(rpc('tick',{room:room.id,position:{x:0,z:0,y:0,yaw:0}}),/ua_room_denied/);
+  await db.exec('reset role');
+  await db.query('insert into public.gallery_artworks(id,published) values($1,true)',[ids[2]]);
+  await identity(ids[0]);
+  await db.query("insert into public.gallery_offers(work_id,kind,amount_minor,rights,checkout_url,published) values($1,'print',10000,'Personal display; no copyright transfer','https://buy.stripe.com/test',true)",[ids[2]]);
+  await identity(null,'anon');assert.equal((await db.query('select * from public.gallery_offers')).rows.length,1);
+  await db.exec('reset role');await db.query('update public.gallery_artworks set published=false where id=$1',[ids[2]]);
   await identity(null,'anon');assert.equal((await db.query('select * from public.gallery_offers')).rows.length,0);
   await assert.rejects(db.query("insert into public.gallery_offers(work_id,kind,amount_minor,rights,checkout_url) values(gen_random_uuid(),'print',100,'No copyright transfer','https://buy.stripe.com/x')"),/permission denied/);
 });
