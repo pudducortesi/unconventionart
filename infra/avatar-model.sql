@@ -1,71 +1,9 @@
--- UnconventionArt: private visits, profiles and moderated chat.
--- No direct client grants on private tables; the RPC owns each authorization check.
-begin;
-create schema if not exists ua_social;
-revoke all on schema ua_social from public, anon, authenticated;
-grant usage on schema ua_social to authenticated;
-
-create table ua_social.profiles (
-  user_id uuid primary key references auth.users(id) on delete cascade,
-  name text not null check(length(trim(name)) between 2 and 32),
-  avatar jsonb not null,
-  suspended boolean not null default false
-);
-create table ua_social.rooms (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users(id) on delete cascade,
-  invite uuid not null unique default gen_random_uuid(),
-  name text not null check(length(trim(name)) between 2 and 60),
-  created_at timestamptz not null default now(),
-  expires_at timestamptz not null default now() + interval '24 hours'
-);
-create index ua_rooms_owner on ua_social.rooms(owner_id);
-create table ua_social.members (
-  room_id uuid references ua_social.rooms(id) on delete cascade,
-  user_id uuid references ua_social.profiles(user_id) on delete cascade,
-  x real not null default 0, z real not null default 0, y real not null default 0,
-  yaw real not null default 0, seen_at timestamptz not null default now(),
-  primary key(room_id,user_id)
-);
-create index ua_members_user on ua_social.members(user_id);
-create table ua_social.messages (
-  id uuid primary key default gen_random_uuid(),
-  room_id uuid not null references ua_social.rooms(id) on delete cascade,
-  user_id uuid not null references ua_social.profiles(user_id) on delete cascade,
-  body text not null check(length(trim(body)) between 1 and 500),
-  created_at timestamptz not null default now()
-);
-create index ua_messages_room_time on ua_social.messages(room_id,created_at desc);
-create index ua_messages_user on ua_social.messages(user_id);
-create table ua_social.blocks (
-  user_id uuid references auth.users(id) on delete cascade,
-  target_id uuid references auth.users(id) on delete cascade,
-  primary key(user_id,target_id), check(user_id <> target_id)
-);
-create index ua_blocks_target on ua_social.blocks(target_id);
-create table ua_social.reports (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  target_id uuid not null references auth.users(id) on delete cascade,
-  room_id uuid not null references ua_social.rooms(id) on delete cascade,
-  reason text not null check(length(trim(reason)) between 3 and 500),
-  created_at timestamptz not null default now()
-);
-create table ua_social.limits (
-  user_id uuid references auth.users(id) on delete cascade,
-  action text, at timestamptz not null, primary key(user_id,action)
-);
-alter table ua_social.profiles enable row level security;
-alter table ua_social.rooms enable row level security;
-alter table ua_social.members enable row level security;
-alter table ua_social.messages enable row level security;
-alter table ua_social.blocks enable row level security;
-alter table ua_social.reports enable row level security;
-alter table ua_social.limits enable row level security;
-revoke all on all tables in schema ua_social from public,anon,authenticated;
-
-create function ua_social.dispatch(action text, payload jsonb) returns jsonb
-language plpgsql security definer set search_path='' as $$
+CREATE OR REPLACE FUNCTION ua_social.dispatch(action text, payload jsonb)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
 declare uid uuid := auth.uid(); rid uuid; room ua_social.rooms; result jsonb;
   target uuid; previous timestamptz; delay interval; a jsonb; n text; pos jsonb;
 begin
@@ -160,11 +98,4 @@ begin
     return result;
   end if;
   raise exception 'ua_invalid_action';
-end $$;
-revoke all on function ua_social.dispatch(text,jsonb) from public,anon,authenticated;
-grant execute on function ua_social.dispatch(text,jsonb) to authenticated;
-create function public.ua_social(action text, payload jsonb default '{}'::jsonb) returns jsonb
-language sql security invoker set search_path='' as $$ select ua_social.dispatch(action,payload) $$;
-revoke all on function public.ua_social(text,jsonb) from public,anon;
-grant execute on function public.ua_social(text,jsonb) to authenticated;
-commit;
+end $function$

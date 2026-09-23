@@ -2,7 +2,7 @@ import * as T from '../../vendor/three.module.js';
 import {normalizeAvatar} from './social-model.js';
 
 // Locally generated, articulated fallback. No remote model/texture requests.
-export function createAvatar(value,name='') {
+function createFallback(value,name='') {
   const a=normalizeAvatar(value),root=new T.Group(),body=new T.Group();root.add(body);
   const width={slim:.89,regular:1,broad:1.13}[a.build];
   const material=(color,roughness=.8)=>new T.MeshStandardMaterial({color,roughness});
@@ -70,10 +70,12 @@ export function createAvatar(value,name='') {
   if(name){const canvas=document.createElement('canvas');canvas.width=384;canvas.height=72;const ctx=canvas.getContext('2d');ctx.fillStyle='rgba(20,24,32,.86)';ctx.beginPath();ctx.roundRect(0,0,384,72,24);ctx.fill();ctx.font='500 30px sans-serif';ctx.fillStyle='white';ctx.textAlign='center';ctx.fillText(name.slice(0,32),192,47,355);const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;const label=new T.Sprite(new T.SpriteMaterial({map:texture,depthWrite:false}));label.position.y=1.96;label.scale.set(1.1,.21,1);root.add(label);}
   let stride=0,disposed=false;
   root.userData.limbs=[...arms,...legs];
+  // Return true only while the gait needs frames to reach its resting pose.
   root.userData.animate=(dt,time,speed=0)=>{
-    if(disposed)return;
+    if(disposed)return false;
     const t=(Number.isFinite(time)?time:0)/1000,delta=Math.max(0,Math.min(.1,Number.isFinite(dt)?dt:0));
     stride+=(T.MathUtils.clamp(speed,0,1)-stride)*(1-Math.exp(-delta*12));
+    if(speed<=0&&stride<.001)stride=0;
     body.position.y=Math.abs(Math.sin(t*7))*stride*.012;
     head.rotation.y=Math.sin(t*.7)*.025*(1-stride);
     const blink=t%4.7,open=blink<.15?Math.max(.08,Math.abs(blink-.075)/.075):1;
@@ -82,6 +84,7 @@ export function createAvatar(value,name='') {
       legs[i].rotation.x=wave*.38;knees[i].rotation.x=-Math.max(0,-wave)*.52;
       arms[i].rotation.x=-wave*.28;elbows[i].rotation.x=-.10-Math.max(0,wave)*.20;
     }
+    return stride>0;
   };
   root.userData.dispose=()=>{if(disposed)return;disposed=true;for(const g of geometries)g.dispose();for(const m of Object.values(mats))m.dispose();root.traverse(o=>{if(o.isSprite){o.material.map?.dispose();o.material.dispose();}});};
   return root;
@@ -92,16 +95,35 @@ export function createAvatarLayer(scene,wake){
     sync(participants,self){
       const ids=new Set();
       for(const p of participants){if(p.id===self)continue;ids.add(p.id);let peer=peers.get(p.id);const signature=JSON.stringify([p.name,p.avatar]);
-        if(peer?.signature!==signature){if(peer){scene.remove(peer.mesh);peer.mesh.userData.dispose();}const mesh=createAvatar(p.avatar,p.name);mesh.position.set(p.x,p.y,p.z);mesh.rotation.y=p.yaw;scene.add(mesh);peer={mesh,signature};peers.set(p.id,peer);}
+        if(peer?.signature!==signature){if(peer){scene.remove(peer.mesh);peer.mesh.userData.dispose();}const mesh=createAvatar(p.avatar,p.name,wake);mesh.position.set(p.x,p.y,p.z);mesh.rotation.y=p.yaw;scene.add(mesh);peer={mesh,signature};peers.set(p.id,peer);}
         peer.target=new T.Vector3(p.x,p.y,p.z);peer.yaw=p.yaw;
       }
       for(const [id,p] of peers)if(!ids.has(id)){scene.remove(p.mesh);p.mesh.userData.dispose();peers.delete(id);}wake();
     },
     update(dt,time){let moving=false;for(const p of peers.values()){
       const distance=p.mesh.position.distanceTo(p.target),angle=Math.atan2(Math.sin(p.yaw-p.mesh.rotation.y),Math.cos(p.yaw-p.mesh.rotation.y));
-      if(distance>.01||Math.abs(angle)>.01){moving=true;p.mesh.position.lerp(p.target,1-Math.exp(-dt*9));p.mesh.rotation.y+=angle*(1-Math.exp(-dt*10));}
-      p.mesh.userData.animate(dt,time,Math.min(1,distance*8));
+      const walking=distance>.01,turning=Math.abs(angle)>.01;
+      if(walking)p.mesh.position.lerp(p.target,1-Math.exp(-dt*9));else p.mesh.position.copy(p.target);
+      if(turning)p.mesh.rotation.y+=angle*(1-Math.exp(-dt*10));else p.mesh.rotation.y=p.yaw;
+      const settling=p.mesh.userData.animate(dt,time,walking?Math.min(1,distance*8):0);
+      moving=walking||turning||settling||moving;
     }return moving;},
     clear(){for(const p of peers.values()){scene.remove(p.mesh);p.mesh.userData.dispose();}peers.clear();wake();},
   };
+}
+
+// Synchronous placeholder preserves room responsiveness; the model is fetched once, on demand.
+export function createAvatar(value,name='',onReady=()=>{}){
+  const a=normalizeAvatar(value),root=createFallback(a,name);
+  if(a.model!=='atelier')return root;
+  const fallbackBody=root.children[0],fallbackAnimate=root.userData.animate,disposeFallback=root.userData.dispose;
+  let loaded=null,disposed=false;
+  root.userData.status='loading';
+  root.userData.animate=(...args)=>(loaded?loaded.userData.animate:fallbackAnimate)(...args);
+  root.userData.ready=import('../../vendor/avatar-runtime.js').then(runtime=>runtime.loadAtelier(a)).then(model=>{
+    if(disposed){model.userData.dispose();return;}
+    loaded=model;fallbackBody.visible=false;root.add(model);root.userData.status='ready';onReady(root);
+  }).catch(()=>{if(!disposed){root.userData.status='fallback';onReady(root);}});
+  root.userData.dispose=()=>{if(disposed)return;disposed=true;if(loaded){root.remove(loaded);loaded.userData.dispose();}disposeFallback();};
+  return root;
 }

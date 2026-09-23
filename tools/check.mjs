@@ -82,6 +82,14 @@ for (const [path, output] of Object.entries(meta.outputs)) {
 }
 assert(!report.initial.includes(report.photo),'Path tracer stays out of initial loading');
 assert(!deployedHtml.includes(report.photo.replace('dist/','')),'Do not preload the path tracer');
+const avatarRuntime = Object.entries(meta.outputs).find(([, output]) => output.entryPoint === 'vendor/avatar-runtime.js')?.[0];
+assert(avatarRuntime, 'Build the on-demand avatar runtime');
+assert(!report.initial.includes(avatarRuntime), 'Avatar runtime stays outside the initial gallery payload');
+assert(!deployedHtml.includes(avatarRuntime.replace('dist/','')), 'Do not preload the avatar runtime');
+assert(!deployedHtml.includes('atelier-v1.glb'), 'Fetch the detailed avatar only when selected or encountered');
+assert((await readFile('avatars/atelier-v1.glb')).equals(await readFile('dist/avatars/atelier-v1.glb')), 'Publish the exact reviewed avatar asset');
+await access('dist/avatars/LICENSE.txt');
+await access('dist/licenses/three-vrm-LICENSE.txt');
 for (const path of ['images/site/brand-original.svg'])
   assert((await readFile(path)).equals(await readFile(`dist/${path}`)),`Preserve original asset bytes: ${path}`);
 const optimizedCatalogue = JSON.parse(await readFile('dist/data/catalogue.json','utf8'));

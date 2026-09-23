@@ -1,27 +1,37 @@
 # Avatar upgrade — 23 September 2026
 
-## Shipped in this change
+## Implemented
 
-A locally generated articulated avatar replaces the original primitive figure. The existing profile schema remains compatible (skin, hair, outfit, haircut, build). The model adds facial features, ears, eyebrows, eyelids, layered hair, shaped torso, cuffs and soles. Shoulder/elbow and hip/knee hierarchies keep hands and shoes attached during gait. The preview offers idle and walking modes; remote avatars animate from interpolated displacement. Geometry and materials are released when replaced.
+The profile now offers **Essenziale** (procedural avatar) and **Atelier · figura femminile** (authored, skinned MPFB model). Existing profiles remain on Essenziale until changed. Both appear in the preview and invitation rooms. The selector persists through the private social RPC; only the two curated model identifiers are accepted, never user-provided URLs.
 
-This is an improved procedural fallback, not a downloaded VRM model or a CharacterStudio integration. It does not match the asset quality of a professionally authored Sims-like character.
+Atelier includes a textured human body and outfit, hair color, skin tint, outfit tint, three body widths and four hairstyle settings. Long uses the authored ponytail; other styles use small fitted procedural hair pieces. These are not separate clothing assets or body-shape morphs. The preview provides walking/idle modes, rotation and a face close-up. The A-pose is relaxed before recording animation baselines. Walk cycles and blinks are generated locally.
 
-## Upstream selection
+## Asset acquisition and optimization
 
-Exact reviewed commits are in `research/avatar-sources.json`.
+The earlier binary-download blocker was resolved using a read-only GitHub Actions asset preparation job and the GitHub artifact download connector. The workflow is committed at `.github/workflows/avatar-assets.yml`. No private data or repository write credential is sent to the asset pipeline.
 
-- https://github.com/pixiv/three-vrm — MIT runtime for VRM models; use a single shared Three.js instance. Pin and test against the project's Three.js 0.186.0 before adding it to the vendor build.
-- https://github.com/M3-org/CharacterStudio — MIT character customization code; assets are separate. Its CharacterManager logic is the integration candidate; do not import its full React/wallet application into the gallery.
-- https://github.com/makehumancommunity/mpfb2 — GPL Blender authoring tool; bundled assets CC0. Author and simplify original characters offline, then export GLB/VRM with a compatible rig and facial morph targets.
-- https://github.com/met4citizen/TalkingHead — MIT facial/lip-sync runtime, later voice phase. Demo assets have independent terms; several are non-commercial.
-- https://github.com/donmccurdy/glTF-Transform — already tracked in research/upstream; candidate for geometry, animation and texture compression. Preserve VRM extensions when processing VRM; do not assume generic glTF transforms retain them.
+Source: `met4citizen/TalkingHead`, commit `eed58d198076a7e1e825f804802921c4d3804d46`, `avatars/mpfb.glb`. Upstream declares this specific model CC0; other demonstration avatars are excluded. Attribution: `avatars/LICENSE.txt`.
 
-## Asset gate and current blocker
+- Original: 36,815,920 bytes.
+- Optimized: 1,779,588 bytes, 22,223 triangles, seven skinned meshes.
+- Geometry simplified with glTF Transform 4.2.1 and meshoptimizer 0.25.0; essential blink/smile/jaw morphs retained; eyelashes omitted; textures reduced to 1024px WebP.
+- Exact asset hash and structure: `avatars/atelier-v1.report.json`.
+- Asset tooling dependency lock: `research/avatar-tooling-lock.json`.
 
-The TalkingHead MPFB example is 36,815,920 bytes, before optimization. Direct GitHub binary downloads and npm registry access timed out in this workspace, and the GitHub connector cannot return that binary. No unverified external avatar is loaded by visitors. No upstream runtime package was installed, and no demo asset was republished.
+## Runtime
 
-Next: acquire a commercially usable rigged asset, inspect its appearance and license, produce mobile LODs/texture atlases, integrate three-vrm, and connect curated wardrobe choices to persistent profile validation. Target budgets (not measured performance): 1–3 MB compressed per avatar, 10–20k triangles at near LOD and 2–5k at far LOD, 1K textures, few material batches. Verify with 16 visitors on real iPhone hardware before calling this production-ready.
+`@pixiv/three-vrm` 3.5.5 (MIT) is vendored in `js/avatar-runtime/three-vrm.js` from the official npm package and bundled with GLTFLoader and SkeletonUtils against the existing shared Three.js 0.186.0 engine. No second Three engine or external CDN is loaded. The VRM loader plugin is registered; the included model is **GLB**, not VRM. General user VRM import and VRM expression/animation UI are not implemented.
+
+Atelier loads only when selected or encountered in a room. One cached template shares geometry/textures between participants; each participant gets their own skeleton and tinted materials. The procedural avatar remains visible while loading and on failure; the preview explicitly reports fallback. Requests have a 15-second timeout. Replaced/disposed instances release owned resources without disposing shared texture/geometry data. Preview animation is separate from gallery rendering, capped at about 30 fps and stops when closed/hidden; reduced-motion preference is respected.
+
+When a participant stops walking, interpolation snaps to the final position and the gait settles fully before releasing the gallery render loop. Resting participants do not keep the full gallery rendering continuously; their idle expressions update when the scene next renders.
+
+## Remaining work
+
+CharacterStudio is evaluated and pinned in `research/avatar-sources.json`, but its editor is not integrated. A full Sims-like wardrobe, additional authored bodies, facial sliders, user VRM import, voice/lip sync, distance LODs, and real iPhone/16-user performance measurements remain future work. Do not describe this release as a complete metaverse avatar creator.
 
 ## Validation
 
-Run `npm run check`. Avatar tests exercise all supported combinations, finite geometry, joint attachment, animation, geometry budgets, idempotent disposal and peer replacement/removal. Browser GPU appearance and multi-device performance still require verification; numerical tests do not establish visual quality.
+`npm run check` completed successfully: build validation and 146 tests. Tests verify the exact model hash, size and triangle budget, skeleton presence, independent instances, finite animation transforms, gait settling, disposal, profile model persistence, invalid model rejection and compatibility with old profiles. Build checks confirm the deployed asset matches the reviewed bytes, licenses are included, and the avatar runtime stays outside initial loading. The existing remote `avatar_model_selection` database migration and deployed model allowlist were also verified.
+
+Node model tests omit image decoding and therefore do not validate GPU materials or on-device frame rates. The cloud browser does not support WebGL; final visual rendering and iPhone performance remain to be checked on a real device.
