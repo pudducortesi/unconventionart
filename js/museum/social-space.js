@@ -8,7 +8,7 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake}) {
   dialog.innerHTML=`<div class="social-heading"><div><span class="eyebrow">UNCONVENTIONART · SOCIAL BETA</span><h2>Il tuo posto in galleria.</h2></div><button type="button" class="social-close" aria-label="Chiudi incontri">×</button></div>
     <nav class="social-tabs" aria-label="Il tuo spazio"><button data-social-tab="avatar" aria-pressed="true">Il mio avatar</button><button data-social-tab="visits" aria-pressed="false">Incontri <span id="social-count"></span></button><button data-social-tab="editions" aria-pressed="false">Edizioni e NFT</button></nav>
     <p id="social-notice" role="status" aria-live="polite"></p>
-    <section data-social-panel="avatar" class="social-avatar-layout"><div class="social-preview-area"><div id="social-preview" aria-label="Anteprima tridimensionale del tuo avatar"></div><p>Trascina per ruotare il personaggio.</p></div><div>
+    <section data-social-panel="avatar" class="social-avatar-layout"><div class="social-preview-area"><div id="social-preview" aria-label="Anteprima tridimensionale del tuo avatar"></div><p>Trascina per ruotare il personaggio.</p><div class="social-actions"><button type="button" id="social-avatar-idle" aria-pressed="true">In posa</button><button type="button" id="social-avatar-walk" aria-pressed="false">Cammina</button></div></div><div>
       <form id="social-profile"><label>Nome nella galleria<input id="social-name" required minlength="2" maxlength="32" autocomplete="nickname" placeholder="Come vuoi essere chiamato?"></label><div id="social-wardrobe"></div><button type="submit" class="social-primary">Salva avatar</button></form>
       <div id="social-identity" hidden><p id="social-identity-name"></p><button id="social-logout" type="button">Esci dall’account</button></div>
       <form id="social-login"><h3>Porta il tuo avatar negli incontri</h3><p>Accedi con il tuo account. La visita individuale resta libera.</p><label>Email<input id="social-email" type="email" autocomplete="email" required maxlength="254"></label><label>Password<input id="social-password" type="password" autocomplete="current-password" required></label><div class="social-actions"><button type="submit" class="social-primary">Accedi</button><button type="submit" name="signup" value="signup" disabled>Crea account</button></div><p id="social-signup-note">Per creare un account usa almeno 12 caratteri e conferma l’email ricevuta.</p></form>
@@ -21,7 +21,7 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake}) {
     <section data-social-panel="editions" hidden><h3>Opere da collezionare.</h3><p>Stampe, edizioni digitali e NFT. Ogni offerta riporta prezzo e diritti inclusi; il pagamento si completa sulla pagina del venditore.</p><button id="social-store-refresh">Aggiorna disponibilità</button><div id="social-editions"></div><p class="social-caption">Il possesso di un NFT non attribuisce automaticamente i diritti d’autore. Consulta i termini della singola opera.</p></section>`;
   const $=s=>dialog.querySelector(s),note=(text,error=false)=>{$('#social-notice').textContent=text;$('#social-notice').dataset.error=String(error);};
   const element=(tag,text)=>{const e=document.createElement(tag);if(text)e.textContent=text;return e;};
-  let avatar={...DEFAULT_AVATAR},profile=null,room=null,service,layer=null,timer,version=0,failures=0,reportTarget=null,rosterKey='',messagesKey='',previewRenderer,previewScene,previewCamera,previewMesh;
+  let avatar={...DEFAULT_AVATAR},profile=null,room=null,service,layer=null,timer,version=0,failures=0,reportTarget=null,rosterKey='',messagesKey='',previewRenderer,previewScene,previewCamera,previewMesh,previewWalking=false,previewFrame=0,previewTime=0;
   try{avatar=normalizeAvatar(JSON.parse(localStorage.getItem('ua-avatar-draft')||'null'));}catch{}
   let serviceError;
   try{service=await createSocialService();}catch(error){serviceError=error.message;note(error.message,true);}
@@ -31,13 +31,25 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake}) {
   function renderPreview(){
     if(!previewRenderer)return;
     if(previewMesh){previewScene.remove(previewMesh);previewMesh.userData.dispose();}
-    previewMesh=createAvatar(avatar);previewMesh.rotation.y=-.32;previewScene.add(previewMesh);drawPreview();
+    previewMesh=createAvatar(avatar);previewMesh.rotation.y=-.32;previewMesh.userData.animate(.1,0);previewScene.add(previewMesh);drawPreview();animatePreview();
   }
   function drawPreview(){if(!previewRenderer)return;const width=Math.max(160,$('#social-preview').clientWidth),height=330;previewRenderer.setSize(width,height,false);previewCamera.aspect=width/height;previewCamera.updateProjectionMatrix();previewRenderer.render(previewScene,previewCamera);}
+  function animatePreview(){
+    if(previewFrame||!previewMesh)return;
+    const frame=time=>{
+      previewFrame=0;
+      if(!dialog.open||document.hidden||$('[data-social-panel=avatar]').hidden)return;
+      if(time-previewTime>=33){previewMesh.userData.animate(Math.min(.1,(time-previewTime)/1000),time,previewWalking?1:0);previewTime=time;previewRenderer.render(previewScene,previewCamera);}
+      if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches)previewFrame=requestAnimationFrame(frame);
+    };
+    previewFrame=requestAnimationFrame(frame);
+  }
+  dialog.addEventListener('close',()=>{cancelAnimationFrame(previewFrame);previewFrame=0;});
   function startPreview(){
-    if(previewRenderer){drawPreview();return;}
+    if(previewRenderer){drawPreview();animatePreview();return;}
     try{previewRenderer=new T.WebGLRenderer({antialias:true,alpha:true});previewRenderer.setPixelRatio(Math.min(devicePixelRatio,1.5));previewScene=new T.Scene();previewScene.add(new T.HemisphereLight(0xffffff,0x777080,2.5));const light=new T.DirectionalLight(0xffffff,3);light.position.set(-2,3,-4);previewScene.add(light);previewCamera=new T.PerspectiveCamera(34,1,.1,20);previewCamera.position.set(0,1.05,-3.7);previewCamera.lookAt(0,.95,0);const canvas=previewRenderer.domElement;canvas.setAttribute('aria-label','Avatar personalizzabile');$('#social-preview').append(canvas);let last=null;canvas.addEventListener('pointerdown',e=>{last=e.clientX;canvas.setPointerCapture(e.pointerId);});canvas.addEventListener('pointermove',e=>{if(last===null)return;previewMesh.rotation.y+=(e.clientX-last)*.015;last=e.clientX;drawPreview();});for(const type of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(type,()=>{last=null;});renderPreview();}catch{$('#social-preview').textContent='Anteprima 3D non disponibile su questo dispositivo. Puoi comunque personalizzare e salvare l’avatar.';}
   }
+  for(const [id,walking] of [['social-avatar-idle',false],['social-avatar-walk',true]])$('#'+id).onclick=()=>{previewWalking=walking;$('#social-avatar-idle').setAttribute('aria-pressed',String(!walking));$('#social-avatar-walk').setAttribute('aria-pressed',String(walking));animatePreview();};
   const labels={skin:'Carnagione',hair:'Colore dei capelli',outfit:'Abbigliamento',style:'Taglio',build:'Corporatura'};
   const optionLabels={short:'Corti',bob:'Caschetto',long:'Lunghi',shaved:'Rasati',slim:'Snella',regular:'Regolare',broad:'Robusta'};
   for(const [key,options] of Object.entries(AVATAR_OPTIONS)){
@@ -87,7 +99,7 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake}) {
   for(const button of dialog.querySelectorAll('[data-social-tab]'))button.onclick=()=>tab(button.dataset.socialTab);
   $('.social-close').onclick=$('#social-return').onclick=()=>dialog.close();
   window.addEventListener('resize',()=>{if(dialog.open)drawPreview();});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){layer?.clear();return;}if(room){clearTimeout(timer);version++;poll(version);}});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){layer?.clear();return;}animatePreview();if(room){clearTimeout(timer);version++;poll(version);}});
   window.addEventListener('pagehide',()=>{version++;clearTimeout(timer);layer?.clear();});
   window.addEventListener('pageshow',event=>{if(event.persisted&&room){clearTimeout(timer);version++;poll(version);}});
   const incoming=inviteCode(location.hash.startsWith('#visit=')?location.hash.slice(7):'');if(incoming)$('#social-invite').value=incoming;

@@ -1,0 +1,22 @@
+{
+  "reviewedAt": "2026-09-23",
+  "status": "evaluated-not-runtime-integrated",
+  "repositories": [
+    {
+      "repo": "pixiv/three-vrm",
+      "sha": "1b4fc0cc7ef39a49d62bb7a66dcfeca8f65316f7"
+    },
+    {
+      "repo": "M3-org/CharacterStudio",
+      "sha": "293182bf4a6087f4a4a7fd00e4fbdfb590029da7"
+    },
+    {
+      "repo": "makehumancommunity/mpfb2",
+      "sha": "7fcc8df56f26776923e0a825f4551c3c3779befe"
+    },
+    {
+      "repo": "met4citizen/TalkingHead",
+      "sha": "eed58d198076a7e1e825f804802921c4d3804d46"
+    }
+  ]
+}
