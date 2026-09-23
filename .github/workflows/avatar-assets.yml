@@ -1,0 +1,57 @@
+name: Prepare avatar assets
+on:
+  push:
+    branches: [codex/immersive-portfolio]
+    paths: [.github/workflows/avatar-assets.yml]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated asset tooling
+        run: |
+          mkdir -p avatar-build/output
+          cd avatar-build
+          npm init -y
+          npm install --ignore-scripts @gltf-transform/core@4.2.1 @gltf-transform/functions@4.2.1 @gltf-transform/extensions@4.2.1 sharp@0.34.3 @pixiv/three-vrm@3.5.5 three@0.186.0
+      - name: Fetch pinned CC0 avatar and optimize textures
+        working-directory: avatar-build
+        run: |
+          cat > prepare.mjs <<'JS'
+          import {NodeIO} from '@gltf-transform/core';
+          import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
+          import {dedup,prune,resample,textureCompress} from '@gltf-transform/functions';
+          import sharp from 'sharp';
+          import {createHash} from 'node:crypto';
+          import {writeFile,copyFile,readFile} from 'node:fs/promises';
+          const commit='eed58d198076a7e1e825f804802921c4d3804d46';
+          const response=await fetch('https://raw.githubusercontent.com/met4citizen/TalkingHead/'+commit+'/avatars/mpfb.glb');
+          if(!response.ok)throw Error('Asset HTTP '+response.status);
+          const bytes=Buffer.from(await response.arrayBuffer());
+          const sha=createHash('sha1').update('blob '+bytes.length+'\0').update(bytes).digest('hex');
+          if(sha!=='cd2ebbe1fe8bcbf3d5b2dfbf1262a7f76814e68f')throw Error('Unexpected asset hash');
+          const io=new NodeIO().registerExtensions(ALL_EXTENSIONS);
+          const doc=await io.readBinary(bytes);
+          await doc.transform(dedup(),prune(),resample(),textureCompress({encoder:sharp,targetFormat:'webp',resize:[1024,1024]}));
+          await io.write('output/mpfb-mobile.glb',doc);
+          await copyFile('node_modules/@pixiv/three-vrm/lib/three-vrm.module.js','output/three-vrm.module.js');
+          await copyFile('node_modules/@pixiv/three-vrm/LICENSE','output/three-vrm-LICENSE.txt');
+          await copyFile('package-lock.json','output/tooling-package-lock.json');
+          const optimized=await readFile('output/mpfb-mobile.glb');
+          const root=doc.getRoot();
+          const report={sourceCommit:commit,sourceBlob:sha,sourceBytes:bytes.length,optimizedBytes:optimized.length,optimizedSHA256:createHash('sha256').update(optimized).digest('hex'),meshes:root.listMeshes().map(m=>({name:m.getName(),primitives:m.listPrimitives().map(p=>({vertices:p.getAttribute('POSITION')?.getCount(),targets:p.listTargets().length,material:p.getMaterial()?.getName()}))})),nodes:root.listNodes().map(n=>({name:n.getName(),mesh:n.getMesh()?.getName(),children:n.listChildren().map(c=>c.getName())})),materials:root.listMaterials().map(m=>m.getName()),skins:root.listSkins().map(s=>({name:s.getName(),joints:s.listJoints().map(n=>n.getName())})),animations:root.listAnimations().map(a=>a.getName())};
+          await writeFile('output/report.json',JSON.stringify(report,null,2));
+          await writeFile('output/README.txt','MPFB avatar from met4citizen/TalkingHead '+commit+'. Upstream README declares mpfb.glb CC0. Other demo avatars are not included. three-vrm library: MIT. Inspect this artifact before deployment.');
+          console.log(JSON.stringify({sourceBytes:bytes.length,optimizedBytes:optimized.length}));
+          JS
+          node prepare.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: avatar-review
+          path: avatar-build/output
+          retention-days: 7
