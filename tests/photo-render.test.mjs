@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import * as T from 'three';
+import { createPhotoSnapshot } from '../js/museum/photo-render-runtime.js';
+test('photo snapshot expands nearby instances and owns copies rather than live scene assets', () => {
+  const scene = new T.Scene();
+  const geometry = new T.BoxGeometry(1,1,1), material = new T.MeshStandardMaterial();
+  let sourceDisposed = false; geometry.addEventListener('dispose', () => sourceDisposed=true);
+  const mesh = new T.InstancedMesh(geometry,material,2);
+  mesh.setMatrixAt(0,new T.Matrix4().makeTranslation(2,1,0));
+  mesh.setMatrixAt(1,new T.Matrix4().makeTranslation(90,1,0));
+  scene.add(mesh);
+  const shot = createPhotoSnapshot(scene,{minX:-5,maxX:5,minZ:-5,maxZ:5});
+  assert.equal(shot.scene.children.length,1);
+  const copy = shot.scene.children[0];
+  assert.equal(copy.matrix.elements[12],2);
+  assert.notEqual(copy.geometry,geometry);
+  assert.notEqual(copy.material,material);
+  assert.equal(copy.isInstancedMesh,undefined);
+  shot.dispose(); assert.equal(sourceDisposed,false);
+  geometry.dispose(); material.dispose(); mesh.dispose();
+});

@@ -1,0 +1,30 @@
+{
+  "purpose": "Source-only optimization research; excluded from website build",
+  "repositories": [
+    {
+      "repo": "lovell/sharp",
+      "sha": "56c6d01f1bdfd9d2b3d3762bd8c79a5e3d2e6921",
+      "path": "research/upstream/sharp"
+    },
+    {
+      "repo": "BinomialLLC/basis_universal",
+      "sha": "99f52d63aa6799cbdaecfe977111dc5ec3b31d47",
+      "path": "research/upstream/basis_universal"
+    },
+    {
+      "repo": "zeux/meshoptimizer",
+      "sha": "717ca3489b457f781e5cd3e3a8bbc0229619415c",
+      "path": "research/upstream/meshoptimizer"
+    },
+    {
+      "repo": "donmccurdy/glTF-Transform",
+      "sha": "a5d768b87efaae1fa65ddd17cd551a45b57abd70",
+      "path": "research/upstream/glTF-Transform"
+    },
+    {
+      "repo": "cloudinary/ssimulacra2",
+      "sha": "81feacf6a5b0bbd7ec11b4a881a4615033ab0b10",
+      "path": "research/upstream/ssimulacra2"
+    }
+  ]
+}

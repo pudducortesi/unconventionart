@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+  <title>Atelier privato — UnconventionArt</title>
+  <link rel="icon" href="images/site/favicon-32.png"><link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <header><a class="wordmark" href="/">UNCONVENTIONART<span>ATELIER PRIVATO</span></a><a class="gallery-link" href="/" target="_blank" rel="noopener">Visita la galleria ↗</a></header>
+  <main>
+    <section class="intro"><p class="eyebrow">IL TUO SPAZIO CURATORIALE</p><h1>Dallo scatto<br>alla parete.</h1><p>Carica le fotografie, scegli dove esporle.<br>La mostra prende forma qui.</p></section>
+    <p id="notice" role="status" aria-live="polite">Collegamento all’archivio…</p>
+    <section id="setup" class="card" hidden><span class="badge">ATTIVAZIONE IN SOSPESO</span><h2>Il tuo atelier è pronto.</h2><p>L’archivio privato e l’accesso amministratore devono ancora essere collegati. Potrai caricare le fotografie dopo l’attivazione.</p><p>Gli originali resteranno riservati. In galleria saranno visibili soltanto le anteprime delle opere pubblicate.</p></section>
+    <form id="login" class="card" hidden><p class="eyebrow">ACCESSO RISERVATO</p><h2>Entra nel tuo atelier</h2><label>Email<input id="email" type="email" autocomplete="username" required></label><label>Password<input id="password" type="password" autocomplete="current-password" required></label><button type="submit">Accedi →</button><p class="muted">Solo gli amministratori abilitati possono accedere. La sessione termina chiudendo o ricaricando questa pagina.</p></form>
+    <form id="set-password" class="card" hidden><p class="eyebrow">ACCESSO RISERVATO</p><h2>Scegli la tua password</h2><label>Nuova password<input id="new-password" type="password" autocomplete="new-password" minlength="12" required></label><label>Ripeti la password<input id="repeat-password" type="password" autocomplete="new-password" minlength="12" required></label><button type="submit">Salva password →</button><p class="muted">Usa almeno 12 caratteri. La password viene inviata soltanto al servizio di autenticazione dell’atelier.</p></form>
+    <section id="workspace" hidden>
+      <div class="toolbar"><p id="summary"></p><button id="logout" class="secondary">Esci</button></div>
+      <section class="upload card"><div><p class="eyebrow">NUOVE FOTOGRAFIE</p><h2>Carica fotografie e videoarte</h2><p>Seleziona più file insieme: vengono caricati uno alla volta con avanzamento e riepilogo degli errori. Ogni file arriva in bozza.</p><p class="muted">Foto: JPEG, PNG e WebP fino a 40 MB. Clip: MP4 (H.264) o WebM fino a 50 MB ciascuna. Mantieni questa pagina aperta durante l’invio.</p></div><div><label class="file-label" for="files">Scegli foto e video +</label><input id="files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,.jpg,.jpeg,.png,.webp,.mp4,.webm" multiple><label>Schermo per le nuove clip<select id="video-hall"><option value="3">Sala 04</option><option value="5">Sala 06</option></select></label><p id="upload-progress" role="status" aria-live="polite"></p></div></section><ol id="upload-results" aria-label="Esito dei caricamenti"></ol><button id="retry-files" type="button" hidden>Riprova i file non caricati</button>
+      <details id="social-moderation" class="card"><summary>Moderazione degli incontri</summary></details>
+      <nav class="filters" aria-label="Filtra le opere"><button data-filter="all" aria-pressed="true">Tutte</button><button data-filter="published" aria-pressed="false">Pubblicate</button><button data-filter="draft" aria-pressed="false">Bozze</button></nav>
+      <div id="works" class="works"></div><p id="empty" class="empty" hidden>La tua prossima mostra comincia con una fotografia.</p>
+    </section>
+    <footer>Originali privati. Anteprime in galleria. La pubblicazione non trasferisce i diritti dell’opera.</footer>
+  </main>
+  <script type="module" src="js/admin.js"></script>
+</body></html>

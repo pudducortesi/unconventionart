@@ -1,45 +1,66 @@
 # UnconventionArt
 
-Fine art photography duo · Dark monochrome.
+Una sola pagina HTML/CSS/JavaScript: galleria contemporanea 3D in prima persona. Dieci sale collegate, venti postazioni per sala, capacità complessiva di 200 opere. L’edificio misura 54 × 140 metri, con una promenade centrale di dieci metri e porte larghe cinque metri. Le sale hanno palette e arredi distinti, con un percorso centrale continuo.
 
-## Stack
+## Avvio
 
-- Static HTML/CSS/JS — no framework, no build step
-- Cormorant Garamond + Inter + JetBrains Mono via Google Fonts
-- JSON-driven content (`data/exhibitions.json`, `data/journal.json`)
-- `tools/publish.py` — drop photos into a folder, get a published site
+Richiede Node.js 20 o successivo.
 
-## Local preview
-
-```bash
-python3 -m http.server 8000
-# open http://localhost:8000
+```sh
+npm ci --ignore-scripts
+npm run setup:ar
+npm run dev
+# http://localhost:4173
+npm run build
+npm run check
 ```
 
-## Adding new work
+`dist/` contiene l’unica pagina della galleria e gli asset pubblici espliciti. Le vecchie pagine editoriali restano nel repository ma non nella build. Vercel riscrive i vecchi indirizzi verso la galleria.
 
-```bash
-python3 tools/publish.py ./my-photos/ --series "Liminal Spaces" --status current --push
-```
+## Visita
 
-See `tools/publish.py --help` for all options.
+L’ingresso si apre nella prima sala, in vista delle fotografie disponibili. Tutte le dieci sale appartengono allo stesso spazio e sono collegate da porte percorribili; il passaggio tra sale non sostituisce la scena.
 
-## Structure
+Desktop: WASD/frecce e trascinamento per guardare. Touch: joystick analogico a sinistra e visuale con l’altro dito; i gesti funzionano contemporaneamente. Il tap sul pavimento avvia un percorso intorno agli ostacoli. Dal pulsante Sale si può raggiungere una sala specifica. Tocca una fotografia per aprirla in HD e il cartellino per leggere la descrizione. Fotografie intere, aiuto, indice e pianta restano nella stessa pagina.
 
-- `index.html` — Homepage (hero, featured exhibition, recent works, journal preview)
-- `exhibitions.html` — Catalogue with All/Current/Past tabs and Viewing Room
-- `about.html` — Biography with the brand mark
-- `journal.html` + `post.html` — Editorial entries
-- `contact.html` — Contact form
-- `css/style.css` — Single stylesheet, design tokens-based
-- `js/main.js` — Vanilla JS: lightbox, scroll reveal, mobile menu, content loaders
-- `data/` — JSON content
-- `images/` — All assets (SVG placeholders, brand mark, OG image, favicons)
-- `tools/publish.py` — Photo publishing pipeline (Pillow + git)
+## Fluidità e caricamento
 
-## Brand assets
+Il movimento usa integrazione indipendente dalla frequenza dello schermo, accelerazione e rilascio graduali, zona morta del joystick e gestione separata delle due dita. Rilasci multitouch, perdita del focus e apertura dei dialoghi non avviano movimenti accidentali.
 
-- `images/site/logo.png` — Master logo, 2000×776
-- `images/site/logo-small.png` — Smaller version, 600×232 (used in header/footer)
-- `images/site/og-image.png` — Open Graph image for social sharing, 1200×630
-- `images/site/favicon-32.png` / `favicon-192.png` / `apple-touch-icon.png` — Favicons
+L’architettura usa geometrie ripetute in istanze: circa 19 mesh e 5.500 triangoli per l’intero edificio, senza luci per singola opera o mappe d’ombra dinamiche. Le ombre di contatto sono condivise. Non vengono caricate 200 texture contemporaneamente: massimo 24 residenti su touch e 48 su desktop, due caricamenti in parallelo. Opere lontane vengono rilasciate e ricaricate avvicinandosi.
+
+Le texture sulle pareti hanno lato massimo 1.024 pixel su touch e 2.048 su desktop; il file fotografico originale resta inalterato ed è usato nel visore. Risoluzione iniziale del canvas limitata a 1,1× su touch, adattata verso il basso solo quando i fotogrammi lenti persistono. Il rendering si ferma a scena immobile e a scheda nascosta.
+
+## Codice
+
+- `js/museum/layout.js`: pianta unica condivisa, pareti, arredi e 200 postazioni.
+- `architecture.js`: ambiente, istanze, illuminazione e fotografie.
+- `navigation.js`: collisioni, griglia di navigazione A*, percorsi continui.
+- `controls.js`: joystick, multitouch, tastiera e filtro del movimento.
+- `streaming.js`: coda delle texture, priorità, limiti, errori e rilascio delle risorse.
+- `main.js`: integrazione della scena, dialoghi, pianta e catalogo.
+- `data/catalogue.json`: opere pubblicate, descrizioni e metadati.
+
+## Fotografie disponibili
+
+È pubblicata una fotografia Kavyar. L’album Lightroom contiene sei fotografie; le altre cinque non sono state importate perché l’esportazione non è disponibile nel flusso di lavoro corrente. Non vengono duplicate fotografie per riempire le sale, né pubblicate immagini di altri album per sostituirle.
+
+Per aggiungere gli scatti Kavyar esportati, inserirli in `images/kavyar/` e in `data/catalogue.json`; le postazioni vengono assegnate automaticamente, fino a 200. `thumbnail` può indicare una versione ottimizzata, `image` resta la fotografia intera. `description`, `medium`, `year`, `edition` sono facoltativi. Il catalogo pubblico viene letto anche durante lo sviluppo locale.
+
+## Verifiche
+
+Build e controlli statici; test di multitouch e input a 30/60/120 Hz; raggiungibilità di tutte le 200 postazioni e dieci porte; collisioni con pareti e arredi; limite e concorrenza dello streaming su 200 opere simulate, smaltimento di caricamenti obsoleti e gestione degli errori. La costruzione delle geometrie è stata verificata con Three.js e 210 percorsi del controller sono stati simulati senza blocchi.
+
+Questi controlli non misurano gli FPS effettivi e non equivalgono al collaudo visivo su iPhone. La verifica interattiva dell’anteprima resta condizionata dall’autenticazione Vercel non disponibile nella sessione di verifica.
+
+## Studio del collezionista
+
+Apri lo Studio dal footer: schede, guida editoriale con lettura locale facoltativa, prova sulla parete, anteprima 3D/AR su richiesta, capitoli e sala di visione. [Stato, configurazione e limiti del rilascio](docs/UPGRADE_RELEASE.md).
+
+### Backend dedicato opzionale
+
+Il servizio Node in `server/` aggiunge richieste dei collezionisti e un curatore AI configurabile, senza dipendenze npm aggiuntive. Rimane scollegato dalla galleria finché `services.apiBaseUrl` è `null`. Installazione Hetzner, conservazione dei contatti e configurazione dei servizi: [docs/HETZNER_BACKEND.md](docs/HETZNER_BACKEND.md). Nessun pagamento o mint automatico.
+
+## Avatar, incontri e edizioni
+
+Il pulsante **Incontri** apre la prima versione sociale: avatar personalizzabile, visite private su invito, chat e offerte. Stato effettivo, limiti e attivazione: [docs/SOCIAL_PLATFORM.md](docs/SOCIAL_PLATFORM.md).

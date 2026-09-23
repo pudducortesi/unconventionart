@@ -1,202 +1,145 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0a0a0a">
-<link rel="icon" type="image/png" sizes="32x32" href="images/site/favicon-32.png">
-<link rel="icon" type="image/png" sizes="192x192" href="images/site/favicon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="images/site/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
-<title>Biography — UnconventionArt</title>
-<meta name="description" content="Biography of UnconventionArt — fine art photography duo, based in Italy, working between direction and instinct.">
-
-</head>
-<body>
-
-<header class="header" id="header">
-  <div class="header__inner">
-    <a href="index.html" class="header__logo" aria-label="UnconventionArt — home">
-      <img src="images/site/logo-small.png" srcset="images/site/logo-small.png 1x, images/site/logo.png 2x" alt="UnconventionArt" class="header__logo-img">
-    </a>
-    <div class="header__right">
-      <nav aria-label="Primary">
-        <ul class="header__nav">
-        <li><a href="exhibitions.html">Works</a></li>
-        <li><a href="exhibitions.html#viewing-room">Viewing Room</a></li>
-        <li><a href="journal.html">Journal</a></li>
-        <li><a href="about.html" class="active">Biography</a></li>
-        <li><a href="contact.html">Contact</a></li>
-        </ul>
+<!doctype html>
+<html lang="it" id="top">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#10100f" />
+    <meta
+      name="description"
+      content="UnconventionArt. Fotografia artistica, ritratti e trasformazioni. Entra nello spazio delle immagini."
+    />
+    <title>La visione — UnconventionArt</title>
+    <link rel="icon" href="images/site/favicon-32.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <script type="module" src="js/main.js"></script>
+  </head>
+  <body data-page="about">
+    <a class="skip" href="#main">Vai al contenuto</a>
+    <header class="header">
+      <a class="brand" href="index.html" aria-label="UnconventionArt, home"
+        >unconvention<span>art</span><i>®</i></a
+      >
+      <nav aria-label="Navigazione principale">
+        <a href="exhibitions.html">Opere</a><a href="about.html">Visione</a
+        ><a href="contact.html">Contatti ↗</a>
       </nav>
-      <button class="header__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
-        <span></span><span></span><span></span>
+      <button class="menu-button" aria-label="Apri menu" aria-haspopup="dialog">
+        Menu <span>＋</span>
       </button>
-    </div>
-  </div>
-</header>
-
-<div class="mobile-menu" id="mobileMenu" role="dialog" aria-label="Menu">
-  <div class="mobile-menu__inner">
-    <div class="mobile-menu__group">
-      <span class="mobile-menu__group-label">Browse</span>
-      <a href="exhibitions.html" class="mobile-menu__link">Works</a>
-      <a href="exhibitions.html#viewing-room" class="mobile-menu__link">Viewing Room</a>
-      <a href="journal.html" class="mobile-menu__link">Journal</a>
-    </div>
-    <div class="mobile-menu__group">
-      <span class="mobile-menu__group-label">Studio</span>
-      <a href="about.html" class="mobile-menu__link">Biography</a>
-      <a href="contact.html" class="mobile-menu__link">Contact</a>
-    </div>
-    <div class="mobile-menu__group">
-      <span class="mobile-menu__group-label">Follow</span>
-      <a href="#" class="mobile-menu__sub">Instagram ↗</a>
-      <a href="#" class="mobile-menu__sub">Facebook ↗</a>
-    </div>
-    <div class="mobile-menu__contact">
-      studio@unconventionart.com<br>
-      Based in Italy · Available worldwide
-    </div>
-  </div>
-</div>
-
-<div class="page-header">
-  <div class="container">
-    <span class="eyebrow">About</span>
-    <h1>Biography</h1>
-    <p>The collaborative practice of a photographer and a muse. Co-authored work, made in trust, improvisation and quiet attention.</p>
-  </div>
-</div>
-
-<section class="about-hero">
-  <div class="container--text">
-    <div class="about-hero__logo">
-      <img src="images/site/logo.png" alt="We Are UnconventionArt" loading="eager">
-    </div>
-    <p class="about-hero__caption">F I N E   A R T   P H O T O G R A P H Y   D U O</p>
-  </div>
-</section>
-
-<hr class="divider">
-
-<section class="section">
-  <div class="container">
-    <div class="about-layout reveal">
-      <div class="about-image">
-        <img src="images/site/duo.svg" alt="UnconventionArt — the duo">
+    </header>
+    <dialog class="menu" id="menu">
+      <div class="menu-top">
+        <span class="eyebrow">UNCONVENTIONART / INDICE</span
+        ><button data-close-menu aria-label="Chiudi menu">Chiudi ×</button>
       </div>
-      <div class="about-text">
-        <h2>The <em>Duo</em></h2>
-        <p>UnconventionArt is the collaborative practice of a photographer and muse who believe that the most powerful images emerge from the space between direction and instinct — where control gives way to presence, and planning dissolves into revelation.</p>
-        <p>Founded in Italy, the duo works across fine art, conceptual and editorial photography. The process is built on trust, improvisation and a shared fascination with light, texture and the human form in unconventional contexts.</p>
-        <p>What began as a single experimental shoot became an ongoing artistic partnership. The work lives in the tension between the seen and the unseen, the staged and the spontaneous. Every image is co-authored — a third thing born from the intersection of two creative perspectives.</p>
-        <p>Their work has been featured on Kavyar and various independent publications. They are available for editorial collaborations, gallery exhibitions and commissioned projects.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section--sm">
-  <div class="container--text">
-    <p class="about-pull reveal">
-      &ldquo;The most interesting images come from the moments we didn't plan — when instinct overrides intention and something <em>truthful</em> appears.&rdquo;
-    </p>
-  </div>
-</section>
-
-<hr class="divider">
-
-<section class="section">
-  <div class="container">
-    <div class="duo-grid">
-      <div class="duo-card reveal">
-        <div class="duo-card__img">
-          <img src="images/site/photographer.svg" alt="The photographer">
+      <nav aria-label="Menu completo">
+        <a href="index.html"><sup>00</sup>La soglia</a
+        ><a href="exhibitions.html"><sup>01</sup>Le opere</a
+        ><a href="about.html"><sup>02</sup>La visione</a
+        ><a href="contact.html"><sup>03</sup>Il dialogo</a>
+      </nav>
+      <p>Fotografia. Corpo. Trasformazione.</p>
+    </dialog>
+    <main id="main">
+      <section class="page-head">
+        <span class="eyebrow">IL NOSTRO MODO DI GUARDARE</span>
+        <h1>Fuori<br />dal <em>previsto.</em></h1>
+      </section>
+      <section class="vision section">
+        <div class="vision-image">
+          <img
+            data-hero
+            alt="Fotografia artistica UnconventionArt"
+            loading="lazy"
+          />
         </div>
-        <span class="eyebrow">Photographer</span>
-        <h3>[Photographer Name]</h3>
-        <p>A self-taught photographer drawn to the interplay of light and shadow, decay and beauty. Influenced by the textures of Italian architecture and the stillness of abandoned spaces. Shoots primarily with natural light, favouring the quiet tension of early morning and late afternoon.</p>
-      </div>
-      <div class="duo-card reveal">
-        <div class="duo-card__img">
-          <img src="images/site/muse.svg" alt="The muse">
+        <div>
+          <span class="eyebrow">UNCONVENTIONART</span>
+          <h2>
+            Un incontro.<br />Due sguardi.<br /><em>Altre possibilità.</em>
+          </h2>
+          <p>
+            UnconventionArt è uno spazio dedicato alla fotografia artistica e al
+            ritratto. Il corpo, il gesto e la materia diventano un linguaggio
+            visivo.
+          </p>
+          <p>
+            La luce rivela, l’ombra lascia aperta una domanda. Ci interessa quel
+            punto in cui un volto smette di essere soltanto un volto e
+            un’immagine comincia a farsi sentire.
+          </p>
+          <a class="text-link" href="contact.html">Iniziamo un dialogo ↗</a>
         </div>
-        <span class="eyebrow">Muse &amp; Model</span>
-        <h3>[Model Name]</h3>
-        <p>A visual artist in her own right, she brings an instinctive understanding of movement, emotion and space to every collaboration. Her presence in front of the camera is not passive — it is a creative act, shaping each image through gesture, stillness and the courage to be truly seen.</p>
+      </section>
+      <section class="approach section">
+        <span class="eyebrow">TRE DIREZIONI, UN SOLO SGUARDO</span>
+        <article data-reveal>
+          <span>01</span>
+          <h2>Presenza</h2>
+          <p>Il ritratto come incontro. Il gesto prima della posa.</p>
+        </article>
+        <article data-reveal>
+          <span>02</span>
+          <h2>Materia</h2>
+          <p>Pelle, luce, colore. Il corpo diventa superficie espressiva.</p>
+        </article>
+        <article data-reveal>
+          <span>03</span>
+          <h2>Altrove</h2>
+          <p>La trasformazione come possibilità di vedersi diversamente.</p>
+        </article>
+      </section>
+    </main>
+    <footer>
+      <a class="footer-invite" href="contact.html"
+        >Facciamo spazio<br />a qualcosa di <em>inatteso.</em><span>↗</span></a
+      >
+      <div class="footer-bottom">
+        <a href="index.html">UNCONVENTIONART</a><span>FOTOGRAFIA / ITALIA</span
+        ><button data-motion aria-pressed="true">Movimento: attivo</button
+        ><a href="#top">Torna su ↑</a>
       </div>
-    </div>
-  </div>
-</section>
-
-<hr class="divider">
-
-<section class="section">
-  <div class="container--text">
-    <div class="reveal text-center mb-40">
-      <span class="eyebrow eyebrow--plain">Our approach</span>
-      <h2 style="margin-top:14px;">Process</h2>
-    </div>
-    <div class="reveal" style="font-size:1rem;line-height:1.85;color:var(--ink-soft);">
-      <p style="margin-bottom:18px;">We work without mood boards. Each series begins with a location — a space that speaks to us — and evolves organically through improvisation. The photographer responds to the muse's movement; the muse responds to the light and the lens. The result is work that feels discovered rather than constructed.</p>
-      <p style="margin-bottom:18px;">Post-production is minimal. We believe in the integrity of the captured moment — colour grading is subtle, retouching is restrained. What you see is very close to what was there.</p>
-      <p>Our work has been featured on Kavyar and various independent publications. We are available for editorial collaborations, gallery exhibitions and commissioned projects.</p>
-    </div>
-  </div>
-</section>
-
-
-<footer class="footer">
-  <div class="container">
-    <div class="footer__inner">
-      <div class="footer__brand">
-        <a href="index.html" class="footer__logo">
-          <img src="images/site/logo-small.png" srcset="images/site/logo-small.png 1x, images/site/logo.png 2x" alt="UnconventionArt" class="footer__logo-img">
-        </a>
-        <p class="footer__tagline">Fine art photography duo.</p>
-        <p class="footer__tagline">Based in Italy · Available worldwide</p>
-        <p class="footer__tagline" style="margin-top:14px;">studio@unconventionart.com</p>
+    </footer>
+    <div class="cursor" aria-hidden="true"><span>GUARDA</span></div>
+    <dialog id="viewer" class="viewer" aria-labelledby="viewer-title">
+      <div class="viewer-bar">
+        <span class="eyebrow" id="viewer-series"></span
+        ><button data-close-viewer aria-label="Chiudi fotografia">
+          Chiudi ×
+        </button>
       </div>
-      <div class="footer__col">
-        <h4>Navigate</h4>
-        <ul>
-          <li><a href="index.html">Home</a></li>
-          <li><a href="exhibitions.html">Works</a></li>
-          <li><a href="journal.html">Journal</a></li>
-          <li><a href="about.html">Biography</a></li>
-          <li><a href="contact.html">Contact</a></li>
-        </ul>
+      <div class="viewer-stage">
+        <button class="arrow previous" aria-label="Fotografia precedente">
+          ←</button
+        ><img id="viewer-image" alt="" /><button
+          class="arrow next"
+          aria-label="Fotografia successiva"
+        >
+          →
+        </button>
       </div>
-      <div class="footer__col">
-        <h4>Follow</h4>
-        <ul>
-          <li><a href="#" target="_blank" rel="noopener">Instagram</a></li>
-          <li><a href="#" target="_blank" rel="noopener">Facebook</a></li>
-          <li><a href="#" target="_blank" rel="noopener">Kavyar</a></li>
-        </ul>
+      <div class="viewer-info">
+        <div>
+          <h2 id="viewer-title"></h2>
+          <p id="viewer-credit"></p>
+        </div>
+        <span id="viewer-count" class="eyebrow"></span
+        ><a id="viewer-contact" href="contact.html">Parliamone ↗</a>
       </div>
-      <div class="footer__col">
-        <h4>Mailing list</h4>
-        <p style="font-size:0.82rem;color:var(--ink-mute);margin-bottom:14px;line-height:1.55;">Quiet updates. New series, exhibitions, occasional reflections.</p>
-        <form class="newsletter" onsubmit="return false;">
-          <input type="email" class="newsletter__input" placeholder="Email address" aria-label="Email address">
-          <button class="newsletter__btn" type="submit">Join</button>
-        </form>
-      </div>
-    </div>
-    <div class="footer__bottom">
-      <span>© 2026 UnconventionArt</span>
-      <span>Italy</span>
-      <span>All rights reserved</span>
-    </div>
-  </div>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/gh/darkroomengineering/lenis@1.1.14/dist/lenis.min.js"></script>
-<script src="js/main.js"></script>
-</body>
+      <div id="viewer-variants" class="variants"></div>
+      <p class="sr-only" id="viewer-live" aria-live="polite"></p>
+    </dialog>
+    <noscript
+      ><p class="noscript">
+        Puoi navigare tutte le pagine. Attiva JavaScript per esplorare il
+        catalogo fotografico interattivo.
+      </p></noscript
+    >
+  </body>
 </html>
