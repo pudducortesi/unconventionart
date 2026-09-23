@@ -1,5 +1,6 @@
 import * as T from '../../vendor/three.module.js';
-import {AVATAR_OPTIONS,DEFAULT_AVATAR,normalizeAvatar,inviteCode,safePose,offerURL} from './social-model.js';
+import {DEFAULT_AVATAR,normalizeAvatar,inviteCode,safePose,offerURL} from './social-model.js';
+import {mountAvatarStudio} from './avatar-studio.js';
 import {createSocialService} from './social-service.js';
 import {createSocialPoller} from './social-poller.js';
 import {createMeetingBookmark} from './meeting-bookmark.js';
@@ -52,8 +53,9 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake,reachParti
   const requireAccount=()=>{if(!service)throw Error(serviceError||'Connessione non disponibile.');if(!service.user)throw Error('Accedi dalla scheda Il mio avatar.');if(!profile)throw Error('Salva il tuo avatar prima di creare o raggiungere un incontro.');};
   function renderPreview(){
     if(!previewRenderer)return;
+    const rotation=previewMesh?.rotation.y??-.32;
     if(previewMesh){previewScene.remove(previewMesh);previewMesh.userData.dispose();}
-    previewMesh=createAvatar(avatar,'',mesh=>{if(mesh!==previewMesh)return;$('#social-model-status').textContent=mesh.userData.status==='ready'?'Modello Atelier pronto.':'Modello Atelier non disponibile: anteprima essenziale attiva.';drawPreview();animatePreview();});$('#social-model-status').textContent=avatar.model==='atelier'?'Caricamento del modello Atelier…':'';previewMesh.rotation.y=-.32;previewMesh.userData.animate(.1,0);previewScene.add(previewMesh);drawPreview();animatePreview();
+    previewMesh=createAvatar(avatar,'',mesh=>{if(mesh!==previewMesh)return;$('#social-model-status').textContent=mesh.userData.status==='ready'?'Modello Atelier pronto.':'Modello Atelier non disponibile: anteprima essenziale attiva.';drawPreview();animatePreview();});$('#social-model-status').textContent=avatar.model==='atelier'?'Caricamento del modello Atelier…':'';previewMesh.rotation.y=rotation;previewMesh.userData.animate(.1,0);previewScene.add(previewMesh);drawPreview();animatePreview();
   }
   function drawPreview(){
     if(!previewRenderer)return;
@@ -80,16 +82,15 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake,reachParti
   }
   for(const [id,walking] of [['social-avatar-idle',false],['social-avatar-walk',true]])$('#'+id).onclick=()=>{previewWalking=walking;$('#social-avatar-idle').setAttribute('aria-pressed',String(!walking));$('#social-avatar-walk').setAttribute('aria-pressed',String(walking));animatePreview();};
   $('#social-avatar-wave').onclick=()=>{if(!previewMesh)return;previewWaveUntil=performance.now()+3000;const still=window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(still){previewMesh.userData.animate(0,performance.now(),0,true);drawPreview();}else animatePreview();clearTimeout(previewWaveTimer);previewWaveTimer=setTimeout(()=>{previewWaveUntil=0;if(previewMesh){previewMesh.userData.animate(0,performance.now(),previewWalking?1:0,false);drawPreview();}},3000);};
-  $('#social-avatar-detail').onclick=()=>{if(!previewCamera)return;const button=$('#social-avatar-detail'),detail=button.getAttribute('aria-pressed')!=='true';button.setAttribute('aria-pressed',String(detail));button.textContent=detail?'Mostra corpo':'Mostra viso';previewCamera.position.set(0,detail?1.52:1.05,detail?-1.15:-3.7);previewCamera.lookAt(0,detail?1.52:.95,0);drawPreview();};
-  const labels={model:'Modello',skin:'Carnagione',hair:'Colore dei capelli',outfit:'Abbigliamento',style:'Taglio',build:'Corporatura',glasses:'Occhiali',frame:'Montatura'};
-  const optionLabels={classic:'Essenziale',atelier:'Atelier · figura femminile',none:'Senza',round:'Tondi',square:'Rettangolari',black:'Nera',tortoise:'Tartarugata',gold:'Dorata',short:'Corti',bob:'Caschetto',long:'Lunghi',shaved:'Rasati',slim:'Snella',regular:'Regolare',broad:'Robusta'};
-  for(const [key,options] of Object.entries(AVATAR_OPTIONS)){
-    const field=element('fieldset'),legend=element('legend',labels[key]);field.append(legend);
-    for(const [i,value] of options.entries()){const label=element('label'),input=element('input');input.type='radio';input.name=key;input.value=value;input.checked=avatar[key]===value;input.setAttribute('aria-label',optionLabels[value]||`${labels[key]} ${i+1}`);label.append(input);if(value.startsWith('#')){label.className='social-swatch';label.style.setProperty('--swatch',value);}else label.append(element('span',optionLabels[value]));input.addEventListener('change',()=>{avatar[key]=value;renderPreview();try{localStorage.setItem('ua-avatar-draft',JSON.stringify(avatar));}catch{}});field.append(label);}$('#social-wardrobe').append(field);
-  }
-  function applyAvatar(value){avatar=normalizeAvatar(value);for(const input of $('#social-wardrobe').querySelectorAll('input'))input.checked=avatar[input.name]===input.value;renderPreview();}
+  $('#social-avatar-detail').onclick=()=>{if(!previewCamera)return;const button=$('#social-avatar-detail'),detail=button.getAttribute('aria-pressed')!=='true';button.setAttribute('aria-pressed',String(detail));button.textContent=detail?'Mostra corpo':'Mostra viso';previewCamera.position.set(0,detail?1.52:1.05,detail?-1.15:-3.7);previewCamera.lookAt(0,(detail?1.52:.95)*avatar.height/100,0);drawPreview();};
+  let previewEditTimer;
+  const studio=mountAvatarStudio($('#social-wardrobe'),{initial:avatar,note,onChange(value){
+    avatar=value;try{localStorage.setItem('ua-avatar-draft',JSON.stringify(avatar));}catch{}
+    clearTimeout(previewEditTimer);previewEditTimer=setTimeout(renderPreview,80);
+  }});
+  function applyAvatar(value){studio.load(value);}
   async function loadProfile(){if(!service?.user){refreshIdentity();return;}const data=await service.rpc('profile');profile=data.profile;if(profile){$('#social-name').value=profile.name;applyAvatar(profile.avatar);}$('#social-blocks').replaceChildren();for(const blocked of data.blocks){const li=element('li',blocked.name+' '),button=element('button','Sblocca');button.onclick=()=>run(button,async()=>{await service.rpc('unblock',{target:blocked.id});li.remove();note('Blocco rimosso.');});li.append(button);$('#social-blocks').append(li);}refreshIdentity();}
-  $('#social-profile').addEventListener('submit',e=>{e.preventDefault();run(e.submitter,async()=>{if(!service?.user)throw Error('Accedi per salvare l’avatar nel tuo account. Le scelte restano su questo dispositivo.');profile=await service.rpc('save_profile',{name:$('#social-name').value.trim(),avatar});refreshIdentity();note('Avatar salvato. Ora puoi partecipare agli incontri.');});});
+  $('#social-profile').addEventListener('submit',e=>{e.preventDefault();run(e.submitter,async()=>{if(!service?.user)throw Error('Accedi per salvare l’avatar nel tuo account. Le scelte restano su questo dispositivo.');profile=await service.rpc('save_profile',{name:$('#social-name').value.trim(),avatar:{...avatar}});refreshIdentity();note('Avatar salvato. Ora puoi partecipare agli incontri.');});});
   $('#social-login').addEventListener('submit',e=>{e.preventDefault();run(e.submitter,async()=>{if(!service)throw Error(serviceError);const email=$('#social-email').value.trim(),password=$('#social-password').value;if(e.submitter?.value==='signup'){if(password.length<12)throw Error('Usa una password di almeno 12 caratteri.');const logged=await service.signup(email,password);$('#social-password').value='';if(!logged){note('Controlla la tua email per confermare l’account, poi torna qui e accedi.');return;}}else{await service.login(email,password);$('#social-password').value='';}await loadProfile();note(profile?'Bentornato. Il tuo avatar è pronto.':'Accesso effettuato. Scegli il nome e salva il tuo avatar.');});});
   function resetRoom(forget=false){poller.stop();room=null;if(forget)bookmark.clear();sender.reset();$('#social-chat button').disabled=false;$('#social-message').value='';unread.reset();messageRows.clear();chatAtBottom=true;clearPresence();$('#social-room-start').hidden=false;$('#social-room-active').hidden=true;$('#social-count').textContent='';updateChatBadge();$('#social-people').replaceChildren();$('#social-messages').replaceChildren();$('#social-report').hidden=true;refreshResume();}
   $('#social-logout').onclick=()=>run($('#social-logout'),async()=>{if(room)try{await service.rpc('leave',{room:room.id});}catch{}resetRoom(true);try{await service.logout();}finally{profile=null;refreshIdentity();}note('Hai lasciato l’account.');});

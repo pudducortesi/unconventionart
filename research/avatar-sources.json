@@ -5,22 +5,30 @@
     {
       "repo": "pixiv/three-vrm",
       "sha": "1b4fc0cc7ef39a49d62bb7a66dcfeca8f65316f7",
-      "integration": "VRMLoaderPlugin from @pixiv/three-vrm 3.5.5; user VRM import remains unimplemented"
+      "integration": "VRMLoaderPlugin from @pixiv/three-vrm 3.5.5; user VRM import remains unimplemented",
+      "path": "research/upstream/three-vrm",
+      "sourceStatus": "downloaded-and-pinned"
     },
     {
       "repo": "M3-org/CharacterStudio",
       "sha": "293182bf4a6087f4a4a7fd00e4fbdfb590029da7",
-      "integration": "Evaluated only; editor not integrated"
+      "integration": "Evaluated only; editor not integrated",
+      "path": "research/upstream/CharacterStudio",
+      "sourceStatus": "downloaded-and-pinned"
     },
     {
       "repo": "makehumancommunity/mpfb2",
       "sha": "7fcc8df56f26776923e0a825f4551c3c3779befe",
-      "integration": "Evaluated authoring tool; no runtime dependency"
+      "integration": "Evaluated authoring tool; no runtime dependency",
+      "path": "research/upstream/mpfb2",
+      "sourceStatus": "downloaded-and-pinned"
     },
     {
       "repo": "met4citizen/TalkingHead",
       "sha": "eed58d198076a7e1e825f804802921c4d3804d46",
-      "integration": "CC0 mpfb.glb model optimized to avatars/atelier-v1.glb; TalkingHead runtime not integrated"
+      "integration": "CC0 mpfb.glb model optimized to avatars/atelier-v1.glb; TalkingHead runtime not integrated",
+      "path": "research/upstream/TalkingHead",
+      "sourceStatus": "downloaded-and-pinned"
     }
   ]
 }

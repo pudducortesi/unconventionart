@@ -37,3 +37,17 @@ CharacterStudio is evaluated and pinned in `research/avatar-sources.json`, but i
 `npm run check` completed successfully: build validation and 148 tests. Tests verify the exact model hash, size and triangle budget, skeleton presence, independent instances, finite animation transforms, gait settling, eyewear attachment/disposal, profile persistence, invalid value rejection and compatibility with old profiles. Build checks confirm the deployed asset matches the reviewed bytes, licenses are included, and the avatar runtime stays outside initial loading. The `avatar_glasses_and_frames` migration is installed in the dedicated Supabase project; its deployed allowlist and function permissions were verified.
 
 Node model tests omit image decoding and therefore do not validate GPU materials or on-device frame rates. The cloud browser does not support WebGL; final visual rendering and iPhone performance remain to be checked on a real device.
+
+## Studio editor — 24 September 2026
+
+A third renderer option, **Studio · stilizzato**, extends the procedural character with nine bounded proportions (height, shoulders, waist, hips and five facial dimensions), seven hairstyles, four facial-hair choices, separate eye/trouser/shoe colours and jacket/shirt/T-shirt/dress silhouettes. These are generated meshes, not new authored garment assets or a replacement for Atelier. The dress uses a short skirt over the existing legs; clothing has no cloth simulation. Height scales the body vertically without changing the gallery camera/collision capsule.
+
+The editor has four collapsible categories, four starter looks, randomization, a 40-step undo/redo history, eight named device-local looks, and versioned JSON export/import. Look files contain character settings only, never identity or authentication. Invalid values are normalized locally and rejected server-side. The active profile remains cloud-saved through the authenticated RPC; device-local looks are explicitly labelled as local and can be exported manually. A saved profile is propagated through the existing room roster.
+
+Atelier supports height, build, skin/hair/outfit colour, hairstyle and glasses. Facial proportions and the procedural wardrobe are disabled for Atelier and clearly described in the editor. Its authored geometry remains intact. The procedural fallback carries the selected Studio configuration when that renderer is used.
+
+All four avatar source repositories are tracked as pinned research submodules alongside the five optimization sources. They remain excluded from the browser payload. Downloading CharacterStudio and MPFB does not install their editor or Blender; the integrated editor is native to this gallery.
+
+The target GPU/Unreal architecture is recorded in `AVATAR_ENGINE_CONTRACT.md`. Matching The Sims in art quality, authored body diversity, clothing fit, facial detail, animation and device performance remains unfinished. This release is a functional customization editor, not an equivalence claim.
+
+Validation for Studio: `npm run check` passes build and 191 tests in an isolated checkout. New tests exercise every enum and slider endpoint against PostgreSQL, malformed data rejection, history branching, local-storage limits/failures, export/import, finite animated geometry for all 28 garment/hair combinations, and propagation of Studio parameters to another participant through the authorized roster.
