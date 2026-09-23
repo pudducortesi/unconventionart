@@ -56,15 +56,16 @@ export function instantiateAtelier(source,a){
   }
   let stride=0,disposed=false;
   // Match the procedural avatar contract: frames are needed only until gait settles.
-  root.userData.animate=(dt,time,speed=0)=>{
+  root.userData.animate=(dt,time,speed=0,waving=false)=>{
     if(disposed)return false;const t=(Number.isFinite(time)?time:0)/1000;
     stride+=(T.MathUtils.clamp(speed,0,1)-stride)*(1-Math.exp(-Math.max(0,Math.min(.1,dt))*12));
     if(speed<=0&&stride<.001)stride=0;
     const rotate=(name,angle)=>{const b=bones[name];if(b)b.bone.quaternion.copy(b.rest).multiply(new T.Quaternion().setFromAxisAngle(b.axis,angle));};
     for(const [i,side]of ['Left','Right'].entries()){const wave=Math.sin(t*7+i*Math.PI)*stride;rotate(side+'UpLeg',wave*.30);rotate(side+'Leg',-Math.max(0,-wave)*.35);rotate(side+'Arm',-wave*.20);rotate(side+'ForeArm',-Math.max(0,wave)*.12);}
+    if(waving){rotate('RightArm',-1.7+.14*Math.sin(t*10));rotate('RightForeArm',-.6+.18*Math.sin(t*10));}
     const blink=t%4.7,closed=blink<.16?1-Math.abs(blink-.08)/.08:0;
     for(const mesh of expressions)for(const key of ['eyeBlinkLeft','eyeBlinkRight']){const i=mesh.morphTargetDictionary[key];if(i!==undefined)mesh.morphTargetInfluences[i]=Math.max(0,closed);}
-    return stride>0;
+    return stride>0||waving;
   };
   root.userData.dispose=()=>{if(disposed)return;disposed=true;disposeGlasses();for(const m of materials)m.dispose();for(const g of extras)g.dispose();const skeletons=new Set();root.traverse(o=>{if(o.skeleton)skeletons.add(o.skeleton);});for(const s of skeletons)s.dispose();};
   root.scale.x=width;
