@@ -29,9 +29,10 @@ Le coordinate conservano solo l'ultimo stato, senza cronologia. I messaggi sono 
 
 ## Verifiche
 
-- `npm run check`: build e 140 test superati, compresi i test precedenti della galleria.
+- `npm run check`: build e 141 test superati, compresi i test precedenti della galleria.
 - Nuovi test PostgreSQL/PGlite: isolamento degli incontri, accessi anonimi negati, mittente verificato, limiti, blocchi, segnalazioni, sospensione, chiusura, URL di pagamento ammessi.
 - Verifica transazionale sul database Supabase reale: due identità di prova, ingresso tramite invito e messaggio attribuito al mittente corretto. Rollback finale: nessun utente o messaggio di prova conservato.
+- Pubblicazione Vercel verificata con stato success; pannelli Avatar, Incontri ed Edizioni controllati nel browser online. La lettura anonima delle offerte funziona e restituisce correttamente il catalogo vuoto. Il browser cloud ha WebGL disabilitato: la verifica visiva del personaggio e della scena resta da fare su dispositivo reale.
 - Da completare: registrazione e conferma email end-to-end, collaudo con due dispositivi reali, prestazioni iPhone e carico simultaneo. Il polling a 1 Hz è adatto al prototipo; prima di aumentare la capienza occorre passare a un servizio realtime con autorizzazione equivalente e limiti misurati.
 
 ## Sviluppi successivi

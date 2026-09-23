@@ -122,7 +122,9 @@ $('#social-open').addEventListener('click', async () => {
     socialController.open();
   } catch {
     socialPromise = null;
-    $('#social-space').textContent = 'Gli incontri non sono disponibili in questo momento. Premi Esc o ricarica la pagina per riprovare.';
+    const dialog = $('#social-space'), message = document.createElement('p'), close = document.createElement('button');
+    message.textContent = 'Gli incontri non sono disponibili in questo momento. Chiudi e riprova.';
+    close.textContent = 'Chiudi'; close.onclick = () => dialog.close(); dialog.replaceChildren(message, close);
   }
 });
 let detailArtwork = null;
