@@ -41,6 +41,17 @@ test('Atelier returns to its exact authored rest pose before releasing animation
   assert.equal(avatar.userData.animate(.016,10000,0),false);
   avatar.userData.dispose();assert.equal(avatar.userData.animate(.016,10016,1),false);
 });
+test('Atelier wave lifts its arm and returns to rest when the gesture ends',async()=>{
+  const avatar=instantiateAtelier((await fixture()).scene,DEFAULT_AVATAR);
+  const arm=avatar.getObjectByName('RightArm'),forearm=avatar.getObjectByName('RightForeArm');
+  const restArm=arm.quaternion.clone(),restForearm=forearm.quaternion.clone();
+  assert.equal(avatar.userData.animate(.016,1000,0,true),true);
+  assert.ok(arm.quaternion.angleTo(restArm)>.5);
+  assert.ok(forearm.quaternion.angleTo(restForearm)>.2);
+  assert.equal(avatar.userData.animate(.016,1016,0,false),false);
+  assert.ok(arm.quaternion.equals(restArm));assert.ok(forearm.quaternion.equals(restForearm));
+  avatar.userData.dispose();
+});
 test('Atelier eyewear sits on the independently cloned head and releases resources',async()=>{
   const source=(await fixture()).scene;
   const a=instantiateAtelier(source,{...DEFAULT_AVATAR,glasses:'round',frame:'gold'});

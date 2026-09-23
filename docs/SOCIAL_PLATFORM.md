@@ -8,6 +8,7 @@
 - Profilo e avatar persistenti nel database. L'anteprima e le preferenze locali non costituiscono un account.
 - Incontri privati con inviti casuali UUID, scadenza dopo 24 ore, massimo 16 presenti, fino a tre incontri attivi per organizzatore. L'utente deve scegliere esplicitamente di partecipare.
 - Presenze e posizione aggiornate con RPC ogni secondo, interpolate nel renderer. Nessuna presenza simulata. Alla perdita della connessione gli avatar remoti scompaiono e viene mostrato lo stato del collegamento; dopo 30 secondi senza aggiornamento il server non considera il partecipante presente.
+- Saluto attivato dal partecipante, visibile agli altri avatar e nell'elenco dei presenti. Dura tre secondi, scade sul server e viene limitato a un invio ogni quattro secondi. Si può provare nell'anteprima dell'avatar senza entrare in un incontro; anche con movimento ridotto la posa torna automaticamente a riposo.
 - Chat di gruppo, blocco reciproco della visibilità e segnalazioni. Blocco dell'organizzatore impedisce di rientrare tramite lo stesso invito. Moderazione dall'atelier, con sospensione e riabilitazione dei profili.
 - Offerte amministrabili per stampa, edizione digitale e NFT; bozza, pubblicazione e ritiro. Visibilità pubblica subordinata a opera pubblicata, offerta pubblicata, prezzo, condizioni e link valido. NFT: rete, contratto e token devono corrispondere al link OpenSea. Nessuna offerta o prezzo di esempio pubblicato.
 
