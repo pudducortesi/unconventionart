@@ -33,7 +33,14 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake}) {
     if(previewMesh){previewScene.remove(previewMesh);previewMesh.userData.dispose();}
     previewMesh=createAvatar(avatar,'',mesh=>{if(mesh!==previewMesh)return;$('#social-model-status').textContent=mesh.userData.status==='ready'?'Modello Atelier pronto.':'Modello Atelier non disponibile: anteprima essenziale attiva.';drawPreview();animatePreview();});$('#social-model-status').textContent=avatar.model==='atelier'?'Caricamento del modello Atelier…':'';previewMesh.rotation.y=-.32;previewMesh.userData.animate(.1,0);previewScene.add(previewMesh);drawPreview();animatePreview();
   }
-  function drawPreview(){if(!previewRenderer)return;const width=Math.max(160,$('#social-preview').clientWidth),height=330;previewRenderer.setSize(width,height,false);previewCamera.aspect=width/height;previewCamera.updateProjectionMatrix();previewRenderer.render(previewScene,previewCamera);}
+  function drawPreview(){
+    if(!previewRenderer)return;
+    const host=$('#social-preview'),width=host.clientWidth,height=host.clientHeight;
+    // Match the responsive CSS box; mobile uses a shorter preview than desktop.
+    if(width<=0||height<=0)return;
+    previewRenderer.setSize(width,height,false);previewCamera.aspect=width/height;
+    previewCamera.updateProjectionMatrix();previewRenderer.render(previewScene,previewCamera);
+  }
   function animatePreview(){
     if(previewFrame||!previewMesh)return;
     const frame=time=>{
