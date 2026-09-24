@@ -51,3 +51,13 @@ All four avatar source repositories are tracked as pinned research submodules al
 The target GPU/Unreal architecture is recorded in `AVATAR_ENGINE_CONTRACT.md`. Matching The Sims in art quality, authored body diversity, clothing fit, facial detail, animation and device performance remains unfinished. This release is a functional customization editor, not an equivalence claim.
 
 Validation for Studio: `npm run check` passes build and 191 tests in an isolated checkout. New tests exercise every enum and slider endpoint against PostgreSQL, malformed data rejection, history branching, local-storage limits/failures, export/import, finite animated geometry for all 28 garment/hair combinations, and propagation of Studio parameters to another participant through the authorized roster.
+
+## Atelier proportions — 24 September 2026
+
+Atelier now supports the nine body/face controls as well as separate top, trousers and shoe colours. A bounded smooth deformation field operates in the original MPFB bind space. It transforms every affected mesh, facial expression endpoint and skeleton joint consistently. Joint inverse matrices are detached from the cached source before recalculation: a shaped participant cannot alter another participant or the source template. Geometry is cloned only for customized shapes; the original avatar asset remains unchanged.
+
+These controls are geometric deformations, not artist-authored MakeHuman target morphs. The original clothing silhouette remains; two material groups divide top and trousers without creating a draw call per triangle. Lightweight procedural shoes are attached to the feet and follow walking. Hair accessories adjust to face width. General interchangeable authored garments, body bases and physically simulated cloth remain unfinished.
+
+Validation: 196 tests including neutral shared geometry, independent inverse bind matrices, matching bind-pose positions, finite expression/animation data, extreme proportions, sampled positive deformation Jacobians, two-group clothing, attached footwear and idempotent disposal. A CPU geometry review compares default and opposite extreme proportions at rest, without texture decoding or GPU shading. It exposed protruding toes in the first shoe fit, corrected before release. This geometric review does not validate actual materials, mobile GPU performance or all animated clothing intersections.
+
+![CPU geometry review, without textures](review/atelier-shape-geometry.png)
