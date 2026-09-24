@@ -1,9 +1,20 @@
 import {normalizeAvatar,DEFAULT_AVATAR,AVATAR_OPTIONS,AVATAR_RANGES} from './social-model.js';
+export const BODY_PRESETS=[
+  {name:'Equilibrata',avatar:{height:100,build:'regular',shoulders:100,waist:100,hips:100,faceWidth:100,jaw:100}},
+  {name:'Slanciata',avatar:{height:112,build:'slim',shoulders:94,waist:88,hips:96,faceWidth:94,jaw:92}},
+  {name:'Atletica',avatar:{height:105,build:'regular',shoulders:115,waist:93,hips:94,faceWidth:103,jaw:114}},
+  {name:'Morbida',avatar:{height:98,build:'broad',shoulders:98,waist:111,hips:114,faceWidth:108,jaw:96}},
+  {name:'Minuta',avatar:{height:88,build:'slim',shoulders:88,waist:94,hips:94,faceWidth:98,jaw:91}},
+];
 export const STUDIO_PRESETS=[
-  {name:'Galleria',avatar:{model:'studio',garment:'jacket',style:'short',outfit:'#31546b'}},
-  {name:'Vernissage',avatar:{model:'studio',garment:'dress',style:'bun',outfit:'#793a57',shoes:'#714b30',glasses:'round',frame:'gold'}},
-  {name:'Street',avatar:{model:'studio',garment:'tshirt',style:'mohawk',hair:'#95335e',outfit:'#eee9df',trousers:'#292c33'}},
-  {name:'Minimal',avatar:{model:'studio',garment:'shirt',style:'bald',beard:'stubble',outfit:'#20242c',skin:'#875338'}},
+  {name:'Curatrice',avatar:{...BODY_PRESETS[1].avatar,model:'atelier',garment:'jacket',style:'bob',outfit:'#20242c',trousers:'#292c33',shoes:'#714b30',glasses:'round',frame:'gold',hair:'#68412c'}},
+  {name:'Vernissage',avatar:{...BODY_PRESETS[3].avatar,model:'atelier',garment:'dress',style:'bun',outfit:'#793a57',trousers:'#292c33',shoes:'#17191d',skin:'#b87952'}},
+  {name:'Architetta',avatar:{...BODY_PRESETS[2].avatar,model:'atelier',garment:'shirt',style:'short',outfit:'#eee9df',trousers:'#31546b',shoes:'#714b30',glasses:'square'}},
+  {name:'Artista',avatar:{...BODY_PRESETS[0].avatar,model:'atelier',garment:'tshirt',style:'long',outfit:'#cc754b',trousers:'#292c33',shoes:'#eee9df',hair:'#95335e'}},
+  {name:'Notturno',avatar:{...BODY_PRESETS[4].avatar,model:'atelier',garment:'jacket',style:'bald',outfit:'#31546b',trousers:'#eee9df',shoes:'#17191d',skin:'#503528'}},
+  {name:'Sage',avatar:{...BODY_PRESETS[1].avatar,model:'atelier',garment:'dress',style:'long',outfit:'#3e6555',trousers:'#292c33',shoes:'#714b30',hair:'#d8d5ce'}},
+  {name:'Street · stilizzato',avatar:{model:'studio',garment:'tshirt',style:'mohawk',hair:'#95335e',outfit:'#eee9df',trousers:'#292c33'}},
+  {name:'Minimal · stilizzato',avatar:{model:'studio',garment:'shirt',style:'bald',beard:'stubble',outfit:'#20242c',skin:'#875338'}},
 ];
 export function createAvatarHistory(initial){
   let current=normalizeAvatar(initial),past=[],future=[];
@@ -14,11 +25,11 @@ export function createAvatarHistory(initial){
     redo(){if(future.length){past.push(current);current=future.pop();}return this.value;},
   };
 }
-export function randomAvatar(random=Math.random){
+export function randomAvatar(random=Math.random,model='studio'){
   const value={...DEFAULT_AVATAR};
   for(const [key,options]of Object.entries(AVATAR_OPTIONS))value[key]=options[Math.min(options.length-1,Math.floor(Math.max(0,random())*options.length))];
   for(const [key,[min,max]]of Object.entries(AVATAR_RANGES))value[key]=Math.round(min+Math.max(0,Math.min(1,random()))*(max-min));
-  value.model='studio';return normalizeAvatar(value);
+  value.model=AVATAR_OPTIONS.model.includes(model)?model:'studio';return normalizeAvatar(value);
 }
 const KEY='ua-avatar-looks-v1';
 export function createLookStore(storage){
