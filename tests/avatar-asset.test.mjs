@@ -2,19 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as T from 'three';
 import {instantiateAtelier} from '../vendor/avatar-runtime.js';
 import {DEFAULT_AVATAR} from '../js/museum/social-model.js';
 
-async function fixture(){
-  const b=await readFile('avatars/atelier-v1.glb'),len=b.readUInt32LE(12),json=JSON.parse(b.subarray(20,20+len));
-  const binary=b.subarray(28+len);json.buffers=[{byteLength:binary.length,uri:'data:application/octet-stream;base64,'+binary.toString('base64')}];
-  // Node has no image decoder: omit maps for structural/skin validation only.
-  json.materials=json.materials.map(m=>({name:m.name,pbrMetallicRoughness:{baseColorFactor:[1,1,1,1]}}));delete json.images;delete json.textures;delete json.extensionsUsed;delete json.extensionsRequired;
-  globalThis.ProgressEvent ||= class{constructor(type,init){Object.assign(this,init);this.type=type;}};
-  return new GLTFLoader().parseAsync(JSON.stringify(json),'');
-}
+import {fixture} from './helpers/avatar-fixture.mjs';
 test('Curated avatar matches reviewed artifact, has a complete skeleton and bounded geometry',async()=>{
   const b=await readFile('avatars/atelier-v1.glb'),report=JSON.parse(await readFile('avatars/atelier-v1.report.json'));
   assert.equal(createHash('sha256').update(b).digest('hex'),report.optimizedSHA256);assert.ok(b.length<2*1024*1024);
@@ -22,7 +14,7 @@ test('Curated avatar matches reviewed artifact, has a complete skeleton and boun
   for(const n of ['Hips','Head','LeftArm','RightArm','LeftLeg','RightLeg'])assert.ok(gltf.scene.getObjectByName(n));
   const a=instantiateAtelier(gltf.scene,{...DEFAULT_AVATAR,style:'bob'}),bAvatar=instantiateAtelier(gltf.scene,{...DEFAULT_AVATAR,style:'long'});
   assert.notEqual(a.getObjectByName('Head'),bAvatar.getObjectByName('Head'));
-  let changed=false;a.traverse(o=>{if(o.isSkinnedMesh){assert.ok(o.skeleton.bones.length>10);o.material.addEventListener('dispose',()=>changed=true);}});
+  let changed=false;a.traverse(o=>{if(o.isSkinnedMesh){assert.ok(o.skeleton.bones.length>10);for(const material of (Array.isArray(o.material)?o.material:[o.material]))material.addEventListener('dispose',()=>changed=true);}});
   for(let t=0;t<3000;t+=33)a.userData.animate(.033,t,1);
   a.updateMatrixWorld(true);a.traverse(o=>assert.ok(o.matrixWorld.elements.every(Number.isFinite)));
   a.userData.dispose();assert.equal(changed,true);bAvatar.userData.animate(.033,3000,1);bAvatar.userData.dispose();
