@@ -61,3 +61,34 @@ These controls are geometric deformations, not artist-authored MakeHuman target 
 Validation: 196 tests including neutral shared geometry, independent inverse bind matrices, matching bind-pose positions, finite expression/animation data, extreme proportions, sampled positive deformation Jacobians, two-group clothing, attached footwear and idempotent disposal. A CPU geometry review compares default and opposite extreme proportions at rest, without texture decoding or GPU shading. It exposed protruding toes in the first shoe fit, corrected before release. This geometric review does not validate actual materials, mobile GPU performance or all animated clothing intersections.
 
 ![CPU geometry review, without textures](review/atelier-shape-geometry.png)
+
+## Coordinated bodies, garments and motion — 24 September 2026
+
+Five named starting proportions (Equilibrata, Slanciata, Atletica, Morbida, Minuta) can be applied while preserving the current face details, model and outfit. Six complete Atelier looks combine proportions, palette, hair and garments; two stylized looks remain available. These are five parameter configurations of the existing body, not five independently authored anatomical models.
+
+Atelier now supports four distinct garment configurations using original geometry authored for this project:
+
+- T-shirt: the curated source top and trousers.
+- Shirt: a fitted collar and buttons added to the source top.
+- Jacket: an open fitted shell, long skinned sleeves, collar and contrasting inner shirt. The front opening is clipped geometrically, interpolating joint weights, rather than removing crossing triangles by their centroids.
+- Dress: an A-line skirt, belt and hem over the source top and leggings. The skirt follows the hips; there is no cloth simulation.
+
+The generated parts use the existing skeleton and profile garment ID, so they save and appear in meetings through the current validated profile contract. No schema or permission changes were needed. Geometry and materials are owned per avatar and released on replacement. Hair-cap proportions were adjusted during visual review.
+
+Atelier movement now layers alternating stride, knee flexion, ankle counter-rotation, torso rotation, hand motion and a small hip displacement. The greeting blends in/out and adds wrist motion and a slight smile. It settles to the exact recorded rest pose and releases the gallery render loop; no permanent idle animation was added. Preview calls with zero dt can display a static gesture for reduced-motion users. This remains procedural animation, not motion capture, inverse-kinematic foot locking or collision-aware cloth.
+
+Verification: build and 201 tests in an isolated checkout. Dedicated checks exercise all twenty body/garment combinations, finite skinned geometry, a per-avatar triangle ceiling, independent resources, gesture transitions, smile reset, exact rest, and comparable poses at 30/60 fps. CPU z-buffer reviews of wardrobe and moving poses caught a jagged jacket opening, fixed before release. They omit textures, alpha maps, morph rendering and GPU material evaluation; real-device appearance, all-frame intersections and mobile performance remain unverified.
+
+Reproduce the geometry inspection after building vendor modules:
+
+```sh
+node tools/review-avatar-geometry.mjs /tmp/ua-wardrobe.json
+python tools/raster-avatar-review.py /tmp/ua-wardrobe.json /tmp/ua-wardrobe.png
+node tools/review-avatar-geometry.mjs /tmp/ua-motion.json motion
+python tools/raster-avatar-review.py /tmp/ua-motion.json /tmp/ua-motion.png
+```
+
+The optional Python inspection script requires Pillow and NumPy; neither is used by the deployed site.
+
+![Wardrobe geometry review without textures](review/atelier-wardrobe-geometry.png)
+![Walking and greeting geometry review without textures](review/atelier-motion-geometry.png)
