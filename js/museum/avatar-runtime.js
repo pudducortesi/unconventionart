@@ -2,6 +2,8 @@ import * as T from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {clone} from 'three/examples/jsm/utils/SkeletonUtils.js';
 import {VRMLoaderPlugin} from '../avatar-runtime/three-vrm.js';
+import {splitAtelierOutfit,attachAtelierShoes} from './avatar-wardrobe.js';
+import {shapeAtelier} from './avatar-shape.js';
 import {normalizeAvatar} from './social-model.js';
 import {attachGlasses} from './avatar-glasses.js';
 
@@ -16,6 +18,7 @@ export function instantiateAtelier(source,a){
   a=normalizeAvatar(a);
   const root=new T.Group(),model=clone(source),materials=new Set(),extras=[];
   root.add(model);model.updateMatrixWorld(true);
+  const disposeShape=shapeAtelier(T,model,a);
   const bounds=new T.Box3().setFromObject(model),height=bounds.max.y-bounds.min.y;
   if(!Number.isFinite(height)||height<.1)throw Error('Modello avatar non valido');
   model.scale.setScalar(1.74/height);model.position.y=-bounds.min.y*model.scale.y;
@@ -33,12 +36,15 @@ export function instantiateAtelier(source,a){
     if(o.name.includes('ponytail'))hairMesh=o;
     if(o.morphTargetDictionary)expressions.push(o);
   });
+  const waistY=model.getObjectByName('Hips').getWorldPosition(new T.Vector3()).y+.015;
+  model.traverse(o=>{if(o.isMesh&&o.name.includes('casualsuit')&&!Array.isArray(o.material)){const split=splitAtelierOutfit(T,o,waistY,a.trousers);extras.push(split.geometry);materials.add(split.material);}});
+  const disposeShoes=attachAtelierShoes(T,root,model,a.shoes);
   // The authored ponytail is available as the long style; other styles use a small fitted cap.
   if(hairMesh)hairMesh.visible=a.style==='long';
   const head=model.getObjectByName('Head');
   if(head&&a.style!=='long'&&a.style!=='bald'){
     const group=new T.Group(),mat=new T.MeshStandardMaterial({color:a.hair,roughness:.85});materials.add(mat);
-    const pos=head.getWorldPosition(new T.Vector3());group.position.copy(pos);root.worldToLocal(group.position);
+    const pos=head.getWorldPosition(new T.Vector3());group.position.copy(pos);root.worldToLocal(group.position);group.scale.x=a.faceWidth/100;
     // Character faces -Z after normalization. Head origin is at the neck.
     const cap=new T.Mesh(new T.SphereGeometry(1,20,12,0,Math.PI*2,0,a.style==='shaved'?1.15:1.6),mat);
     cap.position.set(0,.16,.007);cap.scale.set(.090,a.style==='shaved'?.111:.119,.101);group.add(cap);extras.push(cap.geometry);
@@ -71,7 +77,7 @@ export function instantiateAtelier(source,a){
     for(const mesh of expressions)for(const key of ['eyeBlinkLeft','eyeBlinkRight']){const i=mesh.morphTargetDictionary[key];if(i!==undefined)mesh.morphTargetInfluences[i]=Math.max(0,closed);}
     return stride>0||waving;
   };
-  root.userData.dispose=()=>{if(disposed)return;disposed=true;disposeGlasses();for(const m of materials)m.dispose();for(const g of extras)g.dispose();const skeletons=new Set();root.traverse(o=>{if(o.skeleton)skeletons.add(o.skeleton);});for(const s of skeletons)s.dispose();};
+  root.userData.dispose=()=>{if(disposed)return;disposed=true;disposeGlasses();disposeShoes();disposeShape();for(const m of materials)m.dispose();for(const g of extras)g.dispose();const skeletons=new Set();root.traverse(o=>{if(o.skeleton)skeletons.add(o.skeleton);});for(const s of skeletons)s.dispose();};
   root.scale.x=width;root.scale.y=a.height/100;
   return root;
 }
