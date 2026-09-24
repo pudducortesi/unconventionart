@@ -14,7 +14,7 @@ test('Curated avatar matches reviewed artifact, has a complete skeleton and boun
   for(const n of ['Hips','Head','LeftArm','RightArm','LeftLeg','RightLeg'])assert.ok(gltf.scene.getObjectByName(n));
   const a=instantiateAtelier(gltf.scene,{...DEFAULT_AVATAR,style:'bob'}),bAvatar=instantiateAtelier(gltf.scene,{...DEFAULT_AVATAR,style:'long'});
   assert.notEqual(a.getObjectByName('Head'),bAvatar.getObjectByName('Head'));
-  let changed=false;a.traverse(o=>{if(o.isSkinnedMesh){assert.ok(o.skeleton.bones.length>10);for(const material of (Array.isArray(o.material)?o.material:[o.material]))material.addEventListener('dispose',()=>changed=true);}});
+  let changed=false;a.traverse(o=>{if(o.isSkinnedMesh){assert.ok(o.skeleton.bones.length>=(o.name.startsWith('atelier-')?8:11));for(const material of (Array.isArray(o.material)?o.material:[o.material]))material.addEventListener('dispose',()=>changed=true);}});
   for(let t=0;t<3000;t+=33)a.userData.animate(.033,t,1);
   a.updateMatrixWorld(true);a.traverse(o=>assert.ok(o.matrixWorld.elements.every(Number.isFinite)));
   a.userData.dispose();assert.equal(changed,true);bAvatar.userData.animate(.033,3000,1);bAvatar.userData.dispose();
@@ -38,9 +38,12 @@ test('Atelier wave lifts its arm and returns to rest when the gesture ends',asyn
   const arm=avatar.getObjectByName('RightArm'),forearm=avatar.getObjectByName('RightForeArm');
   const restArm=arm.quaternion.clone(),restForearm=forearm.quaternion.clone();
   assert.equal(avatar.userData.animate(.016,1000,0,true),true);
+  assert.ok(arm.quaternion.angleTo(restArm)<.5,'gesture eases in');
+  for(let t=1016;t<1400;t+=16)avatar.userData.animate(.016,t,0,true);
   assert.ok(arm.quaternion.angleTo(restArm)>.5);
   assert.ok(forearm.quaternion.angleTo(restForearm)>.2);
-  assert.equal(avatar.userData.animate(.016,1016,0,false),false);
+  assert.equal(avatar.userData.animate(.016,1400,0,false),true);
+  let active=true;for(let t=1416;t<2500&&active;t+=16)active=avatar.userData.animate(.016,t,0,false);assert.equal(active,false);
   assert.ok(arm.quaternion.equals(restArm));assert.ok(forearm.quaternion.equals(restForearm));
   avatar.userData.dispose();
 });

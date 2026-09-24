@@ -2,6 +2,8 @@ import * as T from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {clone} from 'three/examples/jsm/utils/SkeletonUtils.js';
 import {VRMLoaderPlugin} from '../avatar-runtime/three-vrm.js';
+import {createAtelierGarment} from './atelier-garments.js';
+import {createAtelierMotion} from './atelier-motion.js';
 import {splitAtelierOutfit,attachAtelierShoes} from './avatar-wardrobe.js';
 import {shapeAtelier} from './avatar-shape.js';
 import {normalizeAvatar} from './social-model.js';
@@ -29,7 +31,7 @@ export function instantiateAtelier(source,a){
     o.frustumCulled=false; // Bind-pose bounds do not cover animated hands/feet.
     const tint=mat=>{const m=mat.clone();materials.add(m);
       if(m.name.includes('body'))m.color.set(a.skin);
-      if(m.name.includes('casualsuit'))m.color.set(a.outfit);
+      if(m.name.includes('casualsuit'))m.color.set(a.garment==='jacket'?'#eee9df':a.outfit);
       if(m.name.includes('ponytail')||m.name.includes('eyebrows'))m.color.set(a.hair);
       return m;};
     o.material=Array.isArray(o.material)?o.material.map(tint):tint(o.material);
@@ -39,6 +41,7 @@ export function instantiateAtelier(source,a){
   const waistY=model.getObjectByName('Hips').getWorldPosition(new T.Vector3()).y+.015;
   model.traverse(o=>{if(o.isMesh&&o.name.includes('casualsuit')&&!Array.isArray(o.material)){const split=splitAtelierOutfit(T,o,waistY,a.trousers);extras.push(split.geometry);materials.add(split.material);}});
   const disposeShoes=attachAtelierShoes(T,root,model,a.shoes);
+  const disposeGarment=createAtelierGarment(T,root,model,a);
   // The authored ponytail is available as the long style; other styles use a small fitted cap.
   if(hairMesh)hairMesh.visible=a.style==='long';
   const head=model.getObjectByName('Head');
@@ -47,9 +50,9 @@ export function instantiateAtelier(source,a){
     const pos=head.getWorldPosition(new T.Vector3());group.position.copy(pos);root.worldToLocal(group.position);group.scale.x=a.faceWidth/100;
     // Character faces -Z after normalization. Head origin is at the neck.
     const cap=new T.Mesh(new T.SphereGeometry(1,20,12,0,Math.PI*2,0,a.style==='shaved'?1.15:1.6),mat);
-    cap.position.set(0,.16,.007);cap.scale.set(.090,a.style==='shaved'?.111:.119,.101);group.add(cap);extras.push(cap.geometry);
-    if(a.style==='bun'){const geo=new T.SphereGeometry(.048,16,12),bun=new T.Mesh(geo,mat);bun.position.set(0,.18,.105);group.add(bun);extras.push(geo);}
-    if(a.style==='mohawk'){const geo=new T.BoxGeometry(.027,.05,.13),crest=new T.Mesh(geo,mat);crest.position.set(0,.285,.01);group.add(crest);extras.push(geo);}
+    cap.position.set(0,.13,-.007);cap.scale.set(.095,a.style==='shaved'?.098:.104,.113);group.add(cap);extras.push(cap.geometry);
+    if(a.style==='bun'){const geo=new T.SphereGeometry(.048,16,12),bun=new T.Mesh(geo,mat);bun.position.set(0,.165,.105);group.add(bun);extras.push(geo);}
+    if(a.style==='mohawk'){const geo=new T.BoxGeometry(.027,.05,.13),crest=new T.Mesh(geo,mat);crest.position.set(0,.253,.01);group.add(crest);extras.push(geo);}
     if(a.style==='bob')for(const side of [-1,1]){const geo=new T.SphereGeometry(1,12,8),lock=new T.Mesh(geo,mat);lock.position.set(side*.078,.085,.022);lock.scale.set(.032,.111,.083);group.add(lock);extras.push(geo);}
     root.add(group);root.updateMatrixWorld(true);head.attach(group);
   }
@@ -61,23 +64,9 @@ export function instantiateAtelier(source,a){
     const axis=new T.Vector3(0,0,1).applyQuaternion(b.getWorldQuaternion(new T.Quaternion()).invert());
     b.quaternion.multiply(new T.Quaternion().setFromAxisAngle(axis,angle));model.updateMatrixWorld(true);
   }
-  const bones={};for(const name of ['LeftArm','RightArm','LeftForeArm','RightForeArm','LeftUpLeg','RightUpLeg','LeftLeg','RightLeg','Head']){
-    const bone=model.getObjectByName(name);if(bone){bones[name]={bone,rest:bone.quaternion.clone(),axis:new T.Vector3(1,0,0).applyQuaternion(bone.getWorldQuaternion(new T.Quaternion()).invert())};}
-  }
-  let stride=0,disposed=false;
-  // Match the procedural avatar contract: frames are needed only until gait settles.
-  root.userData.animate=(dt,time,speed=0,waving=false)=>{
-    if(disposed)return false;const t=(Number.isFinite(time)?time:0)/1000;
-    stride+=(T.MathUtils.clamp(speed,0,1)-stride)*(1-Math.exp(-Math.max(0,Math.min(.1,dt))*12));
-    if(speed<=0&&stride<.001)stride=0;
-    const rotate=(name,angle)=>{const b=bones[name];if(b)b.bone.quaternion.copy(b.rest).multiply(new T.Quaternion().setFromAxisAngle(b.axis,angle));};
-    for(const [i,side]of ['Left','Right'].entries()){const wave=Math.sin(t*7+i*Math.PI)*stride;rotate(side+'UpLeg',wave*.30);rotate(side+'Leg',-Math.max(0,-wave)*.35);rotate(side+'Arm',-wave*.20);rotate(side+'ForeArm',-Math.max(0,wave)*.12);}
-    if(waving){rotate('RightArm',-1.7+.14*Math.sin(t*10));rotate('RightForeArm',-.6+.18*Math.sin(t*10));}
-    const blink=t%4.7,closed=blink<.16?1-Math.abs(blink-.08)/.08:0;
-    for(const mesh of expressions)for(const key of ['eyeBlinkLeft','eyeBlinkRight']){const i=mesh.morphTargetDictionary[key];if(i!==undefined)mesh.morphTargetInfluences[i]=Math.max(0,closed);}
-    return stride>0||waving;
-  };
-  root.userData.dispose=()=>{if(disposed)return;disposed=true;disposeGlasses();disposeShoes();disposeShape();for(const m of materials)m.dispose();for(const g of extras)g.dispose();const skeletons=new Set();root.traverse(o=>{if(o.skeleton)skeletons.add(o.skeleton);});for(const s of skeletons)s.dispose();};
+  const motion=createAtelierMotion(T,model,expressions);let disposed=false;
+  root.userData.animate=(...args)=>motion.update(...args);
+  root.userData.dispose=()=>{if(disposed)return;disposed=true;motion.dispose();disposeGarment();disposeGlasses();disposeShoes();disposeShape();for(const m of materials)m.dispose();for(const g of extras)g.dispose();const skeletons=new Set();root.traverse(o=>{if(o.skeleton)skeletons.add(o.skeleton);});for(const s of skeletons)s.dispose();};
   root.scale.x=width;root.scale.y=a.height/100;
   return root;
 }
