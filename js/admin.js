@@ -4,7 +4,7 @@ import { publishingConfig, publicationPatch } from './publishing.js';
 import { ROOM_PROFILES } from './museum/room-profiles.js';
 const $ = s => document.querySelector(s);
 let offers = [];
-let config, session = null, works = [], filter = 'all', refreshTimer, busy = false, renderVersion = 0;
+let config, session = null, works = [], filter = 'all', refreshTimer, busy = false, renderVersion = 0, artistScope = null;
 const thumbnails = new Set();
 const notice = (text, error = false) => { $('#notice').textContent = text; $('#notice').dataset.error = String(error); };
 const moderation = mountModeration({request,notice});
@@ -45,7 +45,9 @@ $('#login').addEventListener('submit', async event => {
     session = await (await request('/auth/v1/token?grant_type=password', {method:'POST',body:{email:$('#email').value.trim(),password:$('#password').value}})).json();
     $('#password').value = '';
     const admins = await (await request('/rest/v1/gallery_admins?select=user_id')).json();
-    if (!admins.some(a => a.user_id === session.user.id)) throw Error('Questo account non è abilitato all’atelier.');
+    const artists = await (await request('/rest/v1/gallery_artists?select=user_id,artist_slug,display_name,room_slug,capacity,active')).json();
+    artistScope = artists.find(a => a.user_id === session.user.id && a.active) || null;
+    if (!admins.some(a => a.user_id === session.user.id) && !artistScope) throw Error('Questo account non è abilitato all’atelier.');
     scheduleRefresh(); $('#login').hidden = true; $('#workspace').hidden = false;
     await loadWorks(); notice(config.liveCatalogue === false ? 'Archivio collegato. Puoi preparare le bozze; il passaggio della galleria al nuovo catalogo è ancora da completare.' : 'Accesso effettuato. Le nuove fotografie resteranno in bozza fino alla pubblicazione.');
   } catch (error) { endSession(); notice(error.message, true); }
@@ -70,7 +72,10 @@ $('#set-password').addEventListener('submit', async event => {
 function element(tag, text, className) { const node = document.createElement(tag); if (text) node.textContent = text; if (className) node.className = className; return node; }
 function field(form, text, input) { const label = element('label', text); label.append(input); form.append(label); return input; }
 async function loadWorks() {
-  const [photos,videos,loadedOffers] = await Promise.all(['/rest/v1/gallery_artworks?select=*&order=created_at.desc','/rest/v1/gallery_videos?select=*&order=created_at.desc','/rest/v1/gallery_offers?select=*'].map(async path=>(await request(path)).json()));
+  const photoPath = artistScope ? '/rest/v1/gallery_artworks?select=*&owner_user_id=eq.'+encodeURIComponent(session.user.id)+'&room_slug=eq.'+encodeURIComponent(artistScope.room_slug)+'&order=created_at.desc' : '/rest/v1/gallery_artworks?select=*&order=created_at.desc';
+  const videoPath = artistScope ? null : '/rest/v1/gallery_videos?select=*&order=created_at.desc';
+  const offerPath = artistScope ? null : '/rest/v1/gallery_offers?select=*';
+  const [photos,videos,loadedOffers] = await Promise.all([photoPath,videoPath,offerPath].map(async path=>path ? (await request(path)).json() : []));
   offers=loadedOffers;
   works = [...photos,...videos.map(w=>({...w,isVideo:true}))];
   await render();
@@ -91,13 +96,11 @@ async function render() {
     const form = element('form');
     const title = field(form, 'Titolo', element('input')); title.value = work.title; title.required = true; title.maxLength = 160;
     const description = field(form, 'Descrizione', element('textarea')); description.value = work.description; description.maxLength = 3000;
-    const hall = field(form, 'Sala', element('select')); if (!work.isVideo) hall.append(new Option('Assegna automaticamente', ''));
-    ROOM_PROFILES.forEach((room, i) => {if(!work.isVideo || [3,5].includes(i)) hall.append(new Option(`${String(i + 1).padStart(2,'0')} · ${room.name}`, String(i)));});
-    hall.value = work.hall_index === null ? '' : String(work.hall_index);
+    const hall = field(form, 'Sala', element('select')); if (artistScope) { hall.append(new Option('Sala Simone Plozzer', '')); hall.disabled = true; } else { if (!work.isVideo) hall.append(new Option('Assegna automaticamente', '')); ROOM_PROFILES.forEach((room, i) => {if(!work.isVideo || [3,5].includes(i)) hall.append(new Option(`${String(i + 1).padStart(2,'0')} · ${room.name}`, String(i)));}); hall.value = work.hall_index === null ? '' : String(work.hall_index); }
     const actions = element('div', '', 'actions'), save = element('button', 'Salva', 'secondary'), publish = element('button', work.published ? 'Ritira dalla galleria' : 'Pubblica →');
     save.type = 'submit'; publish.type = 'button'; publish.disabled = config.liveCatalogue === false;
     if (publish.disabled) publish.title = 'Pubblicazione disponibile dopo il passaggio al nuovo catalogo.';
-    actions.append(save, publish); form.append(actions); card.append(form); if(!work.isVideo) mountOfferEditor(card,work,offers,{request,notice}); $('#works').append(card);
+    actions.append(save, publish); form.append(actions); card.append(form); if(!work.isVideo && !artistScope) mountOfferEditor(card,work,offers,{request,notice}); $('#works').append(card);
     async function update(published) {
       if (busy) return;
       busy = true; save.disabled = publish.disabled = true;
@@ -139,7 +142,8 @@ async function uploadBatch(files) {
       try {
         const info=mediaInfo(file);status('Preparazione anteprima…');
         const {blob,width,height,duration}=await prepareMedia(file,info);
-        const bucket=info.video?'gallery-videos':'gallery-originals',master=`${id}/${info.video?'clip':'original'}.${info.ext}`,derivative=`${id}/${info.video?'poster':'preview'}.jpg`;
+        if (artistScope && info.video) throw Error('Questo atelier accetta illustrazioni e immagini.');
+        const bucket=info.video?'gallery-videos':'gallery-originals', prefix=artistScope ? `${session.user.id}/` : '', master=`${prefix}${id}/${info.video?'clip':'original'}.${info.ext}`,derivative=`${prefix}${id}/${info.video?'poster':'preview'}.jpg`;
         if(retry){
           const saved=await (await request(`/rest/v1/${info.video?'gallery_videos':'gallery_artworks'}?id=eq.${id}&select=id`)).json();
           if(saved.length){uploaded++;status('Già caricato ✓');continue;}
@@ -153,7 +157,7 @@ async function uploadBatch(files) {
         await upload(bucket,master,file,info.type,'Invio file');
         await upload('gallery-previews',derivative,blob,'image/jpeg','Invio anteprima');
         status('Salvataggio bozza…');
-        await request('/rest/v1/'+(info.video?'gallery_videos':'gallery_artworks'),{method:'POST',body:{id,title:file.name.replace(/\.[^.]+$/,'').slice(0,160)||'Senza titolo',preview_path:derivative,width,height,...(info.video?{video_path:master,duration,hall_index:Number($('#video-hall').value)}:{original_path:master})}});
+        await request('/rest/v1/'+(info.video?'gallery_videos':'gallery_artworks'),{method:'POST',body:{id,title:file.name.replace(/\.[^.]+$/,'').slice(0,160)||'Senza titolo',preview_path:derivative,width,height,...(info.video?{video_path:master,duration,hall_index:Number($('#video-hall').value)}:{original_path:master,...(artistScope?{owner_user_id:session.user.id,room_slug:artistScope.room_slug,hall_index:null}:{})})}});
         uploaded++;status('Caricato in bozza ✓');
       } catch(error) {
         failed.push(file);row.textContent=file.name+' · '+error.message;row.dataset.error='true';
@@ -184,7 +188,9 @@ try {
     try {
       const user = await (await request('/auth/v1/user')).json();
       const admins = await (await request('/rest/v1/gallery_admins?select=user_id')).json();
-      if (!admins.some(a=>a.user_id === user.id)) throw Error('Questo account non è abilitato all’atelier.');
+      const artists = await (await request('/rest/v1/gallery_artists?select=user_id,artist_slug,display_name,room_slug,capacity,active')).json();
+      artistScope = artists.find(a=>a.user_id===user.id && a.active) || null;
+      if (!admins.some(a=>a.user_id === user.id) && !artistScope) throw Error('Questo account non è abilitato all’atelier.');
       session.user = user; scheduleRefresh(); $('#login').hidden = true; $('#set-password').hidden = false;
       notice('Indirizzo verificato. Scegli la password per il tuo atelier.');
     } catch (error) { endSession(); throw error; }

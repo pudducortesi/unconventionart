@@ -11,13 +11,13 @@ export const PHOTO_FORMATS = [
   { width: 2.1, height: 3.15, label: '210 × 315 cm' },
 ];
 export const BUILDING = {
-  minX: -27,
-  maxX: 27,
-  minZ: -130,
+  minX: -33,
+  maxX: 33,
+  minZ: -160,
   maxZ: 10,
   height: 13.2,
 };
-export const BOUNDS = { minX: -26.45, maxX: 26.45, minZ: -129.45, maxZ: 9.45 };
+export const BOUNDS = { minX: -32.7, maxX: 32.7, minZ: -159.7, maxZ: 9.45 };
 export const INITIAL = { x: 0, y: 1.7, z: 3 };
 export const INITIAL_TARGET = { x: 0, y: 5.2, z: 9.55 };
 export const HALLS = [];
@@ -40,7 +40,9 @@ const wall = (x, z, width, depth) =>
 wall(-27, -60, 0.32, 140);
 wall(27, -60, 0.32, 140);
 wall(0, 10, 54, 0.32);
-wall(0, -130, 54, 0.32);
+// South wall opens into the dedicated Simone Plozzer illustration room.
+wall(-16.5, -130, 21, 0.32);
+wall(16.5, -130, 21, 0.32);
 for (let row = 0; row < 5; row++) {
   const z = -13 - row * 26;
   for (const side of [-1, 1]) {
@@ -172,6 +174,17 @@ FURNITURE.push(rectangle(16.5, 8.4, 5.2, 0.65, { kind: 'console' }));
 FURNITURE.push(rectangle(17.5, 7, 1.2, 1.2, { kind: 'lounge', model: 'cantilever' }));
 for (const bench of CORRIDOR_BENCHES)
   FURNITURE.push(rectangle(bench.x, bench.z, bench.width, bench.depth, bench));
+// Simone room physical envelope and sketch partitions participate in collision/pathfinding.
+const SIMONE_CENTER_Z=-145, SIMONE_W=66, SIMONE_D=30;
+wall(-33,SIMONE_CENTER_Z,.2,SIMONE_D);
+wall(33,SIMONE_CENTER_Z,.2,SIMONE_D);
+wall(-18.5,-160,29,.2); wall(18.5,-160,29,.2);
+// Front return walls preserve an 8m portal from the promenade.
+wall(-18.5,-130,29,.2); wall(18.5,-130,29,.2);
+for (const [i,z] of [-155.5,-150.2,-145,-139.8,-134.5].entries()) {
+  const w=i===2?53:47, x=i%2?3.2:-3.2;
+  WALLS.push(rectangle(x,z,w,.18,{kind:'simone-divider'}));
+}
 // Reserved exhibition envelopes: 3.8m along the wall, 4m clear in front.
 // These are planning constraints, not barriers for visitors.
 export const EXHIBITION_ZONES = HALLS.flatMap(hall => hall.slots.map(slot => {

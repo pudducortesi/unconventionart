@@ -1,0 +1,4 @@
+-- Mirrors production migration applied 2026-09-26. See docs/simone-plozzer-room.md.
+-- Artist authorization is enforced server-side via gallery_artists membership,
+-- gallery_artworks owner_user_id/room_slug and storage paths prefixed by auth.uid().
+-- Migration name in Supabase: artist_scoped_rooms.

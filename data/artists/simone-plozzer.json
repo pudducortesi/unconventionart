@@ -1,0 +1,24 @@
+{
+  "artist": {
+    "name": "Simone Plozzer",
+    "email": "simone.plozzer@gmail.com",
+    "role": "artist",
+    "room": "simone-plozzer",
+    "capacity": 75,
+    "permissions": [
+      "artworks:create:own",
+      "artworks:update:own",
+      "artworks:publish:own",
+      "artworks:unpublish:own",
+      "media:upload:own"
+    ],
+    "denied": [
+      "museum:update",
+      "rooms:update:other",
+      "artworks:update:other",
+      "users:manage",
+      "code:manage"
+    ]
+  },
+  "securityNote": "This file is declarative UI/config metadata only. Authorization must also be enforced server-side with Supabase RLS before an invitation is sent."
+}

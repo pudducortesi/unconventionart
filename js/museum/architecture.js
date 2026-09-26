@@ -8,6 +8,7 @@ import { createDesignSeating } from "./design-seating.js";
 import { furnishGallery } from "./furnishings.js";
 import { createMezzanines } from "./mezzanines.js";
 import { BUILDING, HALLS, WALLS, FURNITURE, HANGING_CENTER, PHOTO_FORMATS } from "./layout.js";
+import { createSimoneInterior } from "./simone-interior.js";
 
 /** Ten connected white halls. Repeated construction is instanced by material,
  * so the size of the building does not multiply its lighting or draw calls. */
@@ -15,6 +16,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   const room = new T.Group();
   room.name = "white-museum-200";
   scene.add(room);
+  const simoneInterior = createSimoneInterior(scene);
   const resources = new Set();
   let disposed = false;
   const surfaceReady = () => { if (!disposed) onReady(); };
@@ -289,6 +291,7 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
         if (object.isInstancedMesh) object.dispose();
       });
       scene.remove(room);
+      simoneInterior.dispose();
     },
   };
 }
