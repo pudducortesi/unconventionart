@@ -1,0 +1,1 @@
+#catalogue-update{position:fixed;z-index:1000;left:1rem;bottom:1rem;max-width:min(25rem,calc(100vw - 2rem));padding:1rem;border:1px solid #aaa18c;border-radius:12px;background:#f5f1e7;color:#252522;box-shadow:0 6px 30px #0003}#catalogue-update p{margin:0 0 .75rem}#catalogue-update button{padding:.6rem .8rem;margin-right:.5rem;cursor:pointer}

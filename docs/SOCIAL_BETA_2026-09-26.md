@@ -45,3 +45,11 @@ Prima di aprire una beta pubblica estesa restano da verificare:
 - Le edizioni usano pagine di vendita esterne; il sito non implementa un marketplace con transazioni NFT proprie.
 
 Questa è una beta per visite private a piccoli gruppi, con ingresso VR da collaudare su hardware. Non è ancora un social network pubblico completo con voce, eventi pubblici e marketplace autonomo.
+
+## Aggiornamento successivo: continuità delle visite e anteprime artista
+
+- La pubblicazione di nuove opere mostra un avviso con **Aggiorna galleria** e **Più tardi**. Non riavvia più automaticamente una visita, una sessione VR o un modulo di accesso. Il controllo delle immagini ritirate resta lato server a ogni richiesta.
+- Il servizio pubblico accetta le anteprime con percorso `<proprietario>/<opera>/preview.jpg`, verificandolo contro il proprietario registrato. Non espone originali o cartelle arbitrarie. I vecchi percorsi rimangono supportati per le opere senza proprietario dedicato.
+- Il catalogo restituisce anche `roomSlug`, necessario per completare il collegamento delle sale artista.
+- Verifica del database: 78 opere nel formato precedente, nessun profilo in `gallery_artists`. Il solo modulo di caricamento non equivale quindi a un accesso Artist attivo. Nessun invito email è stato inviato.
+- Suite completa: 216 test superati. Verifica reale del servizio dopo il deploy: catalogo con 78 opere, anteprima JPEG disponibile, opera inesistente rifiutata.

@@ -13,13 +13,13 @@ export function createPublicGallery({url,serviceKey,publicKey,fetchImpl=fetch}) 
     const path = new URL(request.url).pathname.split('/gallery-public/')[1] || '';
     try {
       if (path === 'catalogue') {
-        const response = await fetchImpl(`${url}/rest/v1/gallery_artworks?published=eq.true&select=id,title,description,credit,hall_index,wall_slot,updated_at&order=created_at.asc&limit=201`,{headers:apiHeaders,signal:AbortSignal.timeout(10000)});
+        const response = await fetchImpl(`${url}/rest/v1/gallery_artworks?published=eq.true&select=id,title,description,credit,hall_index,wall_slot,room_slug,updated_at&order=created_at.asc&limit=201`,{headers:apiHeaders,signal:AbortSignal.timeout(10000)});
         if (!response.ok) throw Error();
         const rows = await response.json();
         if (!Array.isArray(rows) || rows.length > 200) throw Error();
         const base = `${url}/functions/v1/gallery-public/image/`;
         const image = id => base + id + (publicKey ? `?apikey=${encodeURIComponent(publicKey)}` : '');
-        const works = rows.map(row=>({id:row.id,title:row.title,description:row.description,credit:row.credit,collection:'atelier',medium:'Fotografia digitale',hallIndex:row.hall_index,wallSlot:row.wall_slot,image:image(row.id),preview:image(row.id),mobilePreview:image(row.id),thumbnail:image(row.id)}));
+        const works = rows.map(row=>({id:row.id,title:row.title,description:row.description,credit:row.credit,collection:'atelier',medium:'Fotografia digitale',hallIndex:row.hall_index,wallSlot:row.wall_slot,roomSlug:row.room_slug || null,image:image(row.id),preview:image(row.id),mobilePreview:image(row.id),thumbnail:image(row.id)}));
         const videoResponse=await fetchImpl(`${url}/rest/v1/gallery_videos?published=eq.true&select=id,title,hall_index,updated_at&order=created_at.asc&limit=201`,{headers:apiHeaders,signal:AbortSignal.timeout(10000)});
         if(!videoResponse.ok)throw Error();
         const videoRows=await videoResponse.json();if(!Array.isArray(videoRows)||videoRows.length>200)throw Error();
@@ -41,11 +41,13 @@ export function createPublicGallery({url,serviceKey,publicKey,fetchImpl=fetch}) 
       }
       if (parts.length !== 2 || parts[0] !== 'image' || !idPattern.test(parts[1])) return json({error:'Not found'},404);
       const id = parts[1];
-      const response = await fetchImpl(`${url}/rest/v1/gallery_artworks?id=eq.${id}&published=eq.true&select=id,preview_path`,{headers:apiHeaders,signal:AbortSignal.timeout(10000)});
+      const response = await fetchImpl(`${url}/rest/v1/gallery_artworks?id=eq.${id}&published=eq.true&select=id,preview_path,owner_user_id`,{headers:apiHeaders,signal:AbortSignal.timeout(10000)});
       if (!response.ok) throw Error();
       const rows = await response.json();
-      if (rows.length !== 1 || rows[0].id !== id || rows[0].preview_path !== `${id}/preview.jpg`) return json({error:'Not found'},404);
-      const photo = await fetchImpl(`${url}/storage/v1/object/authenticated/gallery-previews/${id}/preview.jpg`,{headers:apiHeaders,signal:AbortSignal.timeout(15000)});
+      if (rows.length !== 1 || rows[0].id !== id) return json({error:'Not found'},404);
+      const row=rows[0], expected=row.owner_user_id && idPattern.test(row.owner_user_id) ? `${row.owner_user_id}/${id}/preview.jpg` : `${id}/preview.jpg`;
+      if(row.preview_path !== expected) return json({error:'Not found'},404);
+      const photo = await fetchImpl(`${url}/storage/v1/object/authenticated/gallery-previews/${expected}`,{headers:apiHeaders,signal:AbortSignal.timeout(15000)});
       if (!photo.ok) throw Error();
       const bytes = await photo.arrayBuffer();
       if (bytes.byteLength > 4194304 || new Uint8Array(bytes)[0] !== 255 || new Uint8Array(bytes)[1] !== 216) throw Error();

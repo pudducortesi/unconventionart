@@ -1,3 +1,4 @@
+import {watchCatalogue,announceCatalogueUpdate} from './catalogue-updates.js';
 /** Catalogue can be replaced without changing page templates or interactions. */
 import { publishingConfig } from './publishing.js';
 export async function loadCatalogue({ publicOnly = false } = {}) {
@@ -8,18 +9,9 @@ export async function loadCatalogue({ publicOnly = false } = {}) {
     if (!response.ok) throw Error('La collezione è temporaneamente non disponibile. Riprova tra poco.');
     const data = await response.json();
     if (!Array.isArray(data.works) || !Array.isArray(data.collections)) throw Error('Catalogo non valido.');
-    // A retired work must never reappear from the old static catalogue.
-    // Reload open galleries when the published selection changes.
-    const revision = data.revision;
-    setInterval(async () => {
-      if (document.hidden) return;
-      try {
-        const next = await fetch(publishing.catalogueUrl, options);
-        if (!next.ok) return;
-        const value = await next.json();
-        if (typeof value.revision === 'string' && value.revision !== revision) location.reload();
-      } catch { /* A connection error is not a catalogue deletion. */ }
-    }, 60000);
+    // Public image requests still enforce publication on every access.
+    // Notify about a revision without interrupting meetings or account forms.
+    watchCatalogue({url:publishing.catalogueUrl,options,revision:data.revision,onUpdate:announceCatalogueUpdate});
     return data;
   }
   // Local photographs are excluded from both git and the production build.

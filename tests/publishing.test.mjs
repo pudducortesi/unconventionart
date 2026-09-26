@@ -82,3 +82,18 @@ test('video streaming forwards byte ranges and refuses withdrawn clips',async()=
  const withdrawn=createPublicGallery({url,serviceKey:'secret',fetchImpl:async()=>json([])});
  assert.equal((await withdrawn(new Request(`${url}/functions/v1/gallery-public/video/${id}`))).status,404);
 });
+
+test('artist previews use the verified owner prefix without exposing unrelated objects',async()=>{
+ const owner='20000000-0000-4000-8000-000000000001';
+ for(const preview of [`${owner}/${id}/preview.jpg`,`other/${id}/preview.jpg`,`${owner}/${id}/original.jpg`,`${id}/preview.jpg`]){
+  let requests=0;
+  const handler=createPublicGallery({url,serviceKey:'secret',fetchImpl:async endpoint=>{
+   if(++requests===1)return json([{id,owner_user_id:owner,preview_path:preview}]);
+   assert.equal(endpoint,`${url}/storage/v1/object/authenticated/gallery-previews/${owner}/${id}/preview.jpg`);
+   return new Response(new Uint8Array([255,216,255,217]));
+  }});
+  const valid=preview===`${owner}/${id}/preview.jpg`;
+  assert.equal((await handler(new Request(`${url}/functions/v1/gallery-public/image/${id}`))).status,valid?200:404);
+  assert.equal(requests,valid?2:1);
+ }
+});
