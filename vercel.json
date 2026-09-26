@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "npm ci --ignore-scripts && npm ci --prefix ar-runtime --ignore-scripts && node tools/setup-characterstudio.mjs",
-  "buildCommand": "node tools/build-characterstudio.mjs && node tools/build.mjs",
+  "installCommand": "npm ci --ignore-scripts && npm ci --prefix ar-runtime --ignore-scripts",
+  "buildCommand": "node tools/prepare-characterstudio.mjs && node tools/build.mjs",
   "outputDirectory": "dist",
   "cleanUrls": false,
   "rewrites": [

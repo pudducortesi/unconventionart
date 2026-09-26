@@ -16,3 +16,5 @@ await cp(new URL('LICENSE',root),'integrations/characterstudio/LICENSE.txt');
 const htmlPath='integrations/characterstudio/index.html';
 const storageScript=`<script>globalThis.__uaEditorStorage=Object.create(null);Object.defineProperties(globalThis.__uaEditorStorage,{getItem:{value:function(k){return this[k]??null}},setItem:{value:function(k,v){Object.defineProperty(this,k,{value:String(v),enumerable:true,writable:true,configurable:true})}},removeItem:{value:function(k){delete this[k]}},clear:{value:function(){for(const k of Object.keys(this))delete this[k]}}});</script>`;
 await writeFile(htmlPath,(await readFile(htmlPath,'utf8')).replace('<head>','<head>'+storageScript));
+
+await writeFile('integrations/characterstudio/status.json',JSON.stringify({available:true}));

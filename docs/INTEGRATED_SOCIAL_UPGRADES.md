@@ -28,6 +28,8 @@ npm run check
 npm run check:multiplayer
 ```
 
+La preparazione di CharacterStudio è isolata dalla build della galleria: in caso di errore il laboratorio segnala l’indisponibilità e offre il collegamento esplicito all’editor originale. Il caricamento VRM locale rimane disponibile.
+
 La build Vercel recupera CharacterStudio dalla revisione fissata nel manifest anche quando i submodule non sono materializzati. L’editor usa il catalogo upstream remoto: disponibilità e licenze dei singoli asset rimangono distinte dalla licenza del codice.
 
 Test automatici: autenticazione/inviti per i token voce, rifiuto file VRM non validi, compressione del modello, selezione del pannello VR e sessione WebSocket con due identità, visibilità individuale e revoca. Verifica fisica del visore e conversazione audio reale ancora da effettuare.
