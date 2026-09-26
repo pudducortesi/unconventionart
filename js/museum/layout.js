@@ -192,7 +192,7 @@ for (let i=FURNITURE.length-1;i>=0;i--) if(FURNITURE[i].z>0) FURNITURE.splice(i,
 for (let i=RUGS.length-1;i>=0;i--) if(RUGS[i].z>0) RUGS.splice(i,1);
 for (let i=FURNITURE.length-1;i>=0;i--) if(FURNITURE[i].hallIndex===7) FURNITURE.splice(i,1);
 for (let i=RUGS.length-1;i>=0;i--) if(RUGS[i].hallIndex===7) RUGS.splice(i,1);
-for (const [x,z] of [[14,-91],[20,-89]])
+for (const [x,z] of [[14,-91],[18,-89]])
   FURNITURE.push(rectangle(x,z,6,1.55,{kind:'simone-bench',hallIndex:7}));
 FURNITURE.push(rectangle(10,5,4.48,1.55,{kind:'welcome-desk'}));
 FURNITURE.push(rectangle(-10,6,3.4,1.3,{kind:'welcome-sofa'}));

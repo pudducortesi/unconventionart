@@ -6,16 +6,17 @@ import { cp, mkdir, rm, readFile, writeFile, readdir } from 'node:fs/promises';
 import { gzipSync } from 'node:zlib';
 import { validatePublishingConfig } from '../js/publishing.js';
 const publishing = validatePublishingConfig(JSON.parse(await readFile('data/publishing.json','utf8')));
+const liveCatalogue=publishing.enabled && publishing.liveCatalogue !== false;
 await rm('dist', { recursive:true, force:true });
 await mkdir('dist', { recursive:true });
 await prepareVendor();
-await buildARModel();
+if(!liveCatalogue)await buildARModel();
 // Publish display derivatives only. Masters stay outside the deployment.
-for (const path of ['avatars/atelier-v1.glb','avatars/LICENSE.txt','data/experience.json','data/publishing.json','models/kavyar-01.glb','images/site/favicon-32.png','images/site/brand-original.svg','images/palazzo/colonna-ceiling.webp','images/palazzo/masters','images/palazzo/vaults','corridor-credits.html']) {
+for (const path of ['avatars/atelier-v1.glb','avatars/LICENSE.txt','data/experience.json','data/publishing.json',...(!liveCatalogue?['models/kavyar-01.glb']:[]),'images/site/favicon-32.png','images/site/brand-original.svg','images/palazzo/colonna-ceiling.webp','images/palazzo/masters','images/palazzo/vaults','corridor-credits.html']) {
   await mkdir(`dist/${path.substring(0,path.lastIndexOf('/'))}`, {recursive:true});
   await cp(path,`dist/${path}`,{recursive:true});
 }
-const optimized = await optimizePhotos(JSON.parse(await readFile('data/catalogue.json','utf8')));
+const optimized = liveCatalogue ? {catalogue:{works:[],collections:[],hero:''},report:[]} : await optimizePhotos(JSON.parse(await readFile('data/catalogue.json','utf8')));
 await writeFile('dist/data/catalogue.json',JSON.stringify(optimized.catalogue,null,2));
 await writeFile('photo-optimization-report.json',JSON.stringify(optimized.report,null,2));
 const result = await build({

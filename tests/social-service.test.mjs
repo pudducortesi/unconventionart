@@ -6,6 +6,34 @@ const reply=(data,status=200)=>({ok:status<400,status,json:async()=>data});
 const session=(id='a',expired=false)=>({user:{id},access_token:'test-access-'+id,refresh_token:'test-refresh-'+id,expires_at:Date.now()/1000+(expired?-1:3600)});
 const deferred=()=>{let resolve;const promise=new Promise(r=>resolve=r);return {promise,resolve};};
 const flush=()=>new Promise(r=>setImmediate(r));
+
+test('Callback credentials are verified with Auth before becoming a session',async()=>{
+  const f=await fixture(null,()=>reply({id:'confirmed',email:'user@example.test'}));
+  assert.equal(await f.service.acceptCallback({accessToken:'access',refreshToken:'refresh',expiresIn:3600,type:'recovery'}),true);
+  assert.equal(f.service.user.id,'confirmed');assert.equal(f.calls[0].options.headers.Authorization,'Bearer access');
+  assert(f.calls[0].url.endsWith('/auth/v1/user'));
+});
+test('A rejected callback cannot replace the existing account',async()=>{
+  const f=await fixture(session('a'),()=>reply({message:'invalid token'},401));
+  await assert.rejects(f.service.acceptCallback({accessToken:'bad',refreshToken:'bad',expiresIn:3600}));
+  assert.equal(f.service.user.id,'a');
+});
+test('Callback completion cannot restore a session after logout',async()=>{
+  const gate=deferred(),f=await fixture(null,()=>gate.promise);
+  const pending=assert.rejects(f.service.acceptCallback({accessToken:'access',refreshToken:'refresh'}),{code:'ua_session_changed'});
+  await flush();await f.service.logout();gate.resolve(reply({id:'old'}));await pending;assert.equal(f.service.user,null);
+});
+test('Password recovery uses the public redirect without disclosing account membership',async()=>{
+  const f=await fixture(null,()=>reply({}));await f.service.requestPasswordReset('user@example.test');
+  const url=new URL(f.calls[0].url);assert.equal(url.pathname,'/auth/v1/recover');
+  assert.equal(url.searchParams.get('redirect_to'),'https://unconventionart.vercel.app/');
+  assert.equal(f.calls[0].options.headers.Authorization,undefined);
+});
+test('Password updates require a session and minimum length',async()=>{
+  const f=await fixture(null,()=>reply({}));
+  await assert.rejects(f.service.changePassword('short'));await assert.rejects(f.service.changePassword('long-password-test'),{code:'ua_login_required'});
+  assert.equal(f.calls.length,0);
+});
 async function fixture(initial,handler){
   const values=new Map(initial?[[KEY,JSON.stringify(initial)]]:[]),calls=[];
   const storage={getItem:k=>values.get(k),setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)};

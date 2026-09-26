@@ -1,3 +1,4 @@
+import { readSocialEntry } from './social-entry.js';
 import { museumPlan } from "./museum-plan.js";
 import { createVisitPreloader } from "./visit-preloader.js";
 import { prepareWelcomeFilm } from "./welcome-film.js";
@@ -13,7 +14,7 @@ import { createEnvironment } from "./environment.js";
 import * as T from "../../vendor/three.module.js";
 import { loadCatalogue } from "../catalogue.js";
 import { createVideoScreens } from './video-screens.js';
-let videoScreens, visitPreloader, welcomeFilm;
+let videoScreens, visitPreloader, welcomeFilm, xrVisit, xrStarting=false;
 import { createArchitecture, createArtwork } from "./architecture.js";
 import { createControls } from "./controls.js";
 import { createArtStream } from "./streaming.js";
@@ -36,6 +37,8 @@ import { MEZZANINES, MEZZANINE_HEIGHT } from "./mezzanine-layout.js";
 import { moveOnLevels, findLevelPath, safeLevelViewpoint } from "./level-navigation.js";
 
 // Fetch effects concurrently with the catalogue; initialization still precedes entry.
+let socialEntryStorage;try{socialEntryStorage=sessionStorage;}catch{}
+const socialEntry=readSocialEntry(location,history,socialEntryStorage);
 const effectsModule = import('../../vendor/gallery-effects.js').then(module => ({module}), error => ({error}));
 const $ = (selector) => document.querySelector(selector);
 // Deterrence for casual saving, not DRM: public previews remain renderable.
@@ -113,6 +116,7 @@ $('#social-open').addEventListener('click', async () => {
   openDialog('social-space');
   try {
     socialPromise ||= import('./social-space.js').then(({mountSocial,planMeetingRoute}) => mountSocial({
+      entry: socialEntry,
       getScene: () => scene,
       getPose: () => ({ x:player.x, z:player.z, y:player.floorY, yaw }),
       getCatalogue: () => catalogue,
@@ -270,7 +274,7 @@ $("#photo-render-start").addEventListener("click", async () => {
   }
 });
 function invalidate() {
-  if (renderer && camera && !frame && !disposed && !document.hidden) {
+  if (renderer && camera && !frame && !disposed && !document.hidden && !xrStarting && !xrVisit?.active) {
     if (!lastTime) lastTime = performance.now();
     frame = requestAnimationFrame(render);
   }
@@ -941,7 +945,7 @@ function turnToward(target, delta) {
   return Math.abs(difference) + Math.abs(desired.pitch - pitch);
 }
 function resize() {
-  if (!renderer || !camera) return;
+  if (!renderer || !camera || renderer.xr.isPresenting) return;
   if (photoRender || photoBusy) leavePhotoRender();
   const bounds = root.getBoundingClientRect();
   viewport = { width: bounds.width, height: bounds.height };
@@ -982,7 +986,8 @@ addEventListener("pagehide", (event) => {
   environment?.dispose();
   photoRender?.dispose();
   effects?.dispose();
-  renderer?.dispose();
+  if(xrVisit) void xrVisit.dispose().finally(()=>renderer?.dispose());
+  else renderer?.dispose();
 });
 addEventListener("pageshow", (event) => {
   if (event.persisted) invalidate();
@@ -1160,6 +1165,15 @@ try {
   if (!mobile && !modalOpen) controls.focus();
   resize();
   invalidate();
+  void import('./xr-visit.js').then(async({createXRVisit})=>{
+    xrVisit=await createXRVisit({renderer,scene,camera,player,button:$('#vr-open'),notice:announce,
+      onStart(){xrStarting=true;guide.pause();stop();leavePhotoRender();controls?.exitPointerLock();for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();cancelAnimationFrame(frame);frame=0;},
+      onEnd(){xrStarting=false;if(disposed)return;lastTime=0;pitch=0;setView();resize();invalidate();},
+      update(dt,time,headYaw){yaw=headYaw;socialController?.update(dt,time);architecture.updateLighting(player);videoScreens?.update(player,true);welcomeFilm?.update(player,true);if(time-lastStream>650){stream.update(player,{selected});lastStream=time;}},
+    });
+  }).catch(()=>{ $('#vr-open').textContent='Visore VR non disponibile'; });
 } catch (error) {
   fail(error.message || "Il dispositivo non supporta la visita 3D.");
 }
+
+if(socialEntry.requested)$('#social-open').click();

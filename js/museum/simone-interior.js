@@ -45,7 +45,7 @@ export function createSimoneInterior(scene) {
 
   // Low leather benches on precise tubular frames, informed by MVSEVM's
   // Bauhaus vocabulary without reproducing a catalogue model.
-  for(const [x,z,r] of [[-2,0,0],[4,2,0]]){
+  for(const [x,z,r] of [[-2,0,0],[2,2,0]]){
     const group=new T.Group(); group.position.set(x,0,z);group.rotation.y=r;root.add(group);
     const seat=new T.Mesh(geo,leather);seat.scale.set(5.7,.2,1.27);seat.position.y=.47;group.add(seat);
     for(const sx of [-2.72,2.72]) for(const sz of [-.59,.59]){

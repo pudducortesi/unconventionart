@@ -9,9 +9,9 @@ test('ten room identities have distinct palettes and physical wall relief', () =
     const boxes = [];
     addRoomWallFinishes(hall, (...args) => boxes.push(args), 'paint', 'accent', 'trim', BUILDING.height);
     const relief = boxes.slice(11).filter(b => b[4] > 7 && b[4] < 12);
-    if (hall.index === 0) {
+    if (ROOM_FINISHES[hall.index].treatment === 'gallery') {
       assert.equal(relief.length, 0, 'Portrait walls remain uninterrupted behind the upper compositions');
-      return 'continuous portrait walls';
+      return `continuous gallery walls ${ROOM_FINISHES[hall.index].wall}`;
     }
     assert(relief.length > 0);
     // No upper relief hangs in front of the enlarged photography band.

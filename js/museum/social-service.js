@@ -1,3 +1,4 @@
+import { PUBLIC_GALLERY } from './social-entry.js';
 const KEY='ua-social-session-v1';
 const errors={ua_login_required:'Accedi per partecipare.',ua_suspended:'Questo profilo è sospeso.',ua_rate_limit:'Attendi un momento e riprova.',ua_profile_required:'Salva prima il tuo avatar.',ua_room_limit:'Hai già tre incontri attivi. Chiudine uno prima di crearne altri.',ua_room_full:'Incontro completo: massimo 16 partecipanti.',ua_invite_invalid:'Invito scaduto o non disponibile.',ua_room_denied:'L’incontro è terminato o non è più accessibile.',ua_forbidden:'Operazione non consentita.',ua_invalid_profile:'Usa un nome tra 2 e 32 caratteri.',ua_invalid_avatar:'Seleziona le opzioni disponibili per l’avatar.',ua_target_invalid:'La persona ha lasciato l’incontro.'};
 export async function createSocialService(fetcher=fetch, storage=globalThis.sessionStorage) {
@@ -64,7 +65,28 @@ export async function createSocialService(fetcher=fetch, storage=globalThis.sess
     get user(){return session?.user||null;},
     async settings(){return raw('/auth/v1/settings',{auth:false});},
     async login(email,password){await authenticate('/auth/v1/token?grant_type=password',email,password);},
-    async signup(email,password){return authenticate('/auth/v1/signup',email,password);},
+    async signup(email,password){return authenticate('/auth/v1/signup?redirect_to='+encodeURIComponent(PUBLIC_GALLERY),email,password);},
+    async acceptCallback(callback){
+      if (!callback || callback.error || !callback.accessToken || !callback.refreshToken)
+        throw Error('Il link non è valido o è scaduto. Richiedi una nuova email.');
+      const token=generation;
+      const credentials={access_token:callback.accessToken};
+      const user=await raw('/auth/v1/user',{auth:false,credentials});
+      if(token!==generation)throw changed();
+      if(!user?.id)throw connectionError();
+      const seconds=Number.isFinite(callback.expiresIn)?Math.max(0,Math.min(3600,callback.expiresIn)):0;
+      invalidate();save({access_token:callback.accessToken,refresh_token:callback.refreshToken,user,expires_at:Math.floor(Date.now()/1000)+seconds});
+      return callback.type==='recovery';
+    },
+    async requestPasswordReset(email){
+      return raw('/auth/v1/recover?redirect_to='+encodeURIComponent(PUBLIC_GALLERY),{method:'POST',auth:false,body:{email}});
+    },
+    async changePassword(password){
+      if(typeof password!=='string'||password.length<12)throw Error('Usa una password di almeno 12 caratteri.');
+      const token=generation;await fresh();if(token!==generation)throw changed();
+      await raw('/auth/v1/user',{method:'PUT',body:{password}});
+      if(token!==generation)throw changed();
+    },
     async logout(){const previous=session;invalidate();if(previous)await raw('/auth/v1/logout?scope=local',{method:'POST',credentials:previous});},
     async rpc(action,payload={}){
       const token=generation;await fresh();if(token!==generation)throw changed();

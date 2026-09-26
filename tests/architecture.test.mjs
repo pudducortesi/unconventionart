@@ -62,9 +62,9 @@ for (const mobile of [false, true]) {
       assert(hit.object.material.map?.image.data, 'All rooms have parquet rather than a flat fill');
       const surface = hit.object.material, geometry = hit.object.geometry;
       assert.equal(surface.map.colorSpace, T.SRGBColorSpace);
-      if (hall.index === 0) {
+      if (ROOM_FINISHES[hall.index].finish === 'concrete') {
         assert.equal(surface.bumpMap.colorSpace, T.NoColorSpace);
-        assert.equal(hit.object.name, 'hall-1-concrete-floor');
+        assert.equal(hit.object.name, `${hall.id}-concrete-floor`);
       } else {
         assert.equal(surface.normalMap.colorSpace, T.NoColorSpace);
         assert.equal(surface.roughnessMap.colorSpace, T.NoColorSpace);

@@ -1,4 +1,5 @@
 import * as T from '../../vendor/three.module.js';
+import {invitationURL,clearPendingInvite} from './social-entry.js';
 import {DEFAULT_AVATAR,normalizeAvatar,inviteCode,safePose,offerURL} from './social-model.js';
 import {mountAvatarStudio} from './avatar-studio.js';
 import {createSocialService} from './social-service.js';
@@ -9,15 +10,17 @@ import {participantLocation,createMeetingPresence} from './meeting-wayfinding.js
 export {planMeetingRoute} from './meeting-wayfinding.js';
 import {createAvatar,createAvatarLayer} from './social-avatar.js';
 
-export async function mountSocial({getScene,getPose,getCatalogue,wake,reachParticipant}) {
+export async function mountSocial({getScene,getPose,getCatalogue,wake,reachParticipant,entry={}}) {
   const dialog=document.querySelector('#social-space');
   dialog.innerHTML=`<div class="social-heading"><div><span class="eyebrow">UNCONVENTIONART · SOCIAL BETA</span><h2>Il tuo posto in galleria.</h2></div><button type="button" class="social-close" aria-label="Chiudi incontri">×</button></div>
     <nav class="social-tabs" aria-label="Il tuo spazio"><button data-social-tab="avatar" aria-pressed="true">Il mio avatar</button><button data-social-tab="visits" aria-pressed="false">Incontri <span id="social-count"></span> <span id="social-unread"></span></button><button data-social-tab="editions" aria-pressed="false">Edizioni e NFT</button></nav>
     <p id="social-notice" role="status" aria-live="polite"></p>
+    <div id="social-invitation" class="social-invitation" hidden><strong>Hai ricevuto un invito a una visita.</strong><p id="social-entry-step"></p><button id="social-entry-next" type="button">Continua</button></div>
+    <form id="social-recovery" hidden><h3>Scegli una nuova password</h3><p id="social-recovery-account"></p><label>Nuova password<input id="social-new-password" type="password" autocomplete="new-password" minlength="12" required></label><label>Ripeti la password<input id="social-password-confirm" type="password" autocomplete="new-password" minlength="12" required></label><button class="social-primary">Salva nuova password</button></form>
     <section data-social-panel="avatar" class="social-avatar-layout"><div class="social-preview-area"><div id="social-preview" aria-label="Anteprima tridimensionale del tuo avatar"></div><p>Trascina per ruotare il personaggio.</p><p id="social-model-status" role="status"></p><div class="social-actions"><button type="button" id="social-avatar-detail" aria-pressed="false">Mostra viso</button><button type="button" id="social-avatar-idle" aria-pressed="true">In posa</button><button type="button" id="social-avatar-walk" aria-pressed="false">Cammina</button><button type="button" id="social-avatar-wave">Prova saluto 👋</button></div></div><div>
       <form id="social-profile"><label>Nome nella galleria<input id="social-name" required minlength="2" maxlength="32" autocomplete="nickname" placeholder="Come vuoi essere chiamato?"></label><div id="social-wardrobe"></div><button type="submit" class="social-primary">Salva avatar</button></form>
       <div id="social-identity" hidden><p id="social-identity-name"></p><button id="social-logout" type="button">Esci dall’account</button></div>
-      <form id="social-login"><h3>Porta il tuo avatar negli incontri</h3><p>Accedi con il tuo account. La visita individuale resta libera.</p><label>Email<input id="social-email" type="email" autocomplete="email" required maxlength="254"></label><label>Password<input id="social-password" type="password" autocomplete="current-password" required></label><div class="social-actions"><button type="submit" class="social-primary">Accedi</button><button type="submit" name="signup" value="signup" disabled>Crea account</button></div><p id="social-signup-note">Per creare un account usa almeno 12 caratteri e conferma l’email ricevuta.</p></form>
+      <form id="social-login"><h3>Porta il tuo avatar negli incontri</h3><p>Accedi con il tuo account. La visita individuale resta libera.</p><label>Email<input id="social-email" type="email" autocomplete="email" required maxlength="254"></label><label>Password<input id="social-password" type="password" autocomplete="current-password" required></label><div class="social-actions"><button type="submit" class="social-primary">Accedi</button><button type="submit" name="signup" value="signup" disabled>Crea account</button></div><button type="button" id="social-reset-password">Password dimenticata?</button><p id="social-signup-note">Per creare un account usa almeno 12 caratteri e conferma l’email ricevuta.</p></form>
     </div></section>
     <section data-social-panel="visits" hidden><div id="social-room-start"><div id="social-resume-area" hidden><p>Hai un incontro recente in questa scheda.</p><button type="button" id="social-resume" class="social-primary">Riprendi incontro</button></div><h3>Visita la mostra insieme.</h3><p>Crea un incontro e condividi l’invito. Fino a 16 persone, avatar visibili e chat di gruppo. Gli inviti scadono dopo 24 ore.</p><div class="social-room-forms"><form id="social-create"><label>Nome dell’incontro<input id="social-room-name" required minlength="2" maxlength="60" placeholder="Una sera in galleria"></label><button class="social-primary">Crea incontro</button></form><form id="social-join"><label>Invito ricevuto<input id="social-invite" required placeholder="Incolla il link o il codice" autocomplete="off" maxlength="500"></label><button>Partecipa</button></form></div></div>
       <div id="social-room-active" hidden><div class="social-room-title"><div><span class="eyebrow">INCONTRO PRIVATO</span><h3 id="social-room-title"></h3><p id="social-connection" role="status"></p></div><button id="social-copy">Copia invito</button></div><input id="social-share-link" readonly aria-label="Link di invito" hidden><div class="social-room-layout"><div><h4>Presenti</h4><ul id="social-people"></ul></div><div><button type="button" id="social-chat-new" hidden></button><div id="social-messages" tabindex="0" role="log" aria-label="Messaggi dell’incontro" aria-live="polite"></div><form id="social-chat"><label class="sr-only" for="social-message">Messaggio</label><input id="social-message" placeholder="Scrivi al gruppo…" maxlength="500" required autocomplete="off"><button>Invia</button></form></div></div><p class="social-caption">Raggiungi porta all’ultima posizione ricevuta; le distanze sono in linea d’aria. I messaggi sono visibili ai partecipanti. Nessun microfono viene attivato.</p><div class="social-actions"><button id="social-wave" type="button">Saluta 👋</button><button id="social-return" class="social-primary">Torna nella galleria</button><button id="social-leave">Lascia incontro</button><button id="social-end" hidden>Termina per tutti</button></div></div>
@@ -30,6 +33,12 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake,reachParti
   let avatar={...DEFAULT_AVATAR},profile=null,room=null,service,layer=null,reportTarget=null,presentCount=null,chatAtBottom=true,previewRenderer,previewScene,previewCamera,previewMesh,previewWalking=false,previewWaveUntil=0,previewWaveTimer=0,previewFrame=0,previewTime=0;
   let meetingStorage;try{meetingStorage=globalThis.sessionStorage;}catch{}
   const bookmark=createMeetingBookmark(meetingStorage);
+  let recovering=false;
+  const incoming=entry.invite||null;
+  function refreshEntry(){
+    $('#social-invitation').hidden=!incoming||!!room;
+    $('#social-entry-step').textContent=!service?.user?'1 · Accedi o crea un account per partecipare.':!profile?'2 · Scegli il nome e salva il tuo avatar.':'3 · Il tuo avatar è pronto: apri l’invito e premi Partecipa.';
+  }
   const presence=createMeetingPresence(),people=new Map(),messageRows=new Map(),unread=createUnreadMessages();
   const sender=createChatSender({getRoom:()=>room?.id,getDraft:()=>$('#social-message').value,setDraft:value=>{$('#social-message').value=value;},post:(id,body)=>service.rpc('chat',{room:id,body})});
   const chatVisible=()=>dialog.open&&!document.hidden&&!$('[data-social-panel=visits]').hidden;
@@ -48,7 +57,7 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake,reachParti
   let serviceError;
   try{service=await createSocialService();}catch(error){serviceError=error.message;note(error.message,true);}
   function refreshResume(){const saved=bookmark.read(service?.user?.id);$('#social-resume-area').hidden=!!room||!profile||!saved;if(saved)$('#social-resume').textContent=`Riprendi «${saved.name}»`;}
-  function refreshIdentity(){const user=service?.user;$('#social-login').hidden=!!user;$('#social-identity').hidden=!user;$('#social-identity-name').textContent=user?'Account collegato'+(profile?` · ${profile.name}`:''):'';refreshResume();}
+  function refreshIdentity(){const user=service?.user;$('#social-login').hidden=!!user;$('#social-identity').hidden=!user;$('#social-identity-name').textContent=user?'Account collegato'+(profile?` · ${profile.name}`:''):'';refreshResume();refreshEntry();}
   async function run(button,work){if(button)button.disabled=true;try{await work();}catch(error){note(error.message,true);refreshIdentity();if(!service?.user)resetRoom();}finally{if(button)button.disabled=false;}}
   const requireAccount=()=>{if(!service)throw Error(serviceError||'Connessione non disponibile.');if(!service.user)throw Error('Accedi dalla scheda Il mio avatar.');if(!profile)throw Error('Salva il tuo avatar prima di creare o raggiungere un incontro.');};
   function renderPreview(){
@@ -90,10 +99,21 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake,reachParti
   }});
   function applyAvatar(value){studio.load(value);}
   async function loadProfile(){if(!service?.user){refreshIdentity();return;}const data=await service.rpc('profile');profile=data.profile;if(profile){$('#social-name').value=profile.name;applyAvatar(profile.avatar);}$('#social-blocks').replaceChildren();for(const blocked of data.blocks){const li=element('li',blocked.name+' '),button=element('button','Sblocca');button.onclick=()=>run(button,async()=>{await service.rpc('unblock',{target:blocked.id});li.remove();note('Blocco rimosso.');});li.append(button);$('#social-blocks').append(li);}refreshIdentity();}
-  $('#social-profile').addEventListener('submit',e=>{e.preventDefault();run(e.submitter,async()=>{if(!service?.user)throw Error('Accedi per salvare l’avatar nel tuo account. Le scelte restano su questo dispositivo.');profile=await service.rpc('save_profile',{name:$('#social-name').value.trim(),avatar:{...avatar}});refreshIdentity();note('Avatar salvato. Ora puoi partecipare agli incontri.');});});
+  $('#social-profile').addEventListener('submit',e=>{e.preventDefault();run(e.submitter,async()=>{if(!service?.user)throw Error('Accedi per salvare l’avatar nel tuo account. Le scelte restano su questo dispositivo.');profile=await service.rpc('save_profile',{name:$('#social-name').value.trim(),avatar:{...avatar}});refreshIdentity();note('Avatar salvato. Ora puoi partecipare agli incontri.');if(incoming)tab('visits');});});
   $('#social-login').addEventListener('submit',e=>{e.preventDefault();run(e.submitter,async()=>{if(!service)throw Error(serviceError);const email=$('#social-email').value.trim(),password=$('#social-password').value;if(e.submitter?.value==='signup'){if(password.length<12)throw Error('Usa una password di almeno 12 caratteri.');const logged=await service.signup(email,password);$('#social-password').value='';if(!logged){note('Controlla la tua email per confermare l’account, poi torna qui e accedi.');return;}}else{await service.login(email,password);$('#social-password').value='';}await loadProfile();note(profile?'Bentornato. Il tuo avatar è pronto.':'Accesso effettuato. Scegli il nome e salva il tuo avatar.');});});
+  $('#social-entry-next').onclick=()=>{tab(service?.user&&profile?'visits':'avatar');if(!service?.user)$('#social-email').focus();else if(!profile)$('#social-name').focus();else $('#social-invite').focus();};
+  $('#social-reset-password').onclick=()=>run($('#social-reset-password'),async()=>{
+    if(!service)throw Error(serviceError);const email=$('#social-email');if(!email.reportValidity())return;
+    await service.requestPasswordReset(email.value.trim());note('Se l’indirizzo è registrato, riceverai un link per scegliere una nuova password.');
+  });
+  $('#social-recovery').addEventListener('submit',e=>{e.preventDefault();run(e.submitter,async()=>{
+    const password=$('#social-new-password').value;
+    if(password!==$('#social-password-confirm').value)throw Error('Le due password non coincidono.');
+    await service.changePassword(password);$('#social-new-password').value=$('#social-password-confirm').value='';
+    recovering=false;$('#social-recovery').hidden=true;await loadProfile();note('Password aggiornata. Puoi riprendere la visita.');
+  });});
   function resetRoom(forget=false){poller.stop();room=null;if(forget)bookmark.clear();sender.reset();$('#social-chat button').disabled=false;$('#social-message').value='';unread.reset();messageRows.clear();chatAtBottom=true;clearPresence();$('#social-room-start').hidden=false;$('#social-room-active').hidden=true;$('#social-count').textContent='';updateChatBadge();$('#social-people').replaceChildren();$('#social-messages').replaceChildren();$('#social-report').hidden=true;refreshResume();}
-  $('#social-logout').onclick=()=>run($('#social-logout'),async()=>{if(room)try{await service.rpc('leave',{room:room.id});}catch{}resetRoom(true);try{await service.logout();}finally{profile=null;refreshIdentity();}note('Hai lasciato l’account.');});
+  $('#social-logout').onclick=()=>run($('#social-logout'),async()=>{if(room)try{await service.rpc('leave',{room:room.id});}catch{}resetRoom(true);try{await service.logout();}finally{profile=null;recovering=false;$('#social-recovery').hidden=true;refreshIdentity();}note('Hai lasciato l’account.');});
   function renderState(data){
     const participants=data.participants.filter(p=>safePose(p));
     if(!layer&&getScene())layer=createAvatarLayer(getScene(),wake);
@@ -147,11 +167,11 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake,reachParti
   });
   function pauseRoom(message){poller.stop();clearPresence();if(room)$('#social-connection').textContent=message;}
   function resumeRoom(){if(!room||document.hidden)return;if(navigator.onLine===false){pauseRoom('Sei offline · l’incontro riprende quando torna la connessione.');return;}$('#social-connection').textContent='Collegamento in corso…';poller.start();}
-  async function activate(next){if(room&&room.id!==next.id)try{await service.rpc('leave',{room:room.id});}catch{}resetRoom();room=next;bookmark.remember(room,service.user?.id);refreshResume();$('#social-room-start').hidden=true;$('#social-room-active').hidden=false;$('#social-room-title').textContent=room.name;$('#social-end').hidden=!room.owner;$('#social-share-link').hidden=true;note('Incontro aperto. Torna nella galleria per muoverti insieme agli altri.');resumeRoom();}
+  async function activate(next){if(room&&room.id!==next.id)try{await service.rpc('leave',{room:room.id});}catch{}resetRoom();room=next;clearPendingInvite(meetingStorage);refreshEntry();bookmark.remember(room,service.user?.id);refreshResume();$('#social-room-start').hidden=true;$('#social-room-active').hidden=false;$('#social-room-title').textContent=room.name;$('#social-end').hidden=!room.owner;$('#social-share-link').hidden=true;note('Incontro aperto. Torna nella galleria per muoverti insieme agli altri.');resumeRoom();}
   $('#social-resume').onclick=()=>run($('#social-resume'),async()=>{requireAccount();try{await activate(await bookmark.resume(service));}finally{refreshResume();}});
   $('#social-create').addEventListener('submit',e=>{e.preventDefault();run(e.submitter,async()=>{requireAccount();await activate(await service.rpc('create',{name:$('#social-room-name').value.trim()}));});});
   $('#social-join').addEventListener('submit',e=>{e.preventDefault();run(e.submitter,async()=>{requireAccount();const invite=inviteCode($('#social-invite').value);if(!invite)throw Error('Inserisci un invito valido.');await activate(await service.rpc('join',{invite}));});});
-  $('#social-copy').onclick=()=>run($('#social-copy'),async()=>{const url=new URL(location.href);url.search='';url.hash='visit='+room.invite;$('#social-share-link').value=url.href;try{await navigator.clipboard.writeText(url.href);note('Invito copiato. Condividilo con chi vuoi incontrare.');}catch{$('#social-share-link').hidden=false;$('#social-share-link').select();note('Copia il link mostrato.');}});
+  $('#social-copy').onclick=()=>run($('#social-copy'),async()=>{const url=invitationURL(room.invite);$('#social-share-link').value=url;try{await navigator.clipboard.writeText(url);note('Invito copiato. Condividilo con chi vuoi incontrare.');}catch{$('#social-share-link').hidden=false;$('#social-share-link').select();note('Copia il link mostrato.');}});
   $('#social-chat').addEventListener('submit',async e=>{
     e.preventDefault();if(sender.busy)return;const button=$('#social-chat button');button.disabled=true;
     try{if(await sender.send())note('Messaggio inviato.');}
@@ -180,7 +200,9 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake,reachParti
   window.addEventListener('pageshow',event=>{if(event.persisted)resumeRoom();});
   window.addEventListener('offline',()=>pauseRoom('Sei offline · l’incontro riprende quando torna la connessione.'));
   window.addEventListener('online',resumeRoom);
-  const incoming=inviteCode(location.hash.startsWith('#visit=')?location.hash.slice(7):'');if(incoming)$('#social-invite').value=incoming;
+  if(incoming)$('#social-invite').value=incoming;
+  let callbackNotice='';
+  if(service&&entry.auth){try{recovering=await service.acceptCallback(entry.auth);$('#social-recovery').hidden=!recovering;$('#social-recovery-account').textContent=service.user?.email||'';callbackNotice=recovering?'Imposta la nuova password qui sopra.':'Email confermata. Scegli il tuo avatar e continua.';}catch(error){callbackNotice=error.message;}finally{entry.auth=null;}}
   refreshIdentity();
   if(service) {
     service.settings().then(settings=>{
@@ -190,5 +212,5 @@ export async function mountSocial({getScene,getPose,getCatalogue,wake,reachParti
     }).catch(()=>{$('#social-signup-note').textContent='Registrazioni temporaneamente non verificabili. Riprova più tardi.';});
   }
   if(service?.user)await run(null,loadProfile);
-  return {open(){refreshResume();tab(room||incoming||(profile&&bookmark.read(service?.user?.id))?'visits':'avatar');if(incoming&&!room)note('Hai un invito. Accedi, salva il tuo avatar e premi Partecipa.');},update(dt,time){return layer?.update(dt,time)||false;}};
+  return {open(){refreshResume();refreshEntry();tab(room||(profile&&incoming)||(profile&&bookmark.read(service?.user?.id))?'visits':'avatar');if(callbackNotice){note(callbackNotice);callbackNotice='';}else if(incoming&&!room)note(service?.user&&profile?'Invito pronto. Premi Partecipa per entrare.':'Completa l’accesso e salva il tuo avatar per partecipare.');},update(dt,time){return layer?.update(dt,time)||false;}};
 }
