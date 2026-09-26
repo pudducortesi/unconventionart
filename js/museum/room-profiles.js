@@ -8,7 +8,7 @@ export const ROOM_PROFILES = [
   { name: 'Corpo', mood: 'Curve, pelle e toni caldi. Una sosta più fisica e raccolta.', color: 0xa96f46, rug: 0xc29676, weave: 0xe8c9a8, shape: 'oval', light: 'cluster', seat: 'ribbed' },
   { name: 'Notturno', mood: 'Bordeaux e nero, una visione più intima dello schermo.', color: 0x632d44, rug: 0x543844, weave: 0x957485, shape: 'oval', light: 'single', seat: 'sofa' },
   { name: 'Materia', mood: 'Superfici tessute e sedute distese, tra oliva e terra.', color: 0x626a45, rug: 0x8c906c, weave: 0xc1c49e, shape: 'rectangle', light: 'pair', seat: 'daybed' },
-  { name: 'Archivio', mood: 'Ordine, consultazione e dialogo intorno alla fotografia.', color: 0x374c69, rug: 0x7e8d9a, weave: 0xbbc8d3, shape: 'rectangle', light: 'linear', seat: 'sofa' },
+  { name: 'Simone Plozzer · Illustrazione', mood: 'Noir minimale e gestuale: carta, inchiostro, grafite e tagli cobalto.', color: 0x111214, rug: 0x26282b, weave: 0xf3f0e9, shape: 'rectangle', light: 'linear', seat: 'cantilever' },
   { name: 'Intimo', mood: 'Sedute singole e forme morbide. Guardare con calma.', color: 0x986b73, rug: 0xb19196, weave: 0xdfc2c6, shape: 'oval', light: 'single', seat: 'bibendum' },
   { name: 'Orizzonte', mood: 'Un salotto aperto, blu profondo, prima del ritorno.', color: 0x25525d, rug: 0x60868b, weave: 0xa7c5c7, shape: 'oval', light: 'pair', seat: 'sofa' },
 ].map((profile, index) => ({ ...profile, mood: `${profile.mood} ${ROOM_FINISHES[index].detail}` }));
