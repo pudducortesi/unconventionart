@@ -524,22 +524,7 @@ function buildMaps() {
     section.append(rooms);$('#museum-masterplan').append(section);
   }
   const NS = "http://www.w3.org/2000/svg";
-  // Dedicated illustration room: visible on the live minimap and directly visitable.
-  {
-    const p1=mapPoint({x:-32.7,z:-130}); const p2=mapPoint({x:32.7,z:-159.7});
-    const rect=document.createElementNS(NS,'rect');
-    rect.setAttribute('x',p1.x); rect.setAttribute('y',p1.y);
-    rect.setAttribute('width',p2.x-p1.x); rect.setAttribute('height',p2.y-p1.y);
-    rect.setAttribute('class','map-hall'); rect.dataset.room='simone-plozzer';
-    $('#map-art').append(rect);
-    const button=document.createElement('button'); button.className='hall-button';
-    const name=document.createElement('strong'); name.textContent='Simone Plozzer · Illustrazione';
-    const detail=document.createElement('span'); detail.textContent='75 posizioni · sala aperta';
-    const mood=document.createElement('span'); mood.textContent='Noir minimale · sketch · carta, inchiostro, cobalto';
-    button.append(name,detail,mood); button.addEventListener('click',()=>{ $('#floorplan').close(); guide.pause(); clearSelection(); walkTo({x:0,z:-136},{x:0,y:1.7,z:-145},[{x:0,z:-124},{x:0,z:-129},{x:0,z:-136}]); announce('Percorso verso Sala Simone Plozzer · Illustrazione.'); });
-    $('#hall-list').append(button);
-  }
-  for (const hall of HALLS) {
+  const NS = "http://www.w3.org/2000/svg";\n  for (const hall of HALLS) {
     const p1 = mapPoint({ x: hall.bounds.minX, z: hall.bounds.maxZ });
     const p2 = mapPoint({ x: hall.bounds.maxX, z: hall.bounds.minZ });
     const rect = document.createElementNS(NS, "rect");
