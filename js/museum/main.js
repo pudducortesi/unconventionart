@@ -519,12 +519,12 @@ function buildMaps() {
       const button=document.createElement('button');
       button.textContent=`${String(room.number).padStart(2,'0')} · ${room.title} — ${room.status}`;
       button.disabled=room.status!=='Aperta';
-      button.addEventListener('click',()=>{ $('#floorplan').close(); if(room.specialRoom==='simone-plozzer'){ guide.pause(); clearSelection(); walkTo({x:0,z:-136},{x:0,y:1.7,z:-145},[{x:0,z:-124},{x:0,z:-129},{x:0,z:-136}]); announce('Percorso verso Sala Simone Plozzer · Illustrazione.'); } else visitHall(room.hallIndex); });rooms.append(button);
+      button.addEventListener('click',()=>{ $('#floorplan').close(); visitHall(room.hallIndex); });rooms.append(button);
     }
     section.append(rooms);$('#museum-masterplan').append(section);
   }
   const NS = "http://www.w3.org/2000/svg";
-  const NS = "http://www.w3.org/2000/svg";\n  for (const hall of HALLS) {
+  for (const hall of HALLS) {
     const p1 = mapPoint({ x: hall.bounds.minX, z: hall.bounds.maxZ });
     const p2 = mapPoint({ x: hall.bounds.maxX, z: hall.bounds.minZ });
     const rect = document.createElementNS(NS, "rect");

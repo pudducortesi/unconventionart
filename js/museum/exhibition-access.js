@@ -3,6 +3,7 @@ import { HALLS } from './layout.js';
 // Published photographs and programmed video both open their room.
 export function exhibitionAccess(slots, videos = []) {
   const open = new Set([...slots, ...videos].map(item => item.hallIndex));
+  open.add(7); // Simone's room is accessible before its first artwork is published.
   const closed = HALLS.filter(hall => !open.has(hall.index));
   const doors = closed.map(hall => ({
     hallIndex: hall.index, x: hall.side * 5, z: hall.center.z,

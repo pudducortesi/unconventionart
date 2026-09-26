@@ -8,8 +8,8 @@ test('masterplan has four floors and forty unique rooms, with real and future ac
  assert.equal(plan.length,4);assert(plan.every(f=>f.rooms.length===10));
  const rooms=plan.flatMap(f=>f.rooms);
  assert.equal(new Set(rooms.map(r=>r.number)).size,40);
- assert.equal(rooms.filter(r=>r.status==='Aperta').length,1);
- assert.equal(rooms.filter(r=>r.status==='Chiusa').length,9);
+ assert.equal(rooms.filter(r=>r.status==='Aperta').length,2);
+ assert.equal(rooms.filter(r=>r.status==='Chiusa').length,8);
  assert.equal(rooms.filter(r=>r.status==='Prevista').length,30);
  assert(rooms.filter(r=>r.status==='Prevista').every(r=>r.hallIndex===null));
 });

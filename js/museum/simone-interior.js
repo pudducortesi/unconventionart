@@ -1,5 +1,5 @@
 import * as T from "../../vendor/three.module.js";
-import { SIMONE_ROOM, SIMONE_DIVIDERS } from "./simone-room.js";
+import { SIMONE_ROOM } from "./simone-room.js";
 
 /**
  * Interior-design prototype for the Simone Plozzer artist room.
@@ -8,9 +8,8 @@ import { SIMONE_ROOM, SIMONE_DIVIDERS } from "./simone-room.js";
  */
 export function createSimoneInterior(scene) {
   const root=new T.Group(); root.name='simone-plozzer-interior';
-  // Kept outside the current ten-room circulation until the museum expansion route is connected.
-  // Replaces existing Sala 08 / Archivio, entered from its existing corridor door.
-  root.position.set(-16,0,-91);
+  // Uses the existing Sala 08 envelope and its corridor doorway at x=5, z=-91.
+  root.position.set(16,0,-91);
   scene.add(root);
   const resources=[];
   const mat=(color,roughness=.9,metalness=0)=>{const m=new T.MeshStandardMaterial({color,roughness,metalness});resources.push(m);return m};
@@ -20,29 +19,22 @@ export function createSimoneInterior(scene) {
   const geo=new T.BoxGeometry(1,1,1); resources.push(geo);
   const add=(w,h,d,x,y,z,m=paper,ry=0)=>{const mesh=new T.Mesh(geo,m);mesh.scale.set(w,h,d);mesh.position.set(x,y,z);mesh.rotation.y=ry;mesh.updateMatrix();root.add(mesh);return mesh};
 
-  const width=22, depth=26, height=6.6;
-  add(width,.16,depth,0,-.08,0,ink);
-  add(width,.16,depth,0,height,0,ink);
-  add(width,height,.2,0,height/2,-depth/2,paper);
-  // Front wall leaves a generous central portal toward the existing promenade.
-  add((width-8)/2,height,.2,-(width+8)/4,height/2,depth/2,paper);
-  add((width-8)/2,height,.2,(width+8)/4,height/2,depth/2,paper);
-  add(8,height-4.8,.2,0,(height+4.8)/2,depth/2,paper);
-  add(.2,height,depth,-width/2,height/2,0,paper);
-  add(.2,height,depth,width/2,height/2,0,paper);
+  const depth=26;
+  // The building already supplies walls, parquet and ceiling. A second shell
+  // would close the doorway and cover the museum's actual floor finishes.
 
   // ALIVAR-informed modular divider proportions, deliberately irregular like hand-drawn ink strokes.
-  const localDividers=[[-4.8,-8.2,10.8,.03],[4.5,-3.1,11.5,-.025],[-4.2,2.1,12,.018],[4.6,7.3,10.5,-.02]];
-  for(const [x,z,w,r] of localDividers){ add(w,4.55,.16,x,2.275,z,ink,r); add(w+.06,.035,.22,x,.12,z,metal,r); }
+  const localDividers=[[-5,-7,3.6,0],[5,-5,3.6,0],[-5,6,3.6,0],[5,8,3.6,0]];
+  for(const [x,z,w,r] of localDividers){ add(w,3.7,.16,x,1.85,z,ink,r); add(w+.06,.035,.22,x,.12,z,metal,r); }
 
   // Sparse cyan cuts: colour is atmosphere, never a decorative wash.
-  for(const [x,z,len] of [[-10,-10,4],[10,0,5],[-10,10,4]]){
+  for(const [x,z,len] of [[10,-10,1.5],[10,0,1.5],[10,10,1.5]]){
     const strip=add(.045,3.8,len,x,2.25,z,cyan,0);
     strip.name='simone-cyan-light-cut';
   }
 
   // Minimal sketch furniture: three low islands, black line-work with paper cushions.
-  for(const [x,z,r] of [[-6,-5,.03],[5,5,-.025],[0,10,.02]]){
+  for(const [x,z,r] of [[-2,0,.03],[4,2,-.025]]){
     const group=new T.Group(); group.position.set(x,0,z);group.rotation.y=r;root.add(group);
     const base=new T.Mesh(geo,metal);base.scale.set(6,.16,1.55);base.position.y=.22;group.add(base);
     const seat=new T.Mesh(geo,paper);seat.scale.set(5.65,.24,1.3);seat.position.y=.42;group.add(seat);
@@ -57,7 +49,7 @@ export function createSimoneInterior(scene) {
   const tex=new T.CanvasTexture(canvas);tex.colorSpace=T.SRGBColorSpace;resources.push(tex);
   const signMat=new T.MeshBasicMaterial({map:tex,toneMapped:false});resources.push(signMat);
   const signGeo=new T.PlaneGeometry(6,1);resources.push(signGeo);
-  const sign=new T.Mesh(signGeo,signMat);sign.position.set(0,3.5,depth/2-.12);sign.rotation.y=Math.PI;root.add(sign);
+  const sign=new T.Mesh(signGeo,signMat);sign.position.set(-10.84,3.5,0);sign.rotation.y=-Math.PI/2;root.add(sign);
 
   root.visible=true;
   return {root, dispose(){scene.remove(root);resources.forEach(r=>r.dispose?.());}};
