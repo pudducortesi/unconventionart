@@ -519,7 +519,7 @@ function buildMaps() {
       const button=document.createElement('button');
       button.textContent=`${String(room.number).padStart(2,'0')} · ${room.title} — ${room.status}`;
       button.disabled=room.status!=='Aperta';
-      button.addEventListener('click',()=>{ $('#floorplan').close(); if(room.specialRoom==='simone-plozzer'){ guide.pause(); clearSelection(); walkTo({x:0,z:-136},{x:0,y:1.7,z:-145}); announce('Sala Simone Plozzer · Illustrazione.'); } else visitHall(room.hallIndex); });rooms.append(button);
+      button.addEventListener('click',()=>{ $('#floorplan').close(); if(room.specialRoom==='simone-plozzer'){ guide.pause(); clearSelection(); walkTo({x:0,z:-136},{x:0,y:1.7,z:-145},[{x:0,z:-124},{x:0,z:-129},{x:0,z:-136}]); announce('Percorso verso Sala Simone Plozzer · Illustrazione.'); } else visitHall(room.hallIndex); });rooms.append(button);
     }
     section.append(rooms);$('#museum-masterplan').append(section);
   }
@@ -536,7 +536,7 @@ function buildMaps() {
     const name=document.createElement('strong'); name.textContent='Simone Plozzer · Illustrazione';
     const detail=document.createElement('span'); detail.textContent='75 posizioni · sala aperta';
     const mood=document.createElement('span'); mood.textContent='Noir minimale · sketch · carta, inchiostro, cobalto';
-    button.append(name,detail,mood); button.addEventListener('click',()=>{ $('#floorplan').close(); guide.pause(); clearSelection(); walkTo({x:0,z:-136},{x:0,y:1.7,z:-145}); announce('Sala Simone Plozzer · Illustrazione.'); });
+    button.append(name,detail,mood); button.addEventListener('click',()=>{ $('#floorplan').close(); guide.pause(); clearSelection(); walkTo({x:0,z:-136},{x:0,y:1.7,z:-145},[{x:0,z:-124},{x:0,z:-129},{x:0,z:-136}]); announce('Percorso verso Sala Simone Plozzer · Illustrazione.'); });
     $('#hall-list').append(button);
   }
   for (const hall of HALLS) {
