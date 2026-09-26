@@ -4,8 +4,8 @@ import { isLevelWalkable, moveOnLevels, findLevelPath } from './level-navigation
 
 // Uses the WebXRManager/session pattern from mrdoob/three.js (MIT).
 // The same scene, collision model and social presence are retained in the headset.
-export async function createXRVisit({renderer,scene,camera,player,button,notice,onStart,onEnd,update}) {
-  let active=false,session=null,lastTime=0,first=true,disposed=false;
+export async function createXRVisit({renderer,scene,camera,player,button,notice,onStart,onEnd,update,onWave=()=>{},getStatus=()=>'Visita individuale'}) {
+  let active=false,session=null,lastTime=0,first=true,disposed=false,panel=null;
   const rig=new T.Group();rig.name='vr-visitor-rig';
   const raycaster=new T.Raycaster();raycaster.far=12;
   const tempMatrix=new T.Matrix4(),head=new T.Vector3(),before=new T.Vector3();
@@ -34,6 +34,10 @@ export async function createXRVisit({renderer,scene,camera,player,button,notice,
     return isLevelWalkable(destination)?destination:null;
   }
   function teleport(controller){
+    tempMatrix.extractRotation(controller.matrixWorld);
+    raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+    raycaster.ray.direction.set(0,0,-1).applyMatrix4(tempMatrix);
+    if(panel?.select(raycaster))return;
     const destination=target(controller);
     if(!destination||!findLevelPath(player,destination).length)return;
     Object.assign(player,destination);anchor(player.x,player.z);
@@ -44,7 +48,7 @@ export async function createXRVisit({renderer,scene,camera,player,button,notice,
     const select=()=>teleport(controller);controller.addEventListener('select',select);controllers.push({controller,line,select});
   }
   function end(){
-    active=false;session=null;renderer.setAnimationLoop(null);marker.visible=false;lastTime=0;
+    panel?.dispose();panel=null;active=false;session=null;renderer.setAnimationLoop(null);marker.visible=false;lastTime=0;
     rig.remove(camera);scene.remove(rig);camera.position.set(player.x,player.floorY+1.7,player.z);
     button.disabled=false;button.textContent='Entra in VR';onEnd();
   }
@@ -69,6 +73,7 @@ export async function createXRVisit({renderer,scene,camera,player,button,notice,
       else line.scale.z=8;
     }
     updateCamera().getWorldDirection(direction);
+    panel?.update(dt);
     update(dt,time,Math.atan2(-direction.x,-direction.z));
     renderer.setRenderTarget(null);renderer.render(scene,camera);
   }
@@ -85,7 +90,10 @@ export async function createXRVisit({renderer,scene,camera,player,button,notice,
       onStart();session=next;next.addEventListener('end',end,{once:true});
       scene.add(rig);rig.add(camera);rig.position.set(player.x,player.floorY,player.z);rig.rotation.set(0,0,0);
       camera.position.set(0,0,0);camera.rotation.set(0,0,0);first=true;armed.clear();
-      await renderer.xr.setSession(next);active=true;button.textContent='Esci dalla VR';button.disabled=false;
+      await renderer.xr.setSession(next);
+      if(globalThis.document?.createElement)try{const {createXRPanel}=await import('../../vendor/xr-panel-runtime.js');if(session===next)panel=createXRPanel({parent:camera,renderer,onExit:()=>void next.end(),onWave,getStatus});}catch{notice('Pannello VR non disponibile. Per uscire usa il menu del visore.');}
+      if(session!==next)return;
+      active=true;button.textContent='Esci dalla VR';button.disabled=false;
       renderer.setAnimationLoop(frame);
     }catch(error){if(session)await session.end();else onEnd();button.disabled=false;notice('Il visore non ha avviato la sessione. Puoi continuare la visita sullo schermo.');}
   };

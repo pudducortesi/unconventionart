@@ -1167,6 +1167,7 @@ try {
   invalidate();
   void import('./xr-visit.js').then(async({createXRVisit})=>{
     xrVisit=await createXRVisit({renderer,scene,camera,player,button:$('#vr-open'),notice:announce,
+      onWave:()=>socialController?.wave(),getStatus:()=>socialController?.getStatus()||'Visita individuale',
       onStart(){xrStarting=true;guide.pause();stop();leavePhotoRender();controls?.exitPointerLock();for(const dialog of document.querySelectorAll('dialog[open]'))dialog.close();cancelAnimationFrame(frame);frame=0;},
       onEnd(){xrStarting=false;if(disposed)return;lastTime=0;pitch=0;setView();resize();invalidate();},
       update(dt,time,headYaw){yaw=headYaw;socialController?.update(dt,time);architecture.updateLighting(player);videoScreens?.update(player,true);welcomeFilm?.update(player,true);if(time-lastStream>650){stream.update(player,{selected});lastStream=time;}},

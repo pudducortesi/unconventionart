@@ -1,3 +1,4 @@
+import {optimizeAvatar} from './optimize-avatar.mjs';
 import { optimizePhotos } from './optimize-photos.mjs';
 import { buildARModel } from './build-ar-model.mjs';
 import { prepareVendor } from './vendor.mjs';
@@ -16,11 +17,13 @@ for (const path of ['avatars/atelier-v1.glb','avatars/LICENSE.txt','data/experie
   await mkdir(`dist/${path.substring(0,path.lastIndexOf('/'))}`, {recursive:true});
   await cp(path,`dist/${path}`,{recursive:true});
 }
+const avatarOptimization=await optimizeAvatar('avatars/atelier-v1.glb','dist/avatars/atelier-v1.glb');
+console.log('Avatar compression:',JSON.stringify(avatarOptimization));
 const optimized = liveCatalogue ? {catalogue:{works:[],collections:[],hero:''},report:[]} : await optimizePhotos(JSON.parse(await readFile('data/catalogue.json','utf8')));
 await writeFile('dist/data/catalogue.json',JSON.stringify(optimized.catalogue,null,2));
 await writeFile('photo-optimization-report.json',JSON.stringify(optimized.report,null,2));
 const result = await build({
-  entryPoints:['js/museum/main.js','css/museum.css','js/admin.js','css/admin.css'],
+  entryPoints:['js/museum/main.js','css/museum.css','js/admin.js','css/admin.css','js/avatar-lab.js','css/avatar-lab.css'],
   outdir:'dist/assets', outbase:'.', entryNames:'[name]-[hash]', chunkNames:'chunk-[hash]',
   bundle:true, splitting:true, format:'esm', minify:true, target:'es2022',
   metafile:true, legalComments:'linked',
@@ -67,3 +70,7 @@ for(const path of initial) {const buffer=await readFile(path);bytes+=buffer.leng
 await writeFile('build-meta.json',JSON.stringify(result.metafile,null,2));
 await writeFile('build-report.json',JSON.stringify({initialJsBytes:bytes,initialJsGzipBytes:gzip,initialJsFiles:initial.size,initial:[...initial],photo,main,css},null,2));
 console.log(`Gallery built: ${initial.size} initial JS files, ${bytes} bytes (${gzip} gzip estimate); path tracing on demand.`);
+
+await cp('integrations/characterstudio','dist/characterstudio',{recursive:true});
+const lab=(await readFile('avatar-lab.html','utf8')).replace('src="js/avatar-lab.js"',`src="${url(outputFor('js/avatar-lab.js'))}"`).replace('href="css/avatar-lab.css"',`href="${url(outputFor('css/avatar-lab.css'))}"`);
+await writeFile('dist/avatar-lab.html',lab);

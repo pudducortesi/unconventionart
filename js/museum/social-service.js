@@ -93,6 +93,7 @@ export async function createSocialService(fetcher=fetch, storage=globalThis.sess
       const data=await raw('/rest/v1/rpc/ua_social',{method:'POST',body:{action,payload}});
       if(token!==generation)throw changed();return data;
     },
+    async connectionToken(){const token=generation;await fresh();if(token!==generation)throw changed();return session.access_token;},
     async offers(){return raw('/rest/v1/gallery_offers?select=*&published=eq.true',{auth:false});},
   };
 }

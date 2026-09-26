@@ -1,4 +1,6 @@
-# Potenziamenti installati · 27 settembre 2026
+# Potenziamenti installati
+
+**Stato aggiornato:** integrazione applicativa descritta in [INTEGRATED_SOCIAL_UPGRADES.md](INTEGRATED_SOCIAL_UPGRADES.md). Il resto di questa pagina documenta il precedente checkpoint di installazione.
 
 Tutti i sette repository selezionati sono disponibili come submodule con revisione bloccata. I pacchetti eseguibili sono installati con lockfile; le revisioni dei sorgenti sono indipendenti dalle release npm. Manifest: `research/social-upgrades.json`.
 

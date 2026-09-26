@@ -1,24 +1,42 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "npm ci --ignore-scripts && npm ci --prefix ar-runtime --ignore-scripts",
-  "buildCommand": "node tools/build.mjs",
+  "installCommand": "npm ci --ignore-scripts && npm ci --prefix ar-runtime --ignore-scripts && node tools/setup-characterstudio.mjs",
+  "buildCommand": "node tools/build-characterstudio.mjs && node tools/build.mjs",
   "outputDirectory": "dist",
   "cleanUrls": false,
   "rewrites": [
-    { "source": "/admin", "destination": "/admin.html" },
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
     {
       "source": "/(editorial|exhibitions|collection|about|contact|journal|post).html",
       "destination": "/index.html"
     }
   ],
   "headers": [
-    { "source": "/admin(.*)", "headers": [
-      { "key": "Cache-Control", "value": "no-store" },
-      { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
-      { "key": "X-Frame-Options", "value": "DENY" },
-      { "key": "Referrer-Policy", "value": "no-referrer" }
-    ] },
+    {
+      "source": "/admin(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        }
+      ]
+    },
     {
       "source": "/assets/(.*)",
       "headers": [
@@ -61,6 +79,19 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/characterstudio/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
         }
       ]
     }

@@ -1,0 +1,10 @@
+import {Server} from '@colyseus/core';
+import {WebSocketTransport} from '@colyseus/ws-transport';
+import {createVisitRoom} from './visit-room.mjs';
+import {createSocialAccess} from '../social-access.mjs';
+const url=process.env.SUPABASE_URL,key=process.env.SUPABASE_PUBLISHABLE_KEY;
+if(!url||!key)throw Error('Configure SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY');
+const server=new Server({transport:new WebSocketTransport(),greet:false});
+server.define('visit',createVisitRoom(createSocialAccess({url,key}))).filterBy(['meeting']);
+await server.listen(Number(process.env.PORT)||2567,'0.0.0.0');
+console.log('UnconventionArt multiplayer is listening');

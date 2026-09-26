@@ -1,7 +1,8 @@
 import * as T from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {clone} from 'three/examples/jsm/utils/SkeletonUtils.js';
-import {VRMLoaderPlugin} from '../avatar-runtime/three-vrm.js';
+import {VRMLoaderPlugin} from '@pixiv/three-vrm';
+import {MeshoptDecoder} from 'meshoptimizer';
 import {createAtelierGarment} from './atelier-garments.js';
 import {createAtelierMotion} from './atelier-motion.js';
 import {splitAtelierOutfit,attachAtelierShoes} from './avatar-wardrobe.js';
@@ -11,7 +12,7 @@ import {attachGlasses} from './avatar-glasses.js';
 
 let template;
 function loadTemplate(){
-  if(!template){const loader=new GLTFLoader();loader.register(parser=>new VRMLoaderPlugin(parser));
+  if(!template){const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);loader.register(parser=>new VRMLoaderPlugin(parser));
     template=fetch('/avatars/atelier-v1.glb',{signal:AbortSignal.timeout(15000)}).then(async response=>{if(!response.ok)throw Error('Avatar HTTP '+response.status);return loader.parseAsync(await response.arrayBuffer(),'/avatars/');}).catch(error=>{template=null;throw error;});}
   return template;
 }
