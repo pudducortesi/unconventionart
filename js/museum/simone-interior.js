@@ -9,7 +9,7 @@ import { SIMONE_ROOM, SIMONE_DIVIDERS } from "./simone-room.js";
 export function createSimoneInterior(scene) {
   const root=new T.Group(); root.name='simone-plozzer-interior';
   // Kept outside the current ten-room circulation until the museum expansion route is connected.
-  root.position.set(0,0,-175);
+  root.position.set(0,0,-145);
   scene.add(root);
   const resources=[];
   const mat=(color,roughness=.9,metalness=0)=>{const m=new T.MeshStandardMaterial({color,roughness,metalness});resources.push(m);return m};
@@ -23,7 +23,10 @@ export function createSimoneInterior(scene) {
   add(width,.16,depth,0,-.08,0,ink);
   add(width,.16,depth,0,height,0,ink);
   add(width,height,.2,0,height/2,-depth/2,paper);
-  add(width,height,.2,0,height/2,depth/2,paper);
+  // Front wall leaves a generous central portal toward the existing promenade.
+  add((width-8)/2,height,.2,-(width+8)/4,height/2,depth/2,paper);
+  add((width-8)/2,height,.2,(width+8)/4,height/2,depth/2,paper);
+  add(8,height-4.8,.2,0,(height+4.8)/2,depth/2,paper);
   add(.2,height,depth,-width/2,height/2,0,paper);
   add(.2,height,depth,width/2,height/2,0,paper);
 
@@ -58,6 +61,6 @@ export function createSimoneInterior(scene) {
   const signGeo=new T.PlaneGeometry(6,1);resources.push(signGeo);
   const sign=new T.Mesh(signGeo,signMat);sign.position.set(0,3.5,depth/2-.12);sign.rotation.y=Math.PI;root.add(sign);
 
-  root.visible=false; // enabled when the expansion connector is opened.
+  root.visible=true;
   return {root, dispose(){scene.remove(root);resources.forEach(r=>r.dispose?.());}};
 }
