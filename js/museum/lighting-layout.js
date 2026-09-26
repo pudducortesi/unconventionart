@@ -3,7 +3,7 @@ import { BUILDING, HALLS } from './layout.js';
 // Shared by the visible ceiling geometry and the offline floor-lighting bake.
 export const CEILING_SCHEMES = [
   'coffers', 'fins', 'coffers', 'rafts', 'rafts',
-  'rafts', 'fins', 'coffers', 'rafts', 'fins',
+  'rafts', 'fins', 'fins', 'rafts', 'fins',
 ];
 
 export const FLOOR_REGIONS = [

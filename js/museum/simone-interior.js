@@ -1,5 +1,4 @@
 import * as T from "../../vendor/three.module.js";
-import { SIMONE_ROOM } from "./simone-room.js";
 
 /**
  * Interior-design prototype for the Simone Plozzer artist room.
@@ -13,38 +12,54 @@ export function createSimoneInterior(scene) {
   scene.add(root);
   const resources=[];
   const mat=(color,roughness=.9,metalness=0)=>{const m=new T.MeshStandardMaterial({color,roughness,metalness});resources.push(m);return m};
-  const paper=mat(SIMONE_ROOM.palette.paper,.96), ink=mat(SIMONE_ROOM.palette.ink,.88),
-    graphite=mat(SIMONE_ROOM.palette.graphite,.93), metal=mat(0x17191c,.52,.38);
-  const cyan=new T.MeshBasicMaterial({color:SIMONE_ROOM.palette.cyan,transparent:true,opacity:.34,toneMapped:false});resources.push(cyan);
+  const concrete=mat(0x646968,.95), steel=mat(0x24292b,.52,.42),
+    chrome=mat(0xb5b9b5,.26,.82), leather=mat(0x493b31,.82);
+  const lamp=new T.MeshBasicMaterial({color:0xf4e9d4,toneMapped:false});resources.push(lamp);
   const geo=new T.BoxGeometry(1,1,1); resources.push(geo);
   const add=(w,h,d,x,y,z,m=paper,ry=0)=>{const mesh=new T.Mesh(geo,m);mesh.scale.set(w,h,d);mesh.position.set(x,y,z);mesh.rotation.y=ry;mesh.updateMatrix();root.add(mesh);return mesh};
 
-  const depth=26;
   // The building already supplies walls, parquet and ceiling. A second shell
   // would close the doorway and cover the museum's actual floor finishes.
 
-  // ALIVAR-informed modular divider proportions, deliberately irregular like hand-drawn ink strokes.
+  // Four compact display blades. The structural walls remain in the navigation
+  // model, but are rendered only here so no surfaces compete for the same pixels.
   const localDividers=[[-5,-7,3.6,0],[5,-5,3.6,0],[-5,6,3.6,0],[5,8,3.6,0]];
-  for(const [x,z,w,r] of localDividers){ add(w,3.7,.16,x,1.85,z,ink,r); add(w+.06,.035,.22,x,.12,z,metal,r); }
-
-  // Sparse cyan cuts: colour is atmosphere, never a decorative wash.
-  for(const [x,z,len] of [[10,-10,1.5],[10,0,1.5],[10,10,1.5]]){
-    const strip=add(.045,3.8,len,x,2.25,z,cyan,0);
-    strip.name='simone-cyan-light-cut';
+  for(const [x,z,w,r] of localDividers){
+    add(w,3.6,.16,x,1.9,z,concrete,r);
+    // The rails stand proud of the panel, with visible open steel corners.
+    for(const side of [-1,1]){
+      add(.055,3.75,.28,x+side*(w/2+.055),1.875,z,steel,r);
+      add(w+.16,.055,.28,x,.13,z+side*.035,steel,r);
+    }
+    add(w+.16,.055,.28,x,3.75,z,steel,r);
+    for(const side of [-1,1]) add(.08,.08,.08,x+side*(w/2-.24),.4,z+.13,chrome);
   }
 
-  // Minimal sketch furniture: three low islands, black line-work with paper cushions.
-  for(const [x,z,r] of [[-2,0,.03],[4,2,-.025]]){
+  // Exposed steel ceiling members and warm linear lights: an industrial frame
+  // around the existing room geometry, clear of the artwork hanging zone.
+  for(const z of [-10.5,-3.5,3.5,10.5]){
+    add(20.8,.19,.13,0,6.18,z,steel);
+    add(14.2,.025,.045,0,6.045,z,lamp);
+    for(const x of [-8.9,8.9]) add(.055,.25,.13,x,6.04,z,chrome);
+  }
+
+  // Low leather benches on precise tubular frames, informed by MVSEVM's
+  // Bauhaus vocabulary without reproducing a catalogue model.
+  for(const [x,z,r] of [[-2,0,0],[4,2,0]]){
     const group=new T.Group(); group.position.set(x,0,z);group.rotation.y=r;root.add(group);
-    const base=new T.Mesh(geo,metal);base.scale.set(6,.16,1.55);base.position.y=.22;group.add(base);
-    const seat=new T.Mesh(geo,paper);seat.scale.set(5.65,.24,1.3);seat.position.y=.42;group.add(seat);
-    for(const sx of [-2.7,2.7]){const leg=new T.Mesh(geo,ink);leg.scale.set(.08,.42,1.42);leg.position.set(sx,.2,0);group.add(leg)}
+    const seat=new T.Mesh(geo,leather);seat.scale.set(5.7,.2,1.27);seat.position.y=.47;group.add(seat);
+    for(const sx of [-2.72,2.72]) for(const sz of [-.59,.59]){
+      const leg=new T.Mesh(geo,chrome);leg.scale.set(.045,.45,.045);leg.position.set(sx,.22,sz);group.add(leg);
+    }
+    for(const sz of [-.59,.59]){
+      const rail=new T.Mesh(geo,steel);rail.scale.set(5.5,.045,.045);rail.position.set(0,.29,sz);group.add(rail);
+    }
   }
 
   // Entrance title is intentionally architectural, not a reproduction of Simone's drawings.
   const canvas=document.createElement('canvas');canvas.width=1536;canvas.height=256;
   const ctx=canvas.getContext('2d');ctx.fillStyle='#f3f0e9';ctx.fillRect(0,0,1536,256);
-  ctx.fillStyle='#111214';ctx.font='700 74px sans-serif';ctx.fillText('SIMONE PLOZZER',58,112);
+  ctx.fillStyle='#202528';ctx.font='700 74px sans-serif';ctx.fillText('SIMONE PLOZZER',58,112);
   ctx.font='30px sans-serif';ctx.fillText('ILLUSTRAZIONE / 75 OPERE',61,177);
   const tex=new T.CanvasTexture(canvas);tex.colorSpace=T.SRGBColorSpace;resources.push(tex);
   const signMat=new T.MeshBasicMaterial({map:tex,toneMapped:false});resources.push(signMat);

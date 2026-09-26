@@ -77,6 +77,9 @@ export function createArchitecture(scene, renderer, { mobile = false, onReady = 
   floor.userData.walkable = true;
   room.add(floor);
   for (const wall of WALLS) {
+    // Simone's four display blades have their own dark finish and frame.
+    // Rendering a second white wall at the same coordinates caused z fighting.
+    if (wall.kind === 'simone-divider') continue;
     box(wall.width, ceiling, wall.depth, wall.x, ceiling / 2, wall.z, wallPlaster);
     // A continuous shadow line gives each wall a recessed base and ceiling reveal.
     box(wall.width + 0.006, 0.018, wall.depth + 0.006, wall.x, 0.025, wall.z, recess);

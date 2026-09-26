@@ -7,7 +7,7 @@ export const ROOM_FINISHES = [
   { name: 'Corpo', wall: 0xe1c7b5, accent: 0xb58268, ceiling: 0xefdbca, trim: 0xa06e55, floor: 0xa0774d, finish: 'mosaic', treatment: 'steps', detail: 'Intonaco cipria e cornici a gradoni nei toni della terra.' },
   { name: 'Notturno', wall: 0x8d7884, accent: 0x533346, ceiling: 0xb9a5b4, trim: 0xc3a482, floor: 0xa0774d, finish: 'mosaic', treatment: 'panels', detail: 'Malva profondo, campiture bordeaux e sottili bordature color ottone.' },
   { name: 'Materia', wall: 0xc9c9ad, accent: 0x90936c, ceiling: 0xdfdeca, trim: 0x727551, floor: 0xa0774d, finish: 'mosaic', treatment: 'blocks', detail: 'Pareti calce e oliva, con un fregio di blocchi sfalsati in rilievo.' },
-  { name: 'Archivio', wall: 0xc3cbd2, accent: 0x718397, ceiling: 0xe0e6e9, trim: 0x4c6077, floor: 0xa0774d, finish: 'mosaic', treatment: 'registers', detail: 'Grigio carta e blu polvere, scanditi da registri e montanti regolari.' },
+  { name: 'Simone Plozzer', wall: 0xb8b7b1, accent: 0x8c8d89, ceiling: 0x34383a, trim: 0x2d3233, floor: 0x898b88, finish: 'concrete', treatment: 'gallery', detail: 'Cemento levigato, acciaio brunito e arredi di ispirazione Bauhaus.' },
   { name: 'Intimo', wall: 0xe0cbce, accent: 0xb38f98, ceiling: 0xefdee0, trim: 0x9b737e, floor: 0xa0774d, finish: 'mosaic', treatment: 'frames', detail: 'Rosa polvere e boiserie a doppia cornice, per una sala raccolta.' },
   { name: 'Orizzonte', wall: 0xc1d6d6, accent: 0x628d94, ceiling: 0xdce9e8, trim: 0x426b77, floor: 0xa0774d, finish: 'mosaic', treatment: 'horizon', detail: 'Pareti acqua e petrolio, attraversate da lunghe fasce orizzontali.' },
 ];
