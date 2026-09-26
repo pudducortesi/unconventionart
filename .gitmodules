@@ -34,3 +34,12 @@
 	path = research/upstream/TalkingHead
 	url = https://github.com/met4citizen/TalkingHead.git
 	shallow = true
+[submodule "research/upstream/livekit-client"]
+	path = research/upstream/livekit-client
+	url = https://github.com/livekit/client-sdk-js.git
+[submodule "research/upstream/uikit"]
+	path = research/upstream/uikit
+	url = https://github.com/pmndrs/uikit.git
+[submodule "research/upstream/colyseus"]
+	path = research/upstream/colyseus
+	url = https://github.com/colyseus/colyseus.git

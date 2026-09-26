@@ -3,7 +3,8 @@ import { readFileSync } from 'node:fs';
 const root = new URL('../', import.meta.url);
 const { repositories: optimization } = JSON.parse(readFileSync(new URL('../research/upstream-lock.json', import.meta.url), 'utf8'));
 const { repositories: avatars } = JSON.parse(readFileSync(new URL('../research/avatar-sources.json', import.meta.url), 'utf8'));
-const repositories=[...optimization,...avatars];
+const {repositories: upgrades}=JSON.parse(readFileSync(new URL('../research/social-upgrades.json', import.meta.url),'utf8'));
+const repositories=[...new Map([...optimization,...avatars,...upgrades].map(r=>[r.path,r])).values()];
 const run = args => execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }).trim();
 // Downloads source only; never installs packages or executes upstream build scripts.
 run(['submodule', 'sync', '--', ...repositories.map(p => p.path)]);

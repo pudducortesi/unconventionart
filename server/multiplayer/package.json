@@ -1,0 +1,11 @@
+{
+  "name": "unconventionart-multiplayer",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "colyseus": "0.18.8"
+  }
+}

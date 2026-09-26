@@ -1,0 +1,55 @@
+{
+  "reviewedAt": "2026-09-27",
+  "note": "Source revisions are pinned independently of the installed npm releases; package-lock files pin all npm dependencies.",
+  "repositories": [
+    {
+      "repo": "pixiv/three-vrm",
+      "path": "research/upstream/three-vrm",
+      "sha": "1b4fc0cc7ef39a49d62bb7a66dcfeca8f65316f7",
+      "package": "@pixiv/three-vrm",
+      "version": "3.5.5"
+    },
+    {
+      "repo": "M3-org/CharacterStudio",
+      "path": "research/upstream/CharacterStudio",
+      "sha": "293182bf4a6087f4a4a7fd00e4fbdfb590029da7",
+      "package": null,
+      "version": "0.5.0"
+    },
+    {
+      "repo": "livekit/client-sdk-js",
+      "path": "research/upstream/livekit-client",
+      "sha": "5cadc938236033fb58b72696bdb3c351adbbe587",
+      "package": "livekit-client",
+      "version": "2.22.3"
+    },
+    {
+      "repo": "pmndrs/uikit",
+      "path": "research/upstream/uikit",
+      "sha": "2aaf8aba2e5d7acab7a38426d575d51dcf541597",
+      "package": "@pmndrs/uikit",
+      "version": "1.0.76"
+    },
+    {
+      "repo": "donmccurdy/glTF-Transform",
+      "path": "research/upstream/glTF-Transform",
+      "sha": "a5d768b87efaae1fa65ddd17cd551a45b57abd70",
+      "package": "@gltf-transform/cli",
+      "version": "4.5.0"
+    },
+    {
+      "repo": "zeux/meshoptimizer",
+      "path": "research/upstream/meshoptimizer",
+      "sha": "717ca3489b457f781e5cd3e3a8bbc0229619415c",
+      "package": "meshoptimizer",
+      "version": "1.3.0"
+    },
+    {
+      "repo": "colyseus/colyseus",
+      "path": "research/upstream/colyseus",
+      "sha": "18d8c1ff2a9a6e1e55b705ae55fd83c984e327bb",
+      "package": "colyseus",
+      "version": "0.18.8"
+    }
+  ]
+}
