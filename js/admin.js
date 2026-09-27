@@ -49,7 +49,12 @@ $('#login').addEventListener('submit', async event => {
     artistScope = artists.find(a => a.user_id === session.user.id && a.active) || null;
     if (!admins.some(a => a.user_id === session.user.id) && !artistScope) throw Error('Questo account non è abilitato all’atelier.');
     scheduleRefresh(); $('#login').hidden = true; $('#workspace').hidden = false;
-    await loadWorks(); notice(config.liveCatalogue === false ? 'Archivio collegato. Puoi preparare le bozze; il passaggio della galleria al nuovo catalogo è ancora da completare.' : 'Accesso effettuato. Le nuove fotografie resteranno in bozza fino alla pubblicazione.');
+    await loadWorks();
+    notice(artistScope
+      ? 'Accesso artista effettuato. Puoi preparare le bozze; la pubblicazione attende il collegamento della sala ai posti reali della galleria.'
+      : config.liveCatalogue === false
+        ? 'Archivio collegato. Puoi preparare le bozze; il passaggio della galleria al nuovo catalogo è ancora da completare.'
+        : 'Accesso effettuato. Le nuove fotografie resteranno in bozza fino alla pubblicazione.');
   } catch (error) { endSession(); notice(error.message, true); }
   finally { button.disabled = false; }
 });
@@ -98,8 +103,9 @@ async function render() {
     const description = field(form, 'Descrizione', element('textarea')); description.value = work.description; description.maxLength = 3000;
     const hall = field(form, 'Sala', element('select')); if (artistScope) { hall.append(new Option('Sala Simone Plozzer', '')); hall.disabled = true; } else { if (!work.isVideo) hall.append(new Option('Assegna automaticamente', '')); ROOM_PROFILES.forEach((room, i) => {if(!work.isVideo || [3,5].includes(i)) hall.append(new Option(`${String(i + 1).padStart(2,'0')} · ${room.name}`, String(i)));}); hall.value = work.hall_index === null ? '' : String(work.hall_index); }
     const actions = element('div', '', 'actions'), save = element('button', 'Salva', 'secondary'), publish = element('button', work.published ? 'Ritira dalla galleria' : 'Pubblica →');
-    save.type = 'submit'; publish.type = 'button'; publish.disabled = config.liveCatalogue === false;
-    if (publish.disabled) publish.title = 'Pubblicazione disponibile dopo il passaggio al nuovo catalogo.';
+    save.type = 'submit'; publish.type = 'button'; publish.disabled = config.liveCatalogue === false || (!!artistScope && !work.published);
+    if (artistScope && !work.published) publish.title = 'La sala artista non è ancora collegata ai posti reali della galleria.';
+    else if (config.liveCatalogue === false) publish.title = 'Pubblicazione disponibile dopo il passaggio al nuovo catalogo.';
     actions.append(save, publish); form.append(actions); card.append(form); if(!work.isVideo && !artistScope) mountOfferEditor(card,work,offers,{request,notice}); $('#works').append(card);
     async function update(published) {
       if (busy) return;
@@ -109,7 +115,7 @@ async function render() {
         await request(`/rest/v1/${work.isVideo ? 'gallery_videos' : 'gallery_artworks'}?id=eq.${work.id}`, {method:'PATCH',body:patch});
         await loadWorks(); notice(published ? 'Opera pubblicata. La galleria si aggiorna automaticamente entro un minuto.' : 'Bozza salvata. L’opera non è esposta in galleria.');
       } catch (error) { notice(error.message, true); }
-      finally { busy = false; save.disabled = false; publish.disabled = config.liveCatalogue === false; }
+      finally { busy = false; save.disabled = false; publish.disabled = config.liveCatalogue === false || (!!artistScope && !work.published); }
     }
     form.addEventListener('submit', event => { event.preventDefault(); update(work.published); });
     publish.addEventListener('click', () => update(!work.published));
