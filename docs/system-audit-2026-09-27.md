@@ -2,7 +2,7 @@
 
 ## Aggiornamento operativo — 28 settembre 2026
 
-- La foto Kavyar di prova è stata rimossa dal catalogo statico, dall'HTML senza JavaScript e dal percorso di build; il blob viene rimosso dalla cronologia di tutti i branch Git. Le ricerche di `gallery_artworks` e `storage.objects` non trovano riferimenti Kavyar. Gli URL Vercel controllati rispondono con fallback HTML al vecchio percorso, non con un'immagine.
+- La foto Kavyar di prova è stata rimossa dal catalogo statico, dall'HTML senza JavaScript e dal percorso di build. Tutti i 12 branch remoti puntano alla cronologia riscritta; il vecchio blob immagine e i file benchmark rimossi non sono raggiungibili dai branch. Le ricerche di `gallery_artworks` e `storage.objects` non trovano riferimenti Kavyar. Dopo il push, il check Vercel risulta riuscito sul branch predefinito e sulla PR; il dominio pubblico risponde 200 sulla homepage e 404 al vecchio URL della foto.
 - La migrazione `20260927225917_social_data_retention` è applicata in produzione. Il cron `ua-social-retention` esegue la pulizia ogni cinque minuti e ha completato le prime due esecuzioni. Le policy sono: messaggi 24 ore; profili 30 giorni dalla cancellazione dell'account; segnalazioni 90 giorni. Le tabelle social erano vuote all'applicazione.
 - Auth ora impone password di almeno 12 caratteri con maiuscole, minuscole, cifre e simboli; il cambio password richiede una sessione recente. La protezione password compromesse non è disponibile sul piano Supabase Free. SMTP personalizzato e consegna email restano da verificare.
 - `data/artists/provisional-roster.json` contiene un solo artista segnaposto, inattivo e non collegato ad account, email, membership o pubblicazione. Il nome e lo slug definitivi saranno scelti più avanti.
