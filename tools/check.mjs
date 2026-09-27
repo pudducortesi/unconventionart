@@ -26,7 +26,7 @@ for (const work of data.works) {
   await access(work.image);
   for (const image of work.variants || []) await access(image);
 }
-await access(data.hero);
+if (data.hero) await access(data.hero);
 for (const collection of data.collections)
   assert(
     data.works.some((w) => w.collection === collection.id),

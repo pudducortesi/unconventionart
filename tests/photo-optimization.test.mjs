@@ -7,11 +7,13 @@ import { join } from 'node:path';
 import { optimizePhotos, psnr } from '../tools/optimize-photos.mjs';
 
 test('photo pipeline preserves source and catalogue, creates smaller bounded derivatives with quality checks',async t=>{
- const output=await mkdtemp(join(tmpdir(),'ua-photos-'));t.after(()=>rm(output,{recursive:true,force:true}));
- const catalogue=JSON.parse(await readFile('data/catalogue.json','utf8')),before=structuredClone(catalogue);
- const original=await readFile(catalogue.works[0].image);
- const result=await optimizePhotos(catalogue,{output});
- assert.deepEqual(catalogue,before);assert.deepEqual(await readFile(catalogue.works[0].image),original);
+ const root=await mkdtemp(join(tmpdir(),'ua-photos-input-'));t.after(()=>rm(root,{recursive:true,force:true}));
+ const sourceDir=join(root,'images');await (await import('node:fs/promises')).mkdir(sourceDir,{recursive:true});
+ const sourcePath=join(sourceDir,'sample.jpg');await sharp({create:{width:600,height:800,channels:3,background:'#8b6f54'}}).jpeg({quality:100}).toFile(sourcePath);
+ const output=join(root,'dist');
+ const catalogue={hero:'images/sample.jpg',collections:[],works:[{id:'sample',title:'Sample',image:'images/sample.jpg'}]},before=structuredClone(catalogue);
+ const original=await readFile(sourcePath),result=await optimizePhotos(catalogue,{root,output});
+ assert.deepEqual(catalogue,before);assert.deepEqual(await readFile(sourcePath),original);
  assert.equal(result.catalogue.works[0].image,result.catalogue.works[0].preview);
  assert.notEqual(result.catalogue.works[0].image,before.works[0].image);
  for(const variant of result.report[0].variants){
@@ -26,6 +28,7 @@ test('photo pipeline preserves source and catalogue, creates smaller bounded der
 test('production exposes only previews, never master paths or bytes',async()=>{
  const source=JSON.parse(await readFile('data/catalogue.json','utf8'));
  const published=JSON.parse(await readFile('dist/data/catalogue.json','utf8'));
+ assert.equal(published.works.length,source.works.length);
  for(const [i,work] of published.works.entries()){
   assert.equal(work.image,work.preview);
   for(const path of [work.thumbnail,work.mobilePreview,work.preview])await stat(join('dist',path));
@@ -39,15 +42,13 @@ test('production exposes only previews, never master paths or bytes',async()=>{
  if(publishing.enabled && publishing.liveCatalogue !== false) {
   assert.equal(published.works.length,0);
   await assert.rejects(stat('dist/models'),{code:'ENOENT'});
-  await assert.rejects(stat('dist/images/optimized'),{code:'ENOENT'});
- } else {
- const model=await readFile('dist/models/kavyar-01.glb');
- const original=await readFile(source.works[0].image);
- assert.equal(model.includes(original),false,'AR must not embed the master');
+  await assert.rejects(stat('dist/images/optimized'),{code:'ENOENT'}); } else {
+  assert.equal(published.works.length,0);
+  await assert.rejects(stat('dist/models'),{code:'ENOENT'});
  }
  const html=await readFile('dist/index.html','utf8');
  assert(!html.includes('artwork-original'));
- assert(!html.includes(source.works[0].image));
+ for(const work of source.works)assert(!html.includes(work.image));
 });
 
 test('private/traversing paths are rejected and PSNR compares matching buffers',async t=>{

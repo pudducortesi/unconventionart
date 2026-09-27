@@ -1,0 +1,15 @@
+{
+  "artists": [
+    {
+      "artistSlug": "artista-01",
+      "displayName": "Artista provvisorio 01",
+      "roomSlug": "artista-01",
+      "capacity": 75,
+      "status": "placeholder",
+      "authUserId": null,
+      "email": null,
+      "active": false,
+      "publishingEnabled": false
+    }
+  ]
+}
