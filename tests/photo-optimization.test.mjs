@@ -28,6 +28,7 @@ test('photo pipeline preserves source and catalogue, creates smaller bounded der
 test('production exposes only previews, never master paths or bytes',async()=>{
  const source=JSON.parse(await readFile('data/catalogue.json','utf8'));
  const published=JSON.parse(await readFile('dist/data/catalogue.json','utf8'));
+ assert.equal(published.works.length,source.works.length);
  for(const [i,work] of published.works.entries()){
   assert.equal(work.image,work.preview);
   for(const path of [work.thumbnail,work.mobilePreview,work.preview])await stat(join('dist',path));
@@ -47,7 +48,7 @@ test('production exposes only previews, never master paths or bytes',async()=>{
  }
  const html=await readFile('dist/index.html','utf8');
  assert(!html.includes('artwork-original'));
- assert(!html.includes(source.works[0].image));
+ for(const work of source.works)assert(!html.includes(work.image));
 });
 
 test('private/traversing paths are rejected and PSNR compares matching buffers',async t=>{
