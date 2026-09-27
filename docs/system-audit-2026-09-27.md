@@ -1,17 +1,25 @@
-# Audit del sistema UnconventionArt — 27 settembre 2026
+# Audit del sistema UnconventionArt — rilevazione 27 settembre, aggiornamento 28 settembre 2026
 
-## Sintesi
+## Aggiornamento operativo — 28 settembre 2026
+
+- La foto Kavyar di prova è stata rimossa dal catalogo statico, dall'HTML senza JavaScript e dal percorso di build; il blob viene rimosso dalla cronologia di tutti i branch Git. Le ricerche di `gallery_artworks` e `storage.objects` non trovano riferimenti Kavyar. Gli URL Vercel controllati rispondono con fallback HTML al vecchio percorso, non con un'immagine.
+- La migrazione `20260927225917_social_data_retention` è applicata in produzione. Il cron `ua-social-retention` esegue la pulizia ogni cinque minuti e ha completato le prime due esecuzioni. Le policy sono: messaggi 24 ore; profili 30 giorni dalla cancellazione dell'account; segnalazioni 90 giorni. Le tabelle social erano vuote all'applicazione.
+- Auth ora impone password di almeno 12 caratteri con maiuscole, minuscole, cifre e simboli; il cambio password richiede una sessione recente. La protezione password compromesse non è disponibile sul piano Supabase Free. SMTP personalizzato e consegna email restano da verificare.
+- `data/artists/provisional-roster.json` contiene un solo artista segnaposto, inattivo e non collegato ad account, email, membership o pubblicazione. Il nome e lo slug definitivi saranno scelti più avanti.
+- La ricerca Notion collegata non ha trovato una pagina di progetto canonica. I test automatizzati non sono stati eseguiti in questo aggiornamento.
+
+## Sintesi iniziale (27 settembre)
 
 Il sito pubblico è raggiungibile e usa un catalogo fotografico live su Supabase. L'archivio delle opere e degli originali è protetto da Row Level Security e bucket privati; la funzione pubblica verifica lo stato di pubblicazione prima di restituire un'anteprima. Il sistema è però una beta piccola, non ancora pronta per un lancio sociale pubblico: mancano retention fisica e pulizia dei dati sociali, rate limiting condiviso sul catalogo pubblico, verifica della consegna delle email e prove su dispositivi reali.
 
-## Superfici controllate
+## Superfici controllate al momento dell'audit iniziale
 
 - Repository pubblico GitHub `pudducortesi/unconventionart`, branch predefinito `claude/build-photo-portfolio-Th0gm`, HEAD `f1b0a354`.
 - Produzione Vercel `https://unconventionart.vercel.app/`: ultima deployment controllata `READY`, home HTTP 200. I due deployment precedenti visibili erano falliti.
 - Supabase `unconventionart` in EU Central, Postgres 17.6, funzione `gallery-public` e advisor di sicurezza/performance.
 - Ricerca nel workspace Notion collegato: nessuna pagina di progetto canonica trovata.
 
-## Rilievi prioritari
+## Rilievi prioritari iniziali
 
 ### 1. Schema non riproducibile dal repository — alto
 
@@ -43,7 +51,7 @@ Il database non ha membership artista né opere con proprietario o `room_slug`; 
 
 La migrazione 10 corregge l'accesso RLS per consentire le bozze. L'editor mostra che la sala non è mappata e disabilita la prima pubblicazione artista. Non viene attivata alcuna membership senza l'UUID Auth scelto e una mappatura fisica approvata; il mapping renderer e i vincoli per le 75 posizioni restano da progettare e verificare prima dell'esposizione pubblica.
 
-## Stato e controlli
+## Stato e controlli iniziali
 
 - Catalogo live: 78 opere e nessun video pubblicato; il backend pubblico limita i risultati a 200 elementi e le immagini a 4 MiB.
 - Advisor sicurezza dopo le migrazioni: un warning residuo sulla protezione password; sette rilievi informativi segnalano RLS senza policy nelle tabelle sociali, che non hanno grant diretti e sono usate solo dal dispatcher RPC.
@@ -52,6 +60,6 @@ La migrazione 10 corregge l'accesso RLS per consentire le bozze. L'editor mostra
 - CI: aggiunta una GitHub Action che esegue `npm ci` e `npm run check` per ogni pull request e per i push al branch predefinito.
 - Vercel: nessuna modifica o deploy di produzione effettuato da questo audit.
 
-## Decisioni aperte
+## Decisioni aperte al 27 settembre
 
 Per completare i lavori rimanenti servono: decisione sulla conservazione della foto storica; durata di conservazione per messaggi e altri record sociali; UUID Supabase Auth, nome e slug per ogni artista da abilitare; e disponibilità di una sessione Auth Supabase e di dispositivi fisici per i controlli finali. La guida operativa in `infra/README.md` mantiene queste dipendenze visibili.

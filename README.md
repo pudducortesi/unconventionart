@@ -43,9 +43,7 @@ Le texture sulle pareti hanno lato massimo 1.024 pixel su touch e 2.048 su deskt
 
 ## Fotografie disponibili
 
-È pubblicata una fotografia Kavyar. L’album Lightroom contiene sei fotografie; le altre cinque non sono state importate perché l’esportazione non è disponibile nel flusso di lavoro corrente. Non vengono duplicate fotografie per riempire le sale, né pubblicate immagini di altri album per sostituirle.
-
-Per aggiungere gli scatti Kavyar esportati, inserirli in `images/kavyar/` e in `data/catalogue.json`; le postazioni vengono assegnate automaticamente, fino a 200. `thumbnail` può indicare una versione ottimizzata, `image` resta la fotografia intera. `description`, `medium`, `year`, `edition` sono facoltativi. Il catalogo pubblico viene letto anche durante lo sviluppo locale.
+Il catalogo pubblicato viene letto da Supabase. La copia di prova Kavyar inserita nel repository prima del flusso di caricamento è stata rimossa da file e catalogo statico; non viene sostituita da un'altra immagine. Per nuove opere usa il caricamento del pannello, che applica i controlli e conserva gli originali nell'archivio privato.
 
 ## Verifiche
 

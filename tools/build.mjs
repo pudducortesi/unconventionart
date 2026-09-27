@@ -1,6 +1,5 @@
 import {optimizeAvatar} from './optimize-avatar.mjs';
 import { optimizePhotos } from './optimize-photos.mjs';
-import { buildARModel } from './build-ar-model.mjs';
 import { prepareVendor } from './vendor.mjs';
 import { build } from 'esbuild';
 import { cp, mkdir, rm, readFile, writeFile, readdir } from 'node:fs/promises';
@@ -11,9 +10,8 @@ const liveCatalogue=publishing.enabled && publishing.liveCatalogue !== false;
 await rm('dist', { recursive:true, force:true });
 await mkdir('dist', { recursive:true });
 await prepareVendor();
-if(!liveCatalogue)await buildARModel();
 // Publish display derivatives only. Masters stay outside the deployment.
-for (const path of ['avatars/atelier-v1.glb','avatars/LICENSE.txt','data/experience.json','data/publishing.json',...(!liveCatalogue?['models/kavyar-01.glb']:[]),'images/site/favicon-32.png','images/site/brand-original.svg','images/palazzo/colonna-ceiling.webp','images/palazzo/masters','images/palazzo/vaults','corridor-credits.html']) {
+for (const path of ['avatars/atelier-v1.glb','avatars/LICENSE.txt','data/experience.json','data/publishing.json','images/site/favicon-32.png','images/site/brand-original.svg','images/palazzo/colonna-ceiling.webp','images/palazzo/masters','images/palazzo/vaults','corridor-credits.html']) {
   await mkdir(`dist/${path.substring(0,path.lastIndexOf('/'))}`, {recursive:true});
   await cp(path,`dist/${path}`,{recursive:true});
 }
@@ -44,7 +42,6 @@ collect(main); collect(effects);
 if (initial.has(photo)) throw new Error('Path tracing must remain on demand');
 const url = path => path.replace(/^dist\//,'');
 let html = await readFile('index.html','utf8');
-html = html.replaceAll('images/kavyar/01.jpg', optimized.catalogue.hero);
 html = html.replace('src="js/museum/main.js"',`src="${url(main)}"`).replace('href="css/museum.css"',`href="${url(css)}"`);
 // Fetch the exact same rendering features in parallel, without changing first-frame quality.
 const preloads = [...initial].filter(path=>path!==main).map(path=>`<link rel="modulepreload" href="${url(path)}">`).join('\n    ');
